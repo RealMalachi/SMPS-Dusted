@@ -1,24 +1,20 @@
-# smps-dusted
+# SMPS-Dusted
 Enhanced SMPS driver with convenience upfront
 
 Features
-- Full compatibility with smps2asm
-- System 14 (YM2203) build flag
-- AtGames Firecore support
-- Support for entire driver being a binary blob
+- Driver code and sound data are binary blobs by default
+- Driver code can have multiple sets of sound data
+- Clean-ish code design that emphasises a lack of hard-coding where possible
+- Native AtGames Firecore support
 - Massive reduction in stack pointer fuckery
 - FM Universal Voice Bank
-- PSG per-song Envolope Bank
-- Reorganised SMPS commands list
+- Per-song Volume Envolope Bank
 - SMPS-Z80 BGM tempo
-- SSG-EG provided by instruments
-- Sonic song fade-ins
-- Sonic SFX pitch increase (spindash rev)
-- 7-bit PSG and PCM volume (truncated to the usual 4-bit when sent to the psg) (yes this was taken from clonedriver)
+- SSG-EG provided by FM instruments
 - Extensive error handling
 
 Excludes
-- Sonic ring panning
-- Sonic 1 pushing flag
-- Sonic 2 alternating play/not-play flag for CPZ chemical balls
-- Sonic hard-coded SFX pitch increase
+- Sonic hard-coded ring panning
+- Sonic 1 hard-coded block pushing sound flag
+- Sonic 2 hard-coded CPZ chemical balls play/not-play flag
+- Sonic 2 hard-coded spindash pitch increase (a non hard-coded method from Sonic 3 is provided)

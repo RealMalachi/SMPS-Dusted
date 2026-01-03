@@ -2,6 +2,9 @@
 Make all the code original and better able to take FM and Z80 wait times into account, do things in parallel where possible
 Examples: AMPS, mdsdrv
 
+# Flesh out visual asserts
+It's currently just an ASCII printer
+
 # Allow for greater control with driver blob data
 Saving all the absolute addresses for the blobs offset pointers could allow for more flexibility
 Let's say you only want to change the PCM table, while some pcm drivers can support it, for full compatibility right now you'd need to have a copy of all the sound data

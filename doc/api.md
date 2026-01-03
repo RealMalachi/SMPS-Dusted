@@ -58,3 +58,18 @@ input:
 relative address: +28
 input:
 - a1 = driver ram
+
+## SetupPianoRoll
+relative address: +32
+input:
+- a0 = piano ram
+- a1 = driver ram
+trashes: d0-a6
+description:
+
+## SetDriverDataPointer
+relative address: +36
+input:
+- a0 = driver data address
+- a1 = driver ram
+description:
