@@ -814,10 +814,12 @@ smpsEnv macro data
 	elseif "data"=="REST"
 	dc.b	$83
 	else
-		if data<$80
-		dc.b	data
-		else
+		if data>$7F
 		dc.b	$7F
+		elseif data<0
+		fatal "negative volume envelopes aren't supported"
+		else
+		dc.b	data
 		endif
 	shift
 	smpsEnv ALLARGS
@@ -839,10 +841,12 @@ smpsEnvPsg macro data
 	elseif "data"=="REST"
 	dc.b	$83
 	else
-		if data<$10
-		dc.b	data<<3
-		else
+		if data>$F
 		dc.b	$7F
+		elseif data<0
+		fatal "negative volume envelopes aren't supported"
+		else
+		dc.b	data<<3
 		endif
 	shift
 	smpsEnvPsg ALLARGS

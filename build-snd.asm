@@ -17,7 +17,7 @@ moveq_ macro val,reg
 ; ---------------------------------------------------------------------------
 	include "src/smps-def.asm"
 	include "def-smps2asm.asm"
-	include "def-ids.asm"
+	include "smps-ids.asm"
 	org 0
 	include "inc-bgmsfx.asm"
 ; ---------------------------------------------------------------------------
