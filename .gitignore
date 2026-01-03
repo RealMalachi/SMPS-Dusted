@@ -1,0 +1,11 @@
+desktop.ini
+/*.p
+/*.h
+/*.map
+/*.log
+/*.lst
+_out/
+_test/
+smps-drv.bin
+smps-drv-debug.bin
+smps-snd.bin
