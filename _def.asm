@@ -1,4 +1,4 @@
-	include "sound/smps-68k/def-ids.asm"
+	include "sound/smps-68k/smps-ids.asm"
 ; ---------------------------------------------------------------------------
 _drvname	= "SMPS-DUSTED 68K"
 _drvbgm_start 	= bgm__First
