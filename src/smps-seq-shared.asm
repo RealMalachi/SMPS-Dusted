@@ -169,10 +169,10 @@ VolEnvCommands:
 		move.b	1(a0,d1.w),TrackVolEnvIndex(a5)
 		bra.w	DoVolEnv.loop
 .NoteOff:
+		addq.w	#4,sp					; Do not return to caller
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
 		move.b	TrackVoiceControl(a5),d0
 		add.b	d0,d0
-		addq.w	#4,sp					; doesn't effect ccr ; Do not return to caller
 		bcs.w	PSGNoteOff
 		bpl.w	FMNoteOff
 		bra.w	DACStopSample
@@ -270,7 +270,6 @@ GetVolume:
 		add.w	d1,a0
 		move.b	(a0),d1
 		bmi.s	.envcmd					; If it's stopped at a command, don't add to it
-		lsl.b	#3,d1
 		add.w	d1,d0
 .envcmd:
 .noenv:
