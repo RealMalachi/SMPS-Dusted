@@ -13,7 +13,7 @@ Sonic 2 and 3 also introduced driver-based continuous pitch increases for the sp
 note:
 rest:
 time:
-flag: control flags are , such as volume, voices, modulation, loops, 
+flag: control flags are commands that don't fall under any of the other data, such as volume, voices, modulation, loops, 
 
 ## stack
 each channel has 12 individual bytes of stack, which is primarily used by smpsLoop and smpsCall.

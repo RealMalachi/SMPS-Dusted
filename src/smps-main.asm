@@ -12,10 +12,16 @@ APILUT:
 		bra.w	ResumeDriver				; 28 ;
 		bra.w	SetupPianoRoll				; 32 ; a0 = piano ram
 		bra.w	SetDriverDataPointer			; 36 ; a0 = driver data
+		bra.w	DACGuard				; 40 ;
+		bra.w	DACUnguard				; 44 ;
 ; ---------------------------------------------------------------------------
-		dc.b [64-((*)-APILUT)]$FF			; Line 1111
+		rept (64-(*))/4
+		bra.w	.error
+		endr
 .sign:		dc.b "SMPS-DUSTED 68K V0.1 BY MALACHI",0
 		dc.b [32-((*)-.sign)]" "
+.error:
+		SMPS_assert "Undefined API command"
 ; ---------------------------------------------------------------------------
 QueueSound:
 	set .loc,v_soundqueue_start
@@ -69,6 +75,7 @@ SetDriverDataPointer:
 		if __smpsDebug
 		include "src/smps-renassert.asm"
 		endif
+
 		if (__smpsPCM=="null") || (__smpsTarget=="fuckFM")
 		include "src/null/smps-pcm.asm"
 ;		elseif __smpsPCM=="DirtyPCM"

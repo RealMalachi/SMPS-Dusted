@@ -38,8 +38,47 @@ Tempo could be a complication with the added flags
 # Music wobble effect
 (Paprium)[https://youtu.be/TcnW4iLTK-k&t=812] with its low health effect
 
-# LFO support
-Self-explanatory, add smps-source's LFO control flags
+# Greater support for gameplay-effecting-music communication
+Kinda falls under the same category as all the aformentioned sound flags
+
+# Add useful SMPS features that we don't have
+LFO
+Modulation envelopes
+Pan algorithm/envelopes
+
+# Portamento
+Modulation _works_ but like, come on.
+
+# Randomized sequences
+I recall seeing a fork of mdsdrv add randomized sequence support, since we have an RNG algorithm it's not too much of a stretch
+Say, something like this:
+```
+		smpsRandJump MusEx_RS1,MusEx_RS2,MusEx_RS3,MusEx_RS4,MusEx_RS5,MusEx_RS6
+MusEx_RS1:
+		[thing]
+MusEx_RS2:
+		[other thing]
+MusEx_RS3:
+		[other other thing]
+MusEx_RS4:
+		[evil eastern thing]
+MusEx_RS5:
+		[cool thing]
+MusEx_RS6:
+		[evil western thing]
+```
+This approach lacks scalability compared to a full table like volume envelopes, but I'm hesitant to do that.
+
+# Proper pitch slides
+SMPS Z80 comes with a "pitch slide" mode that makes all update channel ticks provide a detune. That, admittedly, kinda sucks.
+I'd joke about adding a detune envelope, but modulation envelopes would do the same thing so it'd be effectively useless
+
+# Register writes saving
+smpsFMI, smpsFMII and smpsFMChan are unsafe in that the first two dont care for SFXs, and all of them have no means of restoring themselves after a SFX
+
+# Research into sound commands from relevant external tools
+Furnace flags:
+- '16xy': operator multiplier
 
 # PCM pitching in the sample table
 Particularly useful for drivers that play at a consistent rate but support fractional addition/subtraction like DualPCM
@@ -70,13 +109,9 @@ Things to keep in mind:
 # Support for non-flamewing smps2asm variants and conceptualising a new variant
 In regard to the new variant, put simply flamewings smps2asm (the one in the disassemblys) has a lot of baggage that I don't want to deal with anymore
 
+# Easier swapping between distinct audio modes (FM6/PCM, FM3, PSG3/Noise)
+FM6 and PCM are entirely separate and which one takes priority depends on the PCM player, usually PCM-first
+FM3 is currently hard-coded to normal mode
+PSG3 can essentially become PSG4 while still acting like PSG3, it's horrible for playing them together and for compatibility reasons is almost impossible to work around
 
-Notes:
-LFO
-Save BGM register writes when SFX overwrite them
-Look into Furnace flags
-- '16xy': operator multiplier
-Portamento
-Global gameplay-effecting-music communication
-Better pitch slides
-Easier swapping between distinct modes (FM6/PCM, FM3, PSG3/Noise)
+

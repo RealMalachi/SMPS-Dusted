@@ -112,18 +112,17 @@ StopBGM:
 		move.b	TrackVoiceControl(a5),d3
 		add.b	d3,d3
 		add.w	#((30/2)-$40)*2,d3
-
+		lea	RAM_SFXChannel(pc),a3
 	if __smpsBFX=1
-		lea	RAM_BSFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.dacgetptr
 		move.l	a6,a3
 		add.w	d0,a3
 		tst.b	TrackPlaybackControl(a3)
-	 	bmi.s	.dacgotptr
+		bmi.s	.dacgotptr
 .dacgetptr:
+		lea	RAM_BSFXChannel(pc),a3
 	endif
-		lea	RAM_SFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.dacnext
 		move.l	a6,a3
@@ -146,17 +145,17 @@ StopBGM:
 		moveq	#0,d3
 		move.b	TrackVoiceControl(a5),d3
 		add.b	d3,d3
+		lea	RAM_SFXChannel(pc),a3
 	if __smpsBFX=1
-		lea	RAM_BSFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.fmgetptr
 		move.l	a6,a3
 		add.w	d0,a3
 		tst.b	TrackPlaybackControl(a3)
-	 	bmi.s	.fmgotptr
+		bpl.s	.fmgotptr
 .fmgetptr:
+		lea	RAM_BSFXChannel(pc),a3
 	endif
-		lea	RAM_SFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.fmnext
 		move.l	a6,a3
@@ -183,8 +182,8 @@ StopBGM:
 		moveq	#0,d3
 		move.b	TrackVoiceControl(a5),d3
 		lsr.b	#3,d3
+		lea	RAM_SFXChannel(pc),a3
 	if __smpsBFX=1
-		lea	RAM_BSFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.psggetptr
 		move.l	a6,a3
@@ -192,8 +191,8 @@ StopBGM:
 		tst.b	TrackPlaybackControl(a3)
 		bmi.s	.psggotptr
 .psggetptr:
+		lea	RAM_BSFXChannel(pc),a3
 	endif
-		lea	RAM_SFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.psgnext
 		move.l	a6,a3

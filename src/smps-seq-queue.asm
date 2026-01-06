@@ -85,10 +85,6 @@ Cmd_StopSound:
 .valid:
 		tst.b	d7
 		beq.w	StopAllSound
-		btst	#0,d7
-		beq.s	.notbgm
-		bsr.w	StopBGM
-.notbgm:
 		btst	#1,d7
 		beq.s	.notsfx
 		bsr.w	StopSFX
@@ -99,6 +95,8 @@ Cmd_StopSound:
 		bsr.w	StopBSFX
 .notbsfx:
 	endif
+		btst	#0,d7
+		bne.w	StopBGM
 		rts
 ; ---------------------------------------------------------------------------
 Cmd_SetBitFlag:

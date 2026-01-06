@@ -6,6 +6,9 @@ DACCheckIfPlaying:
 DACInitDriver:
 DACLoadBank:
 ; ---------------------------------------------------------------------------
+DACGuard:
+DACUnguard:
+; ---------------------------------------------------------------------------
 DACQueueSample:
 DACQueueSampleSFX:
 DACPauseSample:

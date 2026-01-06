@@ -210,11 +210,36 @@ HandleSoundQueueEnd:
 
 HandleSequencerEnd:
 		rts
-
+; ===========================================================================
 ; Every time the internal music clock overflows, delay the song.
 ; A tempo of $000x will update every frame, 60 times a second
 ; A tempo of $800x will update every other frame, 30 times a second.
-smpsupdtempo macro
+; ---------------------------------------------------------------------------
+TempoWait:
+		move.w	v_main_tempo(a6),d2
+		moveq_	$FFF0,d0
+		and.w	d2,d0
+		moveq_	$000F,d1
+		and.w	d2,d1
+		add.w	d1,d1
+		add.w	d1,d1
+		moveq	#1<<1|1<<0,d2			; if speedup is on and 1up is off, increase the tempo if possible
+		and.b	v_driverflags(a6),d2
+		cmp.b	#1<<1|0<<0,d2
+		bne.s	.nospeedalgo
+		move.w	d0,d2				; TODO: good math
+		lsr.w	#1,d2
+		sub.w	d2,d0
+.nospeedalgo:
+		jmp	.lut(pc,d1.w)
+.lut:		bra.w	.withfractions
+		bra.w	.sansfractions
+		rept 16-2
+		bra.w	.error
+		endr
+.withfractions:
+		add.w	d0,v_main_tempo_timeout(a6)
+		bcc.s	.exit
 	set .val,v_music_dac_tracks+TrackDurationTimeout
 	rept (v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz
 		addq.b	#1,.val(a6)
@@ -230,39 +255,26 @@ smpsupdtempo macro
 		addq.b	#1,.val(a6)
 	set .val,.val+TrackPsgSz
 	endr
-
-	endm
-TempoWait:
-		move.w	v_main_tempo(a6),d2
-		moveq_	$FFF0,d0
-		and.w	d2,d0
-		moveq_	$000F,d1
-		and.w	d2,d1
-		add.w	d1,d1
-		moveq	#1<<1|1<<0,d2			; if speedup is on and 1up is off, increase the tempo if possible
-		and.b	v_driverflags(a6),d2
-		cmp.b	#1<<1|0<<0,d2
-		bne.s	.nospeedalgo
-		move.w	d0,d2				; TODO: good math
-		lsr.w	#1,d2
-		sub.w	d2,d0
-.nospeedalgo:
-		jmp	.lut(pc,d1.w)
-.lut:		bra.s	.withfractions
-		bra.s	.sansfractions
-		rept 16-2
-		bra.s	.error
-		endr
-.withfractions:
-		add.w	d0,v_main_tempo_timeout(a6)
-		bcc.s	.exit
-		smpsupdtempo
 .exit:		rts
 .sansfractions:
 		add.w	d0,v_main_tempo_timeout(a6)
 		bcc.s	.exit
 		clr.w	v_main_tempo_timeout(a6)
-		smpsupdtempo
+	set .val,v_music_dac_tracks+TrackDurationTimeout
+	rept (v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz
+		addq.b	#1,.val(a6)
+	set .val,.val+TrackDacSz
+	endr
+	set .val,v_music_fm_tracks+TrackDurationTimeout
+	rept (v_music_fm_tracks_end-v_music_fm_tracks)/TrackFmSz
+		addq.b	#1,.val(a6)
+	set .val,.val+TrackFmSz
+	endr
+	set .val,v_music_psg_tracks+TrackDurationTimeout
+	rept (v_music_psg_tracks_end-v_music_psg_tracks)/TrackPsgSz
+		addq.b	#1,.val(a6)
+	set .val,.val+TrackPsgSz
+	endr
 		rts
 .error:
 		SMPS_assert "Improper tempo algorithm type, TODO print the algo"

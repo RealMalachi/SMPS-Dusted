@@ -798,7 +798,7 @@ envtableid := envtableid+1
 	endif
 	endm
 
-smpsEnv macro data
+smpsVolEnv macro data
 	if "data"==""
 	elseif "data"=="RESET"
 	dc.b	$80
@@ -822,10 +822,10 @@ smpsEnv macro data
 		dc.b	data
 		endif
 	shift
-	smpsEnv ALLARGS
+	smpsVolEnv ALLARGS
 	endif
 	endm
-smpsEnvPsg macro data
+smpsVolEnvPsg macro data
 	if "data"==""
 	elseif "data"=="RESET"
 	dc.b	$80
@@ -849,7 +849,7 @@ smpsEnvPsg macro data
 		dc.b	data<<3
 		endif
 	shift
-	smpsEnvPsg ALLARGS
+	smpsVolEnvPsg ALLARGS
 	endif
 	endm
 ; ---------------------------------------------------------------------------

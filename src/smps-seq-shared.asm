@@ -635,6 +635,32 @@ cfxSetPSG3:
 		bls.s	.valid
 .invalid:	SMPS_assert "cfSetPSGNoise: Non-PSG3 or PSG4 usage, TODO: print channel"
 .valid:
+; ensure that only PSG3 channels are trying to use this
+		move.w	RAM_BGMChannel+24(pc),d0
+		beq.s	.nopsg3bgm
+		move.l	a6,a3
+		adda.w	d0,a3
+		cmp.l	a3,a5
+		beq.s	.psg3channel
+.nopsg3bgm:
+		move.w	RAM_SFXChannel+24(pc),d0
+		beq.s	.nopsg3sfx
+		move.l	a6,a3
+		adda.w	d0,a3
+		cmp.l	a3,a5
+		beq.s	.psg3channel
+.nopsg3sfx:
+	if __smpsBFX
+		move.w	RAM_BSFXChannel+24(pc),d0
+		beq.s	.nopsg3bsfx
+		move.l	a6,a3
+		adda.w	d0,a3
+		cmp.l	a3,a5
+		beq.s	.psg3channel
+.nopsg3bsfx:
+	endif
+		SMPS_assert "cfxSetPSG3: Non-PSG3 usage, TODO: print channel"
+.psg3channel:
 		endif
 		move.b	#$C0,TrackVoiceControl(a5)		; Turn channel into psg3
 		btst	#_sfxoverride,TrackPlaybackControl(a5)

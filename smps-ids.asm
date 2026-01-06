@@ -5,7 +5,15 @@
 	enum		fTone_01=$01,fTone_02,fTone_03,fTone_04,fTone_05,fTone_06
 	nextenum	fTone_07,fTone_08,fTone_09,fTone_0A,fTone_0B,fTone_0C
 	nextenum	fTone_0D
-	nextenum	sTone_01,sTone_02,sTone_04,sTone_08,sTone_0A,sTone_0C,sTone_0D,sTone_1B
+
+	nextenum	sTone_01,sTone_02,sTone_03,sTone_04,sTone_05,sTone_06
+	nextenum	sTone_07,sTone_08,sTone_09,sTone_0A,sTone_0B,sTone_0C
+	nextenum	sTone_0D,sTone_0E,sTone_0F,sTone_10,sTone_11,sTone_12
+	nextenum	sTone_13,sTone_14,sTone_15,sTone_16,sTone_17,sTone_18
+	nextenum	sTone_19,sTone_1A,sTone_1B,sTone_1C,sTone_1D,sTone_1E
+	nextenum	sTone_1F,sTone_20,sTone_21,sTone_22,sTone_23,sTone_24
+	nextenum	sTone_25,sTone_26,sTone_27
+
 	nextenum	smlTone_04,smlTone_06
 ; ---------------------------------------------------------------------------
 ; DAC IDs
@@ -59,7 +67,7 @@ cmd__First:		equ $F000
 cmd_FadeoutBGM:		equ $F000
 cmd_Fadeout:		equ $F100
 cmd_Fadein:		equ $F200
-cmd_StopAll:		equ $F307
+cmd_StopAll:		equ $F300
 cmd_StopBGM:		equ $F301
 cmd_StopSFX:		equ $F302
 cmd_StopBSFX:		equ $F304

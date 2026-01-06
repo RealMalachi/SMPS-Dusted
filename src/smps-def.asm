@@ -118,13 +118,20 @@ smpsren_vram_length	= $200
 
 SMPS_assert macro
 	if __smpsDebug
-	pea	.t(pc)
-	bra.w	RenderAssert
-.t:	dc.b ALLARGS,0
-	even
+		if ARGCOUNT==0
+		bra.w	RenderAssert
+		else
+		pea	.t(pc)
+		bra.w	RenderAssert
+.t:		dc.b ALLARGS,0
+		even
+		endif
 	else
 	illegal
 	endif
+	endm
+SMPS_assertascii macro
+	dc.b ALLARGS,0
 	endm
 
 ; VDP/DMA
@@ -163,9 +170,9 @@ drvdata:
 .pcmcnt:	ds.w 1
 .bgm:		ds.w 1
 .sfx:		ds.w 1
-.uvbmod:	ds.w 1
 .uvbfm:		ds.w 1
 .uvbvol:	ds.w 1
+.uvbmod:	ds.w 1
 .uvbdac:	ds.l 1
 	dephase
 ; ---------------------------------------------------------------------------

@@ -5,10 +5,14 @@
 ; +0 | Assert text (modified ASCII, see below)
 ; ---------------------------------------------------------------------------
 RenderAssert:
+.ass	= 2+((8+7)*4)	; start of assert data
+	move.w	sr,-(sp)
 	move	#$2700,sr
+	movem.l	d0-a6,-(sp)
+	lea	.ass(sp),a1
 	bsr.w	StopAllSound.skipram
 ; vdp
-	lea	vdpctrl,a5
+	lea	(vdpctrl).l,a5
 	lea	vdpdata-vdpctrl(a5),a4
 	tst.w	(a5)						; clear vdp write pending
 	lea	ErrorVDP(pc),a6
@@ -59,43 +63,53 @@ RenderAssert:
 ; load text plane
 	lea	.headertext(pc),a0
 	move.l	#vdpComm(smpsren_vram_plane<<5+planeLoc(64,2,1),VRAM_WRITE),d3
-	bsr.s	.rendar
-	move.l	(sp),a0						; get assert text
-	move.l	#vdpComm(smpsren_vram_plane<<5+planeLoc(64,2,2),VRAM_WRITE),d3
-	bsr.s	.rendar
-; okay we're done
-	move.w	#$8100|%01000100,(a5)				; enable screen display
-	bra.s	*
 .rendar:
+	moveq	#0,d0
 .lineloop:
 	move.l	d3,(a5)
-.loop:
-	move.b	(a0)+,d4
+.loop:	move.b	(a0)+,d4
 	ext.w	d4				; move bit 7 to bit 15 (priority), clear other bits
 	and.w	#$807F,d4
 	cmp.b	#$20,d4
 	blo.s	.commands
 	move.w	d4,(a4)
-	bra.s	.loop
+	addq.w	#1,d0
+	cmp.w	#36,d0
+	blo.s	.loop
+	bra.w	.cmd_nextline
 .commands:
 	clr.w	d1
 	move.b	d4,d1
-	cmp.w	#2,d1
-	bhi.s	.cmd_exit
+	cmp.w	#(.cmdlute-.cmdlut)/4,d1
+	bhs.s	.cmd_exit
 	add.w	d1,d1
 	add.w	d1,d1
 	jmp	.cmdlut(pc,d1.w)
 .cmdlut:
 	bra.w	.cmd_exit					; $00 ; ASCII 03, end of file
 	bra.w	.cmd_nextline					; $01 ; ASCII 0A, line feed (next line)
-	bra.w	.cmd_regprint					; $02 ; Register print and end of file
+	bra.w	.cmd_nextprint					; $02 ; new assert
+	bra.w	.cmd_nextprintline				; $03 ; new assert and line
+	bra.w	.cmd_regprint					; $04 ; Register print
+.cmdlute:
+; TODO: safety, a lot of it
+.cmd_nextprint:
+	move.l	(a1)+,a0					; get assert text
+	bra.w	.loop
+.cmd_nextprintline:
+	move.l	(a1)+,a0					; get assert text
+;	bra.s	.cmd_nextline
 .cmd_nextline:
+	moveq	#0,d0
 	add.l	#vdpCommDelta(64*2),d3
 	bra.w	.lineloop
 .cmd_regprint:
+	bra.w	.loop
 .cmd_exit:
-	rts
-.headertext:	dc.b "SMPS Assert Error:",0
+; okay we're done here, show's over
+	move.w	#$8100|%01000100,(a5)				; enable screen display
+	bra.s	*
+.headertext:	dc.b "SMPS Assert Error:",1,"====================================",2
 	even
 
 ErrorFontTable:
