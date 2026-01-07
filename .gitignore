@@ -9,3 +9,4 @@ _test/
 smps-drv.bin
 smps-drv-debug.bin
 smps-snd.bin
+smps-ids.asm

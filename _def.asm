@@ -9,17 +9,21 @@ _drvpcm_start	= pcm__First
 _drvpcm_end	= pcm__Last
 _drvcmd_start	= cmd__First
 _drvcmd_end	= cmd__Last
-_drvramsize	= $400
+_drvramsize	= smpsramsize
 
 drvinit macro
 	lea	(SMPS_DriverData).l,a0
 	lea	(v_soundram).w,a1
-	move.w	#_drvramsize,d0
+	move.w	#smpsramsize,d0
 	jsr	(SMPS_InitDriver).l
 	endm
 drvguard macro
+	lea	(v_soundram).w,a1
+	jsr	(SMPS_DACGuard).l
 	endm
 drvunguard macro
+	lea	(v_soundram).w,a1
+	jsr	(SMPS_DACUnguard).l
 	endm
 drvupdvint macro exitflag
 	lea	(v_soundram).w,a1

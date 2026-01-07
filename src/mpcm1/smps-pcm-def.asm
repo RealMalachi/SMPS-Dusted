@@ -19,36 +19,68 @@ Z_MPCM_SampleTable	equ $0210
 Z_MPCM_CommandInput	equ $1FFF
 Z_MPCM_DriverReady	equ $1FFE
 ; ===========================================================================
+; converted into the following format for Z80
 ; 00h - Flags
 ; 01h - Pitch
 ; 02h - Start Bank
 ; 03h - End Bank
 ; 04h - Start Offset (in Start bank)
 ; 06h - End Offset (in End bank)
-dcSample macro SAMPLETYPE,SAMPLEPTR,SAMPLERATE,SAMPLEFLAGS
-	if (SAMPLETYPE==TYPE_NONE)
-	dc.l	0,0
-	dc.b	0,0
-	elseif (SAMPLETYPE==TYPE_PCM)
-	dc.l	SAMPLEPTR-(*+4)
-	dc.l	SAMPLEPTR_End-1-(*+4)
-	dc.b	SAMPLEFLAGS+0, 1+(Z80_Clock/(SAMPLERATE)-(TYPE_PCM_CYCLES)+(13/2))/13
-	elseif (SAMPLETYPE==TYPE_DPCM)
-	dc.l	SAMPLEPTR-(*+4)
-	dc.l	SAMPLEPTR_End-1-(*+4)
-	dc.b	SAMPLEFLAGS+4, 1+(Z80_Clock/(SAMPLERATE)-(TYPE_DPCM_CYCLES)+(13/2))/13
+pcmdef macro sampletype,sampleptr,sampleseqid,samplequeueid,samplerate,sampleflags
+	if "sampletype"=="START"
+		if "sampleptr"<>__smpsPCM
+		fatal "ERROR: The sample table is for sampleptr, whereas the driver expects \{__smpsPCM}"
+		endif
+musidtrack	set 0
+musidbase1	set samplequeueid
+musidbase2	set sampleseqid
+		if "samplerate"<>""
+samplerate	equ samplequeueid
+		shared samplerate
+		endif
 	else
-	fatal "Unknown PCM type"
+		if "samplequeueid"<>""
+samplequeueid	equ musidbase1+musidtrack
+		shared samplequeueid
+		endif
+		if "sampleseqid"<>""
+sampleseqid	equ musidbase2+musidtrack
+		endif
+musidtrack	set musidtrack+1
+
+		if "sampletype"=="END"
+		dc.w	-1	; end marker
+musidtrack	set -1
+		elseif "sampletype"=="NONE"
+		dc.l	0,0
+		dc.b	0,0
+		elseif "sampletype"=="PCM"
+;			if (samplerate+0)>TYPE_PCM_BASE_RATE
+;			fatal "Invalid sample rate: samplerate. TYPE_PCM only supports sample rates <= 29000 Hz"
+;			endif
+		dc.l	sampleptr-(*+4)
+		dc.l	sampleptr_End-1-(*+4)
+		dc.b	sampleflags+0, 1+(Z80_Clock/(samplerate)-(TYPE_PCM_CYCLES)+(13/2))/13
+		elseif "sampletype"=="DPCM"
+;			if samplerate>TYPE_DPCM_BASE_RATE
+;			fatal "Invalid sample rate: samplerate. TYPE_DPCM only supports sample rates <= 32000 Hz"
+;			endif
+		dc.l	sampleptr-(*+4)
+		dc.l	sampleptr_End-1-(*+4)
+		dc.b	sampleflags+4, 1+(Z80_Clock/(samplerate)-(TYPE_DPCM_CYCLES)+(13/2))/13
+		else
+		fatal "ERROR: Unknown or unsupported sample type: sampletype"
+		endif
 	endif
 	endm
 
-incdac:	macro NAME, PATH
+pcminc macro NAME,PATH
+	if "NAME"=="START"
+	elseif "NAME"=="END"
+	else
 	even
 NAME:	label *
 	binclude	PATH
 NAME_End:	label *
-	endm
-incdacStart macro
-	endm
-incdacEnd macro
+	endif
 	endm

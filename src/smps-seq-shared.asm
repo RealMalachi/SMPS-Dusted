@@ -156,8 +156,8 @@ VolEnvCommands:
 		jmp	.lut(pc,d0.w)
 .lut:		bra.s	.Reset					; $80
 		bra.s	.Hold					; $81
-		bra.s	.Jump2Idx				; $82
-		bra.s	.NoteOff				; $83
+		bra.s	.Index					; $82
+		bra.s	.Rest					; $83
 .Reset:
 		clr.b	TrackVolEnvIndex(a5)
 		bra.w	DoVolEnv.loop
@@ -165,10 +165,10 @@ VolEnvCommands:
 ; Decrement to last PSG volume. This ensures that the fade-in volume gets processed
 		subq.b	#1,TrackVolEnvIndex(a5)
 		bra.w	DoVolEnv.loop
-.Jump2Idx:
+.Index:
 		move.b	1(a0,d1.w),TrackVolEnvIndex(a5)
 		bra.w	DoVolEnv.loop
-.NoteOff:
+.Rest:
 		addq.w	#4,sp					; Do not return to caller
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
 		move.b	TrackVoiceControl(a5),d0
@@ -269,9 +269,11 @@ GetVolume:
 		move.b	TrackVolEnvIndex(a5),d1
 		add.w	d1,a0
 		move.b	(a0),d1
-		bmi.s	.envcmd					; If it's stopped at a command, don't add to it
-		add.w	d1,d0
-.envcmd:
+	;	ext.w	d1					; Sign extension for negative envelopes
+	;	bmi.s	.noenv					; If it's stopped at a command, skip
+	;	bpl.s	.envcmd					; If it's stopped at a command, mute it (will occur naturally)
+	;	moveq	#$7F,d1					; ^
+.envcmd:	add.w	d1,d0
 .noenv:
 		move.b	TrackVoiceControl(a5),d3
 		tst.b	v_driverflags2(a6)			; is underwater muffle enabled?
@@ -604,9 +606,9 @@ cfSetVolEnv:
 		rts
 ; ---------------------------------------------------------------------------
 cfSetPSGNoise:
+		move.b	TrackVoiceControl(a5),d0
 		if __smpsDebug=1
 ; ensure that this channel was PSG3 or PSG noise
-		move.b	TrackVoiceControl(a5),d0
 		cmp.b	#$C0,d0
 		beq.s	.valid
 		cmp.b	#$E0,d0
@@ -616,24 +618,37 @@ cfSetPSGNoise:
 .invalid:	SMPS_assert "cfSetPSGNoise: Non-PSG3 or PSG4 usage, TODO: print channel"
 .valid:
 		endif
-		move.b	(a4)+,TrackVoiceControl(a5)		; Turn channel into noise, save noise tone
+; set PSG noise mode
+		move.b	(a4)+,d1
+		move.b	d1,TrackVoiceControl(a5)		; Turn channel into noise, save noise tone
+		moveq	#3,d0					; Figure out if noise mode uses PSG3
+		and.b	d1,d0
+		cmp.b	#3,d0
+		seq.b	d0
+		and.b	#1<<_special,d0				; Turn it into a bitmask for the special flag
+		or.b	d0,TrackPlaybackControl(a5)
+
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	.locret
+		tst.b	d0
+		beq.s	.notpsg34shared
 		move.b	#$DF,(psginput).l			; mute PSG3
-		move.b	TrackVoiceControl(a5),(psginput).l	; Set noise tone
-.locret:	rts
+.notpsg34shared:
+		move.b	d1,(psginput).l				; Set noise tone
+.locret:
+		rts
 ; ---------------------------------------------------------------------------
 cfxSetPSG3:
+		move.b	TrackVoiceControl(a5),d0
 		if __smpsDebug=1
 ; ensure that this channel was PSG3 or PSG noise
-		move.b	TrackVoiceControl(a5),d0
 		cmp.b	#$C0,d0
 		beq.s	.valid
 		cmp.b	#$E0,d0
 		blo.s	.invalid
 		cmp.b	#$E7,d0
 		bls.s	.valid
-.invalid:	SMPS_assert "cfSetPSGNoise: Non-PSG3 or PSG4 usage, TODO: print channel"
+.invalid:	SMPS_assert "cfxSetPSG3: Non-PSG3 or PSG4 usage, TODO: print channel"
 .valid:
 ; ensure that only PSG3 channels are trying to use this
 		move.w	RAM_BGMChannel+24(pc),d0
@@ -663,9 +678,14 @@ cfxSetPSG3:
 .psg3channel:
 		endif
 		move.b	#$C0,TrackVoiceControl(a5)		; Turn channel into psg3
-		btst	#_sfxoverride,TrackPlaybackControl(a5)
+		bclr	#_special,TrackPlaybackControl(a5)	; clear special flag
+		sne.b	d0					; if it was set then mute PSG noise...
+		btst	#_sfxoverride,TrackPlaybackControl(a5)	; ...if SFXs aren't using it
 		bne.s	.locret
+		tst.b	d0
+		beq.s	.notpsg34shared
 		move.b	#$FF,(psginput).l			; mute PSG noise
+.notpsg34shared:
 .locret:	rts
 ; ===========================================================================
 cfModulation68K:

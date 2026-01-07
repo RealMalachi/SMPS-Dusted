@@ -789,9 +789,7 @@ envtableid  := 0
 		fatal "Volume envelope table was compromised or ended prior to this command"
 		endif
 		if "idcmp"<>""
-		if (((*)-envtableoff)/2)+1<>idcmp
-		fatal "ASSERT ERROR: volume envelope doesn't match the defined ID"
-		endif
+idcmp		equ envtableid
 		endif
 	dc.w off-envtableoff
 envtableid := envtableid+1

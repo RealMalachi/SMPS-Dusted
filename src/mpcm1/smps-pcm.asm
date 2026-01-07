@@ -154,6 +154,15 @@ DACCheckIfPlaying:
 		moveq	#0,d0
 		rts
 ; ---------------------------------------------------------------------------
+; INPUT: a1 = driver ram
+DACGuard:
+		SMPS_stopZ80
+		SMPS_waitZ80
+		rts
+DACUnguard:
+		SMPS_startZ80
+		rts
+; ---------------------------------------------------------------------------
 DACQueueSample:
 DACQueueSampleSFX:
 		SMPS_stopZ80

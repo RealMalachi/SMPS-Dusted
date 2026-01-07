@@ -92,50 +92,68 @@ Z_MPCM_ERROR__UNKNOWN_COMMAND:	equ $80
 ; ------------------------------------------------------------------------------
 ; Macro to generate sample record in a sample table
 ; ------------------------------------------------------------------------------
-
-dcSample: macro	SAMPLETYPE, SAMPLEPTR, SAMPLERATE, SAMPLEFLAGS
-	if ARGCOUNT>4
-		fatal "Too many arguments. USAGE: dcSample type, samplePtr, sampleRateHz, flags"
-	endif
-
-	dc.b	SAMPLETYPE					; $00	- type
-
-	if SAMPLETYPE=TYPE_PCM
-		if (SAMPLERATE+0)>TYPE_PCM_MAX_RATE
-			fatal "Invalid sample rate: SAMPLERATE. TYPE_PCM only supports sample rates <= 25100 Hz"
+pcmdef macro sampletype,sampleptr,sampleseqid,samplequeueid,samplerate,sampleflags
+	if "sampletype"=="START"
+		if "sampleptr"<>__smpsPCM
+		fatal "ERROR: The sample table is for sampleptr, whereas the driver expects \{__smpsPCM}"
 		endif
-		dc.b	SAMPLEFLAGS+0				; $01	- flags (optional)
-		dc.b	(SAMPLERATE+0)*256/TYPE_PCM_BASE_RATE	; $02	- pitch (optional for .WAV files)
+musidtrack	set 0
+musidbase1	set samplequeueid
+musidbase2	set sampleseqid
+		if "samplerate"<>""
+samplerate	equ samplequeueid
+		shared samplerate
+		endif
+	else
+		if "samplequeueid"<>""
+samplequeueid	equ musidbase1+musidtrack
+		shared samplequeueid
+		endif
+		if "sampleseqid"<>""
+sampleseqid	equ musidbase2+musidtrack
+		endif
+musidtrack	set musidtrack+1
+
+		if "sampletype"=="END"
+		dc.w	-1	; end marker
+musidtrack	set -1
+		elseif "sampletype"=="NONE"
+		dc.l	0,0,0
+		elseif "sampletype"=="PCM"
+			if (samplerate+0)>TYPE_PCM_MAX_RATE
+			fatal "Invalid sample rate: samplerate. TYPE_PCM only supports sample rates <= 25100 Hz"
+			endif
+		dc.b	TYPE_PCM				; $00	- type
+		dc.b	sampleflags+0				; $01	- flags (optional)
+		dc.b	(samplerate+0)*256/TYPE_PCM_BASE_RATE	; $02	- pitch (optional for .WAV files)
 		dc.b	0					; $03	- <RESERVED>
-		dc.l	SAMPLEPTR-(*+4)				; $04	- start offset
-		dc.l	SAMPLEPTR_End-(*+4)			; $08	- end offset
-
-	elseif SAMPLETYPE=TYPE_PCM_TURBO
-		if ((SAMPLERATE+0)<>TYPE_PCM_TURBO_MAX_RATE)&((SAMPLERATE+0)<>0)
-			fatal "Invalid sample rate: SAMPLERATE. TYPE_PCM_TURBO only supports sample rate of 32000 Hz"
-		endif
-		dc.b	SAMPLEFLAGS+0				; $01	- flags (optional)
+		dc.l	sampleptr-(*+4)				; $04	- start offset
+		dc.l	sampleptr_End-(*+4)			; $08	- end offset
+		elseif "sampletype"=="DPCM"
+			if samplerate>TYPE_DPCM_MAX_RATE
+			fatal "Invalid sample rate: samplerate. TYPE_DPCM only supports sample rates <= 20600 Hz"
+			endif
+		dc.b	TYPE_DPCM				; $00	- type
+		dc.b	sampleflags+0				; $01	- flags (optional)
+		dc.b	(samplerate)*256/TYPE_DPCM_BASE_RATE	; $02	- pitch
+		dc.b	0					; $03	- <RESERVED>
+		dc.l	sampleptr-(*+4)				; $04	- start offset
+		dc.l	sampleptr_End-(*+4)			; $08	- end offset
+		elseif "sampletype"=="PCM-TURBO"
+			if ((samplerate+0)<>TYPE_PCM_TURBO_MAX_RATE)&((samplerate+0)<>0)
+			fatal "Invalid sample rate: samplerate. TYPE_PCM_TURBO only supports sample rate of 32000 Hz"
+			endif
+		dc.b	TYPE_PCM_TURBO				; $00	- type
+		dc.b	sampleflags+0				; $01	- flags (optional)
 		dc.b	$FF					; $02	- pitch (optional for .WAV files)
 		dc.b	0					; $03	- <RESERVED>
-		dc.l	SAMPLEPTR-(*+4)				; $04	- start offset
-		dc.l	SAMPLEPTR_End-(*+4)			; $08	- end offset
-
-	elseif SAMPLETYPE=TYPE_DPCM
-		if SAMPLERATE>TYPE_DPCM_MAX_RATE
-			fatal "Invalid sample rate: SAMPLERATE. TYPE_DPCM only supports sample rates <= 20600 Hz"
+		dc.l	sampleptr-(*+4)				; $04	- start offset
+		dc.l	sampleptr_End-(*+4)			; $08	- end offset
+		elseif "sampletype"=="DPCM-HQ"
+		fatal "TEMPORAL ERROR: MPCM2.1 doesn't exist at this point in time"
+		else
+		fatal "ERROR: Unknown or unsupported sample type: sampletype"
 		endif
-		dc.b	SAMPLEFLAGS+0				; $01	- flags (optional)
-		dc.b	(SAMPLERATE)*256/TYPE_DPCM_BASE_RATE	; $02	- pitch
-		dc.b	0					; $03	- <RESERVED>
-		dc.l	SAMPLEPTR-(*+4)				; $04	- start offset
-		dc.l	SAMPLEPTR_End-(*+4)			; $08	- end offset
-
-	elseif SAMPLETYPE=TYPE_NONE
-		dc.b	0, 0, 0
-		dc.l	0, 0
-
-	else
-		fatal "Unknown sample type. Please use one of: TYPE_PCM, TYPE_DPCM, TYPE_PCM_TURBO, TYPE_NONE"
 	endif
 	endm
 
@@ -143,15 +161,15 @@ dcSample: macro	SAMPLETYPE, SAMPLEPTR, SAMPLERATE, SAMPLEFLAGS
 ; Macro to include a sample file
 ; ------------------------------------------------------------------------------
 
-incdac macro NAME, PATH
+pcminc macro NAME,PATH
+	if "NAME"=="START"
+	elseif "NAME"=="END"
+	else
 	even
 NAME:	label *
 	binclude	PATH
 NAME_End:	label *
-	endm
-incdacStart macro
-	endm
-incdacEnd macro
+	endif
 	endm
 
 ; ------------------------------------------------------------------------------

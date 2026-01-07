@@ -158,7 +158,7 @@ Cmd_SetBitFlag_Mono:
 		btst	#5,v_driverflags(a6)
 		beq.s	.fmstereo
 		or.b	#$C0,d1				; force mono
-.fmstereo:	bsr.w	WriteFMIorII
+.fmstereo:	bsr.w	WriteFMIorIIMain
 .fmnext:	lea	TrackFmSz(a5),a5
 		dbf	d7,.fmloop
 		rts
@@ -484,7 +484,7 @@ Sound_PlayBGM:
 		btst	#5,v_driverflags(a6)
 		beq.s	.fmstereo
 		or.b	#$C0,d1
-.fmstereo:	bsr.w	WriteFMIorII
+.fmstereo:	bsr.w	WriteFMIorIIMain
 		movem.l	(sp)+,a0/d2-d3
 
 		add.w	#TrackFmSz,a5
@@ -675,8 +675,6 @@ Sound_PlaySFX:
 		beq.s	.nobgmequ
 		move.l	a6,a2
 		add.w	d0,a2
-		tst.b	TrackPlaybackControl(a2)
-		bpl.s	.nobgmequ
 		or.b	#1<<_sfxoverride,TrackPlaybackControl(a2)
 .nobgmequ:
 	if __smpsBFX=1
@@ -685,8 +683,6 @@ Sound_PlaySFX:
 		beq.s	.nossfxequ
 		move.l	a6,a2
 		add.w	d0,a2
-		tst.b	TrackPlaybackControl(a2)
-		bpl.s	.nossfxequ
 		or.b	#1<<_sfxoverride,TrackPlaybackControl(a2)
 .nossfxequ:
 	endif
@@ -744,7 +740,7 @@ Sound_PlaySFX_Setup:
 		btst	#5,v_driverflags(a6)
 		beq.s	.fmstereo
 		or.b	#$C0,d1
-.fmstereo:	bsr.w	WriteFMIorII
+.fmstereo:	bsr.w	WriteFMIorIIMain
 		movem.l	(sp)+,a0/d2
 		rts
 .do:
@@ -806,19 +802,15 @@ Sound_PlaySFX_BSFX:
 		beq.s	.nobgmequ
 		move.l	a6,a2
 		add.w	d0,a2
-		tst.b	TrackPlaybackControl(a2)
-		bpl.s	.nobgmequ
 		or.b	#1<<_sfxoverride,TrackPlaybackControl(a2)
 .nobgmequ:
-		lea	RAM_SFXChannel(pc),a2
-		move.w	(a2,d3.w),d0
-		beq.s	.nosfxequ
-		move.l	a6,a2
-		add.w	d0,a2
-		tst.b	TrackPlaybackControl(a2)
-		bpl.s	.nosfxequ
-		or.b	#1<<_sfxoverride,TrackPlaybackControl(a2)
-.nosfxequ:
+;		lea	RAM_SFXChannel(pc),a2
+;		move.w	(a2,d3.w),d0
+;		beq.s	.nosfxequ
+;		move.l	a6,a2
+;		add.w	d0,a2
+;		or.b	#1<<_sfxoverride,TrackPlaybackControl(a2)
+;.nosfxequ:
 		bsr.w	Sound_PlaySFX_Setup
 .nop:
 		dbf	d7,.loadloop

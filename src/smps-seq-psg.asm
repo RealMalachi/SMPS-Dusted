@@ -98,21 +98,22 @@ PSGPrepareNote:
 .valid:
 ; TODO: check for other noise modes
 		moveq_	$E0,d0
-		and.b	TrackVoiceControl(a5),d0	; Get channel bits
-		cmpi.b	#$E0,d0
-		blo.s	.notnoise
-		moveq_	$C0,d0				; Use PSG 3 channel bits
-.notnoise:
+		and.b	TrackVoiceControl(a5),d0		; Get channel bits
+		btst	#_special,TrackPlaybackControl(a5)
+		beq.s	.notpsg34shared
+		moveq_	$C0,d0					; Use PSG 3 channel bits
+.notpsg34shared:
 		moveq	#$F,d1
-		and.w	d6,d1				; Low nibble of frequency
-		or.b	d1,d0				; Latch tone data to channel
-		lsr.w	#4,d6				; Get upper 6 bits of frequency
-		andi.b	#$3F,d6				; Send to latched channel
+		and.w	d6,d1					; Low nibble of frequency
+		or.b	d1,d0					; Latch tone data to channel
+		lsr.w	#4,d6					; Get upper 6 bits of frequency
+		andi.b	#$3F,d6					; Send to latched channel
 		move.b	d0,(psginput).l
 		move.b	d6,(psginput).l
 PSGUpdateFreq_exit:
 		rts
 ; ===========================================================================
+PSGSilence:
 PSGNoteOff:
 		btst	#_sfxoverride,TrackPlaybackControl(a5)	; Is SFX overriding?
 		bne.s	PSGNoteOff_exit				; Return if so
@@ -120,9 +121,10 @@ SendPSGNoteOff:
 		moveq	#$1F,d0					; Maximum volume attenuation
 		or.b	TrackVoiceControl(a5),d0		; PSG channel to change
 		move.b	d0,(psginput).l
-		cmpi.b	#$DF,d0					; Are stopping PSG3?
-		bne.s	PSGNoteOff_exit
+		btst	#_special,TrackPlaybackControl(a5)
+		beq.s	.notpsg34shared
 		move.b	#$FF,(psginput).l			; If so, stop noise channel while we're at it
+.notpsg34shared:
 PSGNoteOff_exit:
 		rts
 ; ===========================================================================

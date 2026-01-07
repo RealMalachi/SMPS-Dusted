@@ -8,6 +8,8 @@ SMPS_PauseDriver		= *+24
 SMPS_ResumeDriver		= *+28
 SMPS_SetupPianoRoll		= *+32
 SMPS_SetDriverDataPointer	= *+36
+SMPS_DACGuard			= *+40
+SMPS_DACUnguard			= *+44
 SMPS_Signature			= *+64	; ASCII with zero-terminator
 	binclude "sound/smps-68k/smps-drv.bin"
 SMPS_DriverData:
