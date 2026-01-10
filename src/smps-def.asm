@@ -1,5 +1,6 @@
 ; defined during assembler call
 ;__smpsDebug	equ 0
+__smpsDataVer	equ 0
 
 ; "fuckFM" is MD without FM
 ; "sys14" is 2xYM2203 (unimplemented)
@@ -10,6 +11,8 @@ __smpsTarget	equ "mdgen"
 __smpsPCM	equ "MegaPCM2"
 __smpsJingle	equ 1
 __smpsBFX	equ 1
+__smpsModEnv	equ 1
+__smpsPanEnv	equ 0
 ; picoADPCM
 ; coperaADPCM
 	if (__smpsPCM=="null") || (__smpsTarget=="fuckFM")
@@ -168,6 +171,7 @@ drvdata:
 .bgmcnt:	ds.w 1
 .sfxcnt:	ds.w 1
 .pcmcnt:	ds.w 1
+.version:	ds.w 1
 .bgm:		ds.w 1
 .sfx:		ds.w 1
 .uvbfm:		ds.w 1
@@ -228,8 +232,11 @@ TrackModulationSpeed:		ds.b 1			; FM/PSG
 TrackModulationDelta:		ds.b 1			; FM/PSG
 TrackModulationSteps:		ds.b 1			; FM/PSG
 TrackModulationVal:		ds.w 1			; FM/PSG
-;TrackModEnvIndex:		ds.b 1			; FM/PSG
+	if __smpsModEnv
+TrackModEnvIndex:		;ds.b 1			; FM/PSG
+TrackModEnvPtr:			ds.l 1			; FM/PSG
 ;TrackModEnvMultiply:		ds.b 1			; FM/PSG
+	endif
 TrackPsgSz:			;ds.b 0
 
 TrackFmVoiceIndex:		;ds.b 1			; FM

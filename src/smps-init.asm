@@ -28,6 +28,10 @@ InitDriver:
 	endif
 		move.w	#$7AD4,v_random(a1)
 		bsr.w	SetDriverDataPointer
+		cmp.w	#__smpsDataVer,drvdata.version(a1)
+		beq.s	.okayitsfine
+		SMPS_assert "Driver data version type doesn't match the drivers expected version type, TODO: print both"
+.okayitsfine:
 
 		bsr.s	Detect_Firecore
 		seq	d0

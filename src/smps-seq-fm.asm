@@ -67,15 +67,17 @@ FMSetFreq:
 		subi.b	#$80,d5					; Make it a 1-based index
 		beq.s	.rest
 		add.b	TrackTranspose(a5),d5			; Add track transposition
-		if __smpsDebug
-		chk	#12*8,d5
-		endif
+	if __smpsDebug
+		cmp.w	#12*8,d5
+		bhi.s	.assert
+	endif
 		add.b	d5,d5					; Clear high byte and sign bit
 		move.w	FMFrequencies(pc,d5.w),TrackFreq(a5)	; Store new frequency
 		rts
 .rest:		or.b	#1<<_resting,TrackPlaybackControl(a5)
 		move.w	#-1,TrackFreq(a5)			; Clear frequency
 		bra.w	FinishTrackUpdate
+.assert:	SMPS_assert "FMSetFreq: invalid frequency, TODO: print freq id"
 ; ===========================================================================
 ; FM Note Values: b-0 to a#8
 ;
@@ -107,23 +109,24 @@ FMFrequencies:
 FMFrequenciesEnd:
 ; ===========================================================================
 FMUpdateFreq:
-		tst.b	TrackModulationCtrl(a5)		; is modulation (calculated or envelopes) enabled?
-		beq.s	FMUpdateFreq_exit		; if not, branch
+		moveq_	%10111111,d0
+		and.b	TrackModulationCtrl(a5),d0		; is modulation (calculated or envelopes) enabled?
+		beq.s	FMUpdateFreq_exit			; if not, branch
 
 FMPrepareNote:
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	FMUpdateFreq_exit
 		bsr.w	GetFrequency
 		bpl.s	.valid
-		moveq	#0,d6
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
+		rts
 .valid:
-		move.w	d6,-(sp)			; d1.b = d6>>8
+		move.w	d6,-(sp)				; d1.b = d6>>8
 		move.b	(sp)+,d1
-		moveq_	$A4,d0				; Register for upper 6 bits of frequency
+		moveq_	$A4,d0					; Register for upper 6 bits of frequency
 		bsr.w	WriteFMIorII
 		move.b	d6,d1
-		moveq_	$A0,d0				; Register for lower 8 bits of frequency
+		moveq_	$A0,d0					; Register for lower 8 bits of frequency
 		bra.w	WriteFMIorII
 ; ---------------------------------------------------------------------------
 FMUpdateFreq_exit:
@@ -219,17 +222,18 @@ WriteFMIorII:
 		move.b	TrackVoiceControl(a5),d2	; Get voice control bits
 		bclr	#2,d2				; Is this bound for part I or II? (also clear chip toggle)
 		bne.s	.fm2				; Branch if for part II
-		if __smpsDebug
-		and.w	#$FF,d2
-		chk	#2,d2
-		endif
+	if __smpsDebug
+		cmp.b	#2,d2
+		bhi.s	.assert
+	endif
 		add.b	d0,d2				; Add in voice control bits
 		bra.s	WriteFMI.chcont
+.assert:	SMPS_assert "WriteFMIorII: Invalid FM channel, TODO: print channel"
 .fm2:
-		if __smpsDebug
-		and.w	#$FF,d2
-		chk	#2,d2
-		endif
+	if __smpsDebug
+		cmp.b	#2,d2
+		bhi.s	.assert
+	endif
 		add.b	d0,d2
 		bra.s	WriteFMII.chcont
 WriteFMI:

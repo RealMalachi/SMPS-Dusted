@@ -36,8 +36,12 @@ FinishTrackUpdate:
 		bne.s	.locret
 		move.b	TrackNoteTimeoutMaster(a5),TrackNoteTimeout(a5)	; Reset note fill timeout
 		clr.b	TrackVolEnvIndex(a5)				; Reset volume envelope index
+	if __smpsModEnv
+		clr.b	TrackModEnvIndex(a5)
+;		clr.b	TrackModEnvMultiply(a5)				; umm what the sigma
+	endif
 		tst.b	TrackModulationCtrl(a5)
-		beq.s	.nomod
+		bpl.s	.nomod
 		move.l	TrackModulationPtr(a5),a0			; Modulation data pointer
 		move.b	(a0)+,TrackModulationWait(a5)			; Reset wait
 		move.b	(a0)+,TrackModulationSpeed(a5)			; Reset speed
@@ -109,41 +113,149 @@ DoModulation:
 		move.b	3(a0),TrackModulationSteps(a5)			; Restore from modulation data
 		neg.b	TrackModulationDelta(a5)			; Negate modulation delta
 .z80_locret:
-		rts
+		;rts
 ; ===========================================================================
 ; OUTPUT
-; d6.w = note
+; d6.w = note, rest 
 ; ccr = n-bit clear (bpl) if valid frequency was found
+; TRASHES: d0-d1/a0
+GetFrequency_Rest:
+		rts
 GetFrequency:
-		move.w	TrackFreq(a5),d6				; Get current note frequency
-		bmi.s	.nofreq
+		move.w	TrackFreq(a5),d6			; Get current note frequency
+		bmi.s	GetFrequency_Rest
 .cont:
-		move.b	TrackDetune(a5),d0 				; Get detune value
+		move.b	TrackDetune(a5),d0 			; Get detune value
 		ext.w	d0
-		add.w	d0,d6						; Add note frequency
+		add.w	d0,d6					; Add note frequency
 		move.b	TrackModulationCtrl(a5),d0
 		bpl.s	.nomod
 		add.w	TrackModulationVal(a5),d6
 .nomod:
 ; TODO: modulation envolopes
 		;move.b	TrackModulationCtrl(a5),d0
-;		and.w	#$3F,d0
-;		beq.s	.nomodenv
-;		add.w	d0,d0
-;		move.l	DriverData.uvbmod(pc),a0
-;		adda.w	-2(a0,d0.w),a0
-.nomodenv:
-		if 1==0;__smpsDebug
-		tst.w	d6
-		bpl.s	.fine
-		SMPS_assert "Freqency overflow, sets sign bit"
-.fine:
-		else
-		and.w	#$7FFF,d6					; clear sign bit and ccr n-bit
-		moveq	#0,d0						; clear n-bit
+		and.w	#$3F,d0
+		beq.s	.nomodenv
+	if __smpsModEnv
+		add.b	d0,d0
+		move.l	TrackModEnvPtr(a5),a0
+		move.b	-2(a0,d0.w),-(sp)
+		move.w	(sp)+,d1
+		move.b	1-2(a0,d0.w),d1
+		adda.w	d1,a0
+
+		move.b	TrackModEnvIndex(a5),d0
+.loop:
+		move.b	(a0,d0.w),d1
+		cmp.b	#$80,d1
+		bne.s	.gotmodenv
+		if __smpsDebug
+		addq.b	#1,d0
+		bcs.w	.ass_indexcarryage
+		subq.b	#1,d0
 		endif
-.nofreq:
+		clr.w	d1
+		move.b	1(a0,d0.w),d1
+		add.w	d1,d1
+		if __smpsDebug
+		cmp.w	#.modenvcmde-.modenvcmd,d1
+		bhs.w	.ass_modenvcmdtoobig
+		endif
+		jmp	.modenvcmd(pc,d1.w)
+.gotmodenv:
+		addq.b	#1,d0
+		if __smpsDebug
+		bcs.w	.ass_indexcarryage
+		endif
+		ext.w	d1
+.gotmodenv2:
+		add.w	d1,d6
+		move.b	d0,TrackModEnvIndex(a5)
+	else
+		SMPS_assert "Driver disabled Modulation Envelopes"
+	endif
+.nomodenv:
+		and.w	#$7FFF,d6				; clear sign bit and ccr n-bit
+		;moveq	#0,d0					; clear n-bit
 		rts
+	if __smpsModEnv
+; ---------------------------------------------------------------------------
+.modenvcmd:
+		bra.s	.EnvS12P				; $00
+		bra.s	.EnvS12P				; $01
+		bra.s	.EnvS12P				; $02
+		bra.s	.EnvS12P				; $03
+		bra.s	.EnvS12P				; $04
+		bra.s	.EnvS12P				; $05
+		bra.s	.EnvS12P				; $06
+		bra.s	.EnvS12P				; $07
+		bra.s	.EnvS12N				; $08
+		bra.s	.EnvS12N				; $09
+		bra.s	.EnvS12N				; $0A
+		bra.s	.EnvS12N				; $0B
+		bra.s	.EnvS12N				; $0C
+		bra.s	.EnvS12N				; $0D
+		bra.s	.EnvS12N				; $0E
+		bra.s	.EnvS12N				; $0F
+		bra.s	.Reset					; $10
+		bra.s	.Hold					; $11
+		bra.s	.Index					; $12
+		bra.s	.Rest					; $13
+		bra.s	.EnvS16					; $14
+.modenvcmde:
+.EnvS12N:
+		or.w	#$F0<<1,d1				; 1111XXXX
+.EnvS12P:
+		asl.w	#8-1,d1					; ....XXXX 00000000
+		move.b	2(a0,d0.w),d1				; ....XXXX YYYYYYYY
+		addq.b	#3,d0
+		if __smpsDebug
+		bcc.s	.gotmodenv2
+		bcs.w	.ass_indexcarryage
+		else
+		bra.s	.gotmodenv2
+		endif
+.EnvS16:
+		move.b	2(a0,d0.w),-(sp)
+		move.w	(sp)+,d1
+		move.b	3(a0,d0.w),d1
+		addq.b	#4,d0
+		if __smpsDebug
+		bcc.s	.gotmodenv2
+		bcs.w	.ass_indexcarryage
+		else
+		bra.s	.gotmodenv2
+		endif
+.Reset:
+		moveq	#0,d0
+		bra.w	.loop
+.Hold:
+		subq.b	#1,d0
+		bra.w	.loop
+.Index:
+		if __smpsDebug
+		addq.b	#2,d0
+		bcs.w	.ass_indexcarryage
+		move.b	(a0,d0.w),d0
+		else
+		move.b	2(a0,d0.w),d0
+		endif
+		bra.w	.loop
+.Rest:
+		pea	.RestEnd(pc)
+		move.b	TrackVoiceControl(a5),d0
+		add.b	d0,d0
+		bcs.w	PSGNoteOff
+		bpl.w	FMNoteOff
+		bra.w	DACStopSample
+.RestEnd:
+		moveq	#-1,d6
+		rts
+.ass_indexcarryage:
+		SMPS_assert "Error: Modulation envelope index carriage error, TODO: print channel"
+.ass_modenvcmdtoobig:
+		SMPS_assert "Error: Modulation envelope command exceeds the table, TODO: print command"
+	endif
 ; ===========================================================================
 VolEnvCommands_SizeAssert:
 	;	lsr.b	#1,d0					; reobtain id
@@ -349,10 +461,11 @@ CoordFlag:
 ; ===========================================================================
 cfExtCmd:
 		move.b	(a4)+,d5
-		if __smpsDebug
-		chk	#((.lute-.lut)/2)-1,d5
-		endif
 		add.w	d5,d5
+	if __smpsDebug
+		cmp.w	#.lute-.lut,d5
+		bhs.w	cfxUnk
+	endif
 		move.w	.lut(pc,d5.w),d5
 		jmp	.lut(pc,d5.w)
 .lut:
@@ -364,7 +477,6 @@ cfExtCmd:
 		dc.w  cfxSetLFO-.lut				; cxSetLFO
 		dc.w  cfxSetCommunication-.lut			; cxCommunicate
 		dc.w  cfxFadeInToPrevious-.lut			; cxSongFadeIn
-		dc.w  cfxStopSpecialFM-.lut			; cxStopSSFX
 		dc.w  cfxUnk-.lut				; cxSpecialFM3
 		dc.w  cfxRevUp-.lut				; cxRevUp
 		dc.w  cfxRevAddCur-.lut				; cxRevAddCur
@@ -868,116 +980,90 @@ cfxStopFM:
 		bhs.s	cfStopTrack
 		bsr.w	FMSilence
 		;bra.s	cfStopTrack
-; ===========================================================================
+; ---------------------------------------------------------------------------
 cfStopTrack:
-		moveq	#-1,d3
+		addq.w	#8,sp						; stop processing this channel
 		and.b	#(1<<_playing|1<<_noattack)!$FF,TrackPlaybackControl(a5)
-
-		moveq	#0,d3
-		move.b	TrackVoiceControl(a5),d3			; Get voice control bits
-		bmi.s	.stoppsg
-		add.b	d3,d3
-		bmi.s	.stopdac
-		bsr.w	FMNoteOff
-		bra.s	.stopfm
-.stoppsg:	and.b	#$E0,d3
-		lsr.b	#3,d3
-		bsr.w	PSGNoteOff
-.stopfm:
-; load either SSFX or BGM ontop of the freed SFX channel
+		smpsMakeChannelRamIndex d3,TrackVoiceControl(a5)
+; check which channel we're using
 		lea	RAM_SFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
-		beq.s	.notsfx						; If not a SFX, check BGM
+		beq.s	.notsfx
 		move.l	a6,a3
 		adda.w	d0,a3
-		cmp.l	a5,a3						; Are we processing a SFX?
-		bne.s	.getbgmptr					; If not, check BGM
+		cmp.l	a5,a3
+		bne.s	.notsfx
 		clr.b	v_sndprio(a6)					; Clear priority
+		bra.s	.nosfx
 .notsfx:
+; find parallel channels to restore
+		lea	RAM_SFXChannel(pc),a3
+		move.w	(a3,d3.w),d0
+		beq.s	.nosfx
+		move.l	a6,a3
+		adda.w	d0,a3
+		cmp.l	a5,a3
+		bne.s	.nosfx
+		tst.b	TrackPlaybackControl(a3)
+		bmi.s	.restore
+.nosfx:
 	if __smpsBFX=1
 		lea	RAM_BSFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
-		beq.s	.getbgmptr					; If not SSFX exists for this channel, get BGM
+		beq.s	.nobsfx
 		move.l	a6,a3
 		adda.w	d0,a3
-		cmp.l	a5,a3						; Are we processing a SFX?
-		tst.b	TrackPlaybackControl(a3)			; Is this SSFX channel playing?
-		bmi.s	.gotptr						; Branch if, load SSFX instead of BGM
+		cmp.l	a5,a3
+		bne.s	.nobsfx
+		tst.b	TrackPlaybackControl(a3)
+		bmi.s	.restore
+.nobsfx:
 	endif
-.getbgmptr:
 		lea	RAM_BGMChannel(pc),a3
 		move.w	(a3,d3.w),d0
-		beq.s	.locexit					; If not SSFX exists for this channel, get BGM
+		beq.s	.nobgm
 		move.l	a6,a3
 		adda.w	d0,a3
+		cmp.l	a5,a3
+		bne.s	.nobgm
 		tst.b	TrackPlaybackControl(a3)			; Is track playing?
-		bpl.s	.locexit					; Branch if not
-;		SMPS_kdebugtext "stop addr restore bgm"
-.gotptr:
-		and.b	#(1<<_sfxoverride)!$FF,TrackPlaybackControl(a3)
-		or.b	#1<<_resting,TrackPlaybackControl(a3)
-		;move.b	TrackVoiceControl(a3),8(sp)			; debug, shove voice control into debugging address
-		cmp.b	#$40,TrackVoiceControl(a3)
-		bhs.s	.psgstop
-		exg.l	a3,a5
-		bsr.w	SetVoicePan
-		move.l	a3,a5
-.stopdac:
-.locexit:
-		addq.w	#8,sp						; stop processing this channel
-		move.l	(sp),d2
-		SMPS_kdebugtext "stop addr:",ktext_writehex_d2
-		rts
-; ---------------------------------------------------------------------------
-.psgstop:	move.b	TrackVoiceControl(a3),d0
-		cmpi.b	#$E0,d0
-		blo.s	.locexit
-		cmpi.b	#$E7,d0
-		bhi.s	.locexit
-		move.b	d0,(psginput).l		; Set noise tone
-		bra.s	.locexit
-; ===========================================================================
-cfxStopSpecialFM:
-	if __smpsBFX=1
-		and.b	#(1<<_playing|1<<_noattack)!$FF,TrackPlaybackControl(a5)
+		bmi.s	.restore					; Branch if not
+.nobgm:
+; no channel to restore, just turn the current one off
+		move.b	TrackVoiceControl(a5),d0			; Get voice control bits
+		add.b	d0,d0
+		bcs.s	.psg
+		bmi.s	.dac
+		;bpl.s	.fm
+.fm:		bra.w	FMNoteOff
+.psg:		bra.w	PSGNoteOff
+.dac:		bra.w	DACStopSample
 
-		moveq	#0,d3					; only update FM
-		move.b	TrackVoiceControl(a5),d3
-		bmi.s	.ssfxpsg
-		add.b	d3,d3
-		bmi.s	.ssfxpcm
-		bsr.w	FMNoteOff
-		lea	RAM_SFXChannel(pc),a3
-		move.w	(a3,d3.w),d0
-		beq.s	.nosfxequ
-		move.l	a6,a3
-		adda.w	d0,a3
-		tst.b	TrackPlaybackControl(a3)		; Is SFX using the now freed channel?
-		bmi.s	.restore				; Branch if yes
-		SMPS_kdebugtext "sfx rest fail"
-.nosfxequ:
-		lea	RAM_BGMChannel(pc),a3
-		move.w	(a3,d3.w),d0
-		beq.s	.nobgmequ
-		move.l	a6,a3
-		adda.w	d0,a3
+; found channel to restore, initiate the new one
 .restore:
 		and.b	#(1<<_sfxoverride)!$FF,TrackPlaybackControl(a3)
 		or.b	#1<<_resting,TrackPlaybackControl(a3)
+		move.b	TrackVoiceControl(a5),d0			; Get voice control bits
+		add.b	d0,d0
+		bcs.s	.r_psg
+		bmi.s	.r_dac
+		;bpl.s	.r_fm
+.r_fm:		bsr.w	FMNoteOff
 		exg.l	a3,a5
 		bsr.w	SetVoicePan
 		move.l	a3,a5
-.nobgmequ:
-.ssfxpsg:
-.ssfxpcm:
-		addq.w	#8,sp					; stop processing this channel
-		move.l	(sp),d2
-		SMPS_kdebugtext "ssfx stop addr:",ktext_writehex_d2
 		rts
-	else
-		SMPS_kdebugtext "smpsStopSpecial call when __smpsBFX is disabled"
-		bra.w	cfStopTrack
-	endif
+.r_psg:		bsr.w	PSGNoteOff
+		move.b	TrackVoiceControl(a3),d0			; If PSG4...
+		cmp.b	#$E0,d0
+		bhs.s	.r_psgnoise
+		btst	#_special,TrackPlaybackControl(a3)		; ...or PSG3 using PSG4 for noise...
+		beq.s	.r_psgnah
+		or.b	#$E0,d0						; ...set noise tone
+.r_psgnoise:	move.b	d0,(psginput).l
+.r_psgnah:	rts
+.r_dac:		bra.w	DACStopSample
+; TODO: like fm I think you need to set pan
 ; ===========================================================================
 cfxRevUp:
 		move.b	v_revving_pitch(a6),d0

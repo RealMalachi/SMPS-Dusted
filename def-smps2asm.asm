@@ -130,7 +130,6 @@ cxPanAMSFMS		ds.b 1		; cfxPanningAMSFMS
 cxSetLFO		ds.b 1		; cfxSetLFO
 cxCommunicate		ds.b 1		; cfSetCommunication
 cxSongFadeIn		ds.b 1		; cfxFadeInToPrevious
-cxStopSSFX		ds.b 1		; cfxStopSpecialFM4
 cxSpecialFM3		ds.b 1		; cfxUnk
 cxRevUp			ds.b 1		; cfxRevUp
 cxRevAddCur		ds.b 1		; cfxRevAddCur
@@ -205,6 +204,7 @@ smpsHeaderStartSong macro ver, sourcesmps2asmver
 SourceDriver set ver
 songStart set *
 volenvHeader set 0
+modenvHeader set 0
 fmCount   set 0
 psgCount  set 0
 dacCount  set 0
@@ -248,6 +248,10 @@ smpsHeaderVolEnv macro loc
 volenvHeader set loc
 	endm
 
+smpsHeaderModEnv macro loc
+modenvHeader set loc
+	endm
+
 ; Header macros for music (not for SFX)
 ; Header - Set up Channel Usage
 smpsHeaderChan macro fm,psg,dac
@@ -270,6 +274,11 @@ smpsHeaderTempo macro div,mod
 	dc.w	0
 	else
 	CheckedChannelPointer volenvHeader
+	endif
+	if modenvHeader=0
+	dc.w	0
+	else
+	CheckedChannelPointer modenvHeader
 	endif
 	convertMainTempoMod mod
 	dc.b	div,dacCount,fmCount,psgCount
@@ -318,6 +327,11 @@ smpsHeaderTempoSFX macro div
 	dc.w	0
 	else
 	CheckedChannelPointer volenvHeader
+	endif
+	if modenvHeader=0
+	dc.w	0
+	else
+	CheckedChannelPointer modenvHeader
 	endif
 	dc.b	div
 	endm
@@ -606,13 +620,13 @@ smpsReturn macro val
 smpsStop macro
 	dc.b	cStop
 	endm
+; Stops background SFX channel
+smpsStopSpecial macro
+	dc.b	cStop
+	endm
 ; Silences FM channel then stops
 smpsStopFM macro
 	dc.b	cExtCmd,cxStopFM
-	endm
-; Stops special SFX channel
-smpsStopSpecial macro
-	dc.b	cExtCmd,cxStopSSFX
 	endm
 ; ---------------------------------------------------------------------------
 ; Sonic game specific features, don't expect these to be commonplace elsewhere
@@ -796,19 +810,17 @@ envtableid := envtableid+1
 	endif
 	endm
 
-smpsVolEnv macro data
+smpsVolEnv macro data,data2
 	if "data"==""
 	elseif "data"=="RESET"
 	dc.b	$80
 	elseif "data"=="HOLD"
 	dc.b	$81
 	elseif "data"=="INDEX"
-	dc.b	$82
-	shift
-		if "data"==""
+		if "data2"==""
 		fatal "Where's the index?"
 		endif
-	dc.b	data	; index
+	dc.b	$82,data2
 	elseif "data"=="REST"
 	dc.b	$83
 	else
@@ -823,19 +835,17 @@ smpsVolEnv macro data
 	smpsVolEnv ALLARGS
 	endif
 	endm
-smpsVolEnvPsg macro data
+smpsVolEnvPsg macro data,data2
 	if "data"==""
 	elseif "data"=="RESET"
 	dc.b	$80
 	elseif "data"=="HOLD"
 	dc.b	$81
 	elseif "data"=="INDEX"
-	dc.b	$82
-	shift
-		if "data"==""
+		if "data2"==""
 		fatal "Where's the index?"
 		endif
-	dc.b	data	; index
+	dc.b	$82,data2
 	elseif "data"=="REST"
 	dc.b	$83
 	else
@@ -848,6 +858,34 @@ smpsVolEnvPsg macro data
 		endif
 	shift
 	smpsVolEnvPsg ALLARGS
+	endif
+	endm
+
+smpsModEnv macro data,data2
+	if "data"==""
+	elseif "data"=="RESET"
+	dc.b	$80,$10
+	elseif "data"=="HOLD"
+	dc.b	$80,$11
+	elseif "data"=="INDEX"
+		if "data2"==""
+		fatal "Where's the index?"
+		endif
+	dc.b	$80,$12,data2
+	elseif "data"=="REST"
+	dc.b	$80,$13
+	else
+		if (data>$7FFF)||(data<~$7FFF)
+		warning "bruh zone"
+		elseif (data>$7FF)||(data<~$7FF)
+		dc.b	$80,$14,(data>>8)&$FF,(data)&$FF
+		elseif (data>$7F)||(data<-$7F)
+		dc.b	$80,$00|(data>>8)&$F,(data)&$FF
+		else
+		dc.b	data
+		endif
+	shift
+	smpsModEnv ALLARGS
 	endif
 	endm
 ; ---------------------------------------------------------------------------

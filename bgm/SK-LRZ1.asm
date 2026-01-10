@@ -1,7 +1,6 @@
 Snd_LRZ1_Header:
 	smpsHeaderStartSong 3
 	smpsHeaderVoiceUVB
-;	smpsHeaderVolEnv    Snd_LRZ1_VoicesPSG
 	smpsHeaderChan      $06, $03
 	smpsHeaderTempo     $01, $26
 
@@ -385,11 +384,3 @@ Snd_LRZ1_Jump03:
 	smpsPSGvoice        sTone_08
 	dc.b	nBb6, $60, $0C
 	smpsJump            Snd_LRZ1_Jump03
-
-Snd_LRZ1_VoicesPSG:
-.ind:	dc.w  .st01-.ind,.st02-.ind,.st04-.ind,.st08-.ind,.st0C-.ind
-.st01:	dc.b  $02,$83
-.st02:	dc.b  $00,$02,$04,$06,$08,$10,$83
-.st04:	dc.b  $00,$00,$02,$03,$04,$04,$05,$05,$05,$06,$06,$81
-.st08:	dc.b  $00,$00,$00,$02,$03,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0E,$0F,$83
-.st0C:	dc.b  $00,$00,$01,$01,$03,$03,$04,$05,$83

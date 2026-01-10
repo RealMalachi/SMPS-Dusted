@@ -60,17 +60,18 @@ PSGSetFreq:
 		subi.b	#$81,d5					; Convert to 0-based index
 		bcs.s	.rest					; If $80, put track at rest
 		add.b	TrackTranspose(a5),d5
-		if __smpsDebug
-		chk	#12*7,d5
-		endif
+	if __smpsDebug
+		cmp.w	#12*7,d5
+		bhi.s	.assert
+	endif
 		add.b	d5,d5					; Also clear sign bit
 		move.w	PSGFrequencies(pc,d5.w),TrackFreq(a5)	; Set new frequency
 		bra.w	FinishTrackUpdate
-; ---------------------------------------------------------------------------
 .rest:		or.b	#1<<_resting,TrackPlaybackControl(a5)	; Set 'track at rest' bit
 		move.w	#-1,TrackFreq(a5)			; Invalidate note frequency
 		pea	PSGNoteOff(pc)
 		bra.w	FinishTrackUpdate
+.assert:	SMPS_assert "PSGSetFreq: invalid frequency, TODO: print freq id"
 ; ===========================================================================
 ; PSG Note Values: c-0 to a-6
 ; ---------------------------------------------------------------------------
@@ -85,16 +86,17 @@ PSGFrequencies:
 PSGFrequenciesEnd:
 ; ===========================================================================
 PSGUpdateFreq:
-		tst.b	TrackModulationCtrl(a5)		; is modulation (calculated or envelopes) enabled?
-		beq.s	PSGUpdateFreq_exit		; if not, branch
+		moveq_	%10111111,d0
+		and.b	TrackModulationCtrl(a5),d0		; is modulation (calculated or envelopes) enabled?
+		beq.s	PSGUpdateFreq_exit			; if not, branch
 
 PSGPrepareNote:
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	PSGUpdateFreq_exit
 		bsr.w	GetFrequency
 		bpl.s	.valid
-		moveq	#-1,d6
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
+		rts
 .valid:
 ; TODO: check for other noise modes
 		moveq_	$E0,d0

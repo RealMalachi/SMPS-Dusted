@@ -5,10 +5,9 @@ SMPS_Start:
 	if MOMPASS=1
 .s:	dc.w 0,0,0
 	else
-.s:	dc.w bgm__Last-bgm__First
-	dc.w sfx__Last-sfx__First
-	dc.w pcm__Last-pcm__First
+.s:	dc.w bgm__Last-bgm__First,sfx__Last-sfx__First,pcm__Last-pcm__First
 	endif
+	dc.w __smpsDataVer
 	dc.w SMPS_MusicIndex-.s
 	dc.w SMPS_SoundIndex-.s
 	dc.w SMPS_UVB_FM-.s
@@ -44,10 +43,24 @@ command equ cmpid
 SourceSMPS2ASM := 1
 SourceDriver := 1
 SMPS_ModEnvIndex:
-;	smpsEnvTable START
-;	smpsEnvTable .m01,mEnv_01
-;	smpsEnvTable END
-;.m01:	smpsModEnv $00,RESET
+	smpsEnvTable START
+	smpsEnvTable SMPS_ModEnvIndex_m01,mEnv_01
+	smpsEnvTable SMPS_ModEnvIndex_m02,mEnv_02
+	smpsEnvTable SMPS_ModEnvIndex_m03,mEnv_03
+	smpsEnvTable SMPS_ModEnvIndex_m04,mEnv_04
+	smpsEnvTable SMPS_ModEnvIndex_m05,mEnv_05
+	smpsEnvTable SMPS_ModEnvIndex_m06,mEnv_06
+	smpsEnvTable SMPS_ModEnvIndex_m07,mEnv_07
+	smpsEnvTable SMPS_ModEnvIndex_m08,mEnv_08
+	smpsEnvTable END
+SMPS_ModEnvIndex_m02:	smpsModEnv $00
+SMPS_ModEnvIndex_m01:	smpsModEnv $01,$02,$01,$00,-$01,-$02,-$03,-$04,-$03,-$02,-$01,REST
+SMPS_ModEnvIndex_m03:	smpsModEnv $00,$00,$00,$00,$13,$26,$39,$4C,$5F,$72,$7F,$72,REST
+SMPS_ModEnvIndex_m04:	smpsModEnv $01,$02,$03,$02,$01,$00,-$01,-$02,-$03,-$02,-$01,$00,INDEX,0
+SMPS_ModEnvIndex_m05:	smpsModEnv $00,$00,$01,$03,$01,$00,-$01,-$03,-$01,$00,INDEX,2
+SMPS_ModEnvIndex_m06:	smpsModEnv $00,$00,$00,$00,  0, 10, 20, 30,  20,  10,   0, -10, -20, -30, -20, -10,INDEX,4
+SMPS_ModEnvIndex_m07:	smpsModEnv $00,$00,$00,$00, 22, 44, 66, 44,  22,   0, -22, -44, -66, -44, -22,INDEX,3
+SMPS_ModEnvIndex_m08:	smpsModEnv $01,$02,$03,$04,$03,$02,$01,$00,-$01,-$02,-$03,-$04,-$03,-$02,-$01,$00,INDEX,1
 
 ; ---------------------------------------------------------------------------
 ; Universal Volume Envelopes
@@ -1134,8 +1147,7 @@ SMPS_SoundIndex:
 	sfxdef 0,0,0,SoundCF,sfx_Signpost
 	sfxdef 0,0,0,SfxRevUp,sfx_RevUp
 	sfxdef 0,0,0,SfxRevRel,sfx_RevRel
-	sfxdef 0,1,0,SsfxWaterfall,ssfx_Waterfall
-	sfxdef 0,1,0,SsfxFmTest,ssfx_TestFM4
+	sfxdef 0,1,0,BsfxWaterfall,bsfx_Waterfall
 	sfxdef 0,0,1,CsfxWindQuiet,csfx_WindQuiet
 	sfxdef 0,0,0,SfxTest,sfx_Test
 	sfxdef END,sfx__Last
@@ -1288,9 +1300,7 @@ SoundCE:	include "sfx/SndCE - Ring Left Speaker.asm"
 		even
 SoundCF:	include "sfx/SndCF - Signpost.asm"
 		even
-SsfxWaterfall:	include "sfx/SndD0 - Waterfall.asm"
-		even
-SsfxFmTest:	include "sfx/SSFX-TestFM.asm"
+BsfxWaterfall:	include "sfx/SndD0 - Waterfall.asm"
 		even
 ; ---------------------------------------------------------------------------
 ; Music data

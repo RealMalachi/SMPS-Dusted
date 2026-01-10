@@ -43,7 +43,7 @@ CycleSoundQueue:
 Cmd_FadeOutMusicStopSFX:
 		move.w	d7,-(sp)
 		bsr.w	StopSFX
-	if __smpsBFX=1
+	if __smpsBFX
 		bsr.w	StopBSFX
 	endif
 		move.w	(sp)+,d7
@@ -75,7 +75,7 @@ Cmd_FadeIn:
 		rts
 ; ---------------------------------------------------------------------------
 Cmd_StopSound:
-	if __smpsBFX=1
+	if __smpsBFX
 		cmp.b	#1<<3,d7
 	else
 		cmp.b	#1<<2,d7
@@ -89,7 +89,7 @@ Cmd_StopSound:
 		beq.s	.notsfx
 		bsr.w	StopSFX
 .notsfx:
-	if __smpsBFX=1
+	if __smpsBFX
 		btst	#2,d7
 		beq.s	.notbsfx
 		bsr.w	StopBSFX
@@ -143,7 +143,7 @@ Cmd_SetBitFlag_Mono:
 		bsr.s	.fmloop
 		lea	v_sfx_fm_tracks(a6),a5
 		moveq	#((v_sfx_fm_tracks_end-v_sfx_fm_tracks)/TrackFmSz)-1,d7
-		if __smpsBFX=1
+		if __smpsBFX
 		bsr.s	.fmloop
 		lea	v_spcsfx_fm_tracks(a6),a5
 		moveq	#((v_spcsfx_fm_tracks_end-v_spcsfx_fm_tracks)/TrackFmSz)-1,d7
@@ -184,7 +184,7 @@ Cmd_SetBitFlag_SSG:
 		bsr.s	.loop
 		lea	v_sfx_fm_tracks(a6),a5
 		moveq	#((v_sfx_fm_tracks_end-v_sfx_fm_tracks)/TrackFmSz)-1,d7
-		if __smpsBFX=1
+		if __smpsBFX
 		bsr.s	.loop
 		lea	v_spcsfx_fm_tracks(a6),a5
 		moveq	#((v_spcsfx_fm_tracks_end-v_spcsfx_fm_tracks)/TrackFmSz)-1,d7
@@ -208,7 +208,7 @@ Cmd_SetBitFlag_Muffle:
 		moveq	#((v_sfx_psg_tracks_end-v_sfx_psg_tracks)/TrackPsgSz)-1,d7
 		moveq	#TrackPsgSz,d6
 		bsr.s	.fade
-	if __smpsBFX=1
+	if __smpsBFX
 		lea	v_spcsfx_fm_tracks(a6),a5
 		moveq	#((v_spcsfx_fm_tracks_end-v_spcsfx_fm_tracks)/TrackFmSz)-1,d7
 		moveq	#TrackFmSz,d6
@@ -251,6 +251,18 @@ FMInitBytes:	dc.b 0, 1, 2, 4, 5, 6
 PSGInitBytes:	dc.b $80, $A0, $C0, $E0
 	even
 ; ===========================================================================
+; TODO: enums?
+-
+	phase 0
+	if __smpsModEnv
+queue_modenvptr	ds.l 1
+	endif
+queue_volenvptr	ds.l 1
+queue_fminstptr	ds.l 1
+queue_stacksize	;ds.l 1
+	dephase
+	!org -
+; ---------------------------------------------------------------------------
 Sound_PlayBGM:
 		move.l	v_dataptr(a6),a3
 		moveq	#0,d0
@@ -263,93 +275,108 @@ Sound_PlayBGM:
 		move.l	a3,a4
 		add.l	d0,a4
 
-		move.b	(a4),d1
+		move.b	(a4),d6
 		move.l	(a4),d0
 		add.l	d0,a3				; a3 now points to song header
-
-		move.b	#5,v_paltimer(a6)
-		btst	#6,d1				; bit 22 is the PAL slow play flag
-		beq.s	.pal_playnorm
-		st.b	v_paltimer(a6)
-.pal_playnorm:
-	if __smpsJingle=1
-		btst	#7,d1				; bit 23 is the "1up" song flag
+; misc initiation
+		clr.b	v_fadein_counter(a6)
+		clr.b	v_fadeout_counter(a6)
+; distinguish between main songs and jingles
+	if __smpsJingle
+		btst	#7,d6				; bit 23 is the "1up" song flag
 		beq.s	.bgmnot1up
 		bset	#0,v_driverflags(a6)		; if 1up is already playing, branch
-		bne.s	.bgm_loadMusic
+		bne.s	.bgm_loadJingle
 
-		moveq_	$FF!(1<<_sfxoverride),d2
-	set .val,v_music_dac_tracks+TrackPlaybackControl
-	rept (v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz
-		and.b	d2,.val(a6)
-	set .val,.val+TrackDacSz
-	endr
-	set .val,v_music_fm_tracks+TrackPlaybackControl
-	rept (v_music_fm_tracks_end-v_music_fm_tracks)/TrackFmSz
-		and.b	d2,.val(a6)
-	set .val,.val+TrackFmSz
-	endr
-	set .val,v_music_psg_tracks+TrackPlaybackControl
-	rept (v_music_psg_tracks_end-v_music_psg_tracks)/TrackPsgSz
-		and.b	d2,.val(a6)
-	set .val,.val+TrackPsgSz
-	endr
+		moveq_	$FF!(1<<_sfxoverride),d1
+		set .val,v_music_dac_tracks+TrackPlaybackControl
+		rept (v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz
+		and.b	d1,.val(a6)
+		set .val,.val+TrackDacSz
+		endr
+		set .val,v_music_fm_tracks+TrackPlaybackControl
+		rept (v_music_fm_tracks_end-v_music_fm_tracks)/TrackFmSz
+		and.b	d1,.val(a6)
+		set .val,.val+TrackFmSz
+		endr
+		set .val,v_music_psg_tracks+TrackPlaybackControl
+		rept (v_music_psg_tracks_end-v_music_psg_tracks)/TrackPsgSz
+		and.b	d1,.val(a6)
+		set .val,.val+TrackPsgSz
+		endr
 
 		lea	v_1up_save_ram(a6),a0
 		lea	v_1up_ram_copy(a6),a1
-		moveq	#((v_1up_ram_copy_end-v_1up_ram_copy)/4)-1,d2
+		moveq	#((v_1up_ram_copy_end-v_1up_ram_copy)/4)-1,d1
 .backupramloop:	move.l	(a0)+,(a1)+
-		dbf	d2,.backupramloop
+		dbf	d1,.backupramloop
 		if (v_1up_ram_copy_end-v_1up_ram_copy)&2
 		move.w	(a0)+,(a1)+
 		endif
-		bra.s	.bgm_loadMusic
+		bra.s	.bgm_loadJingle
 .bgmnot1up:
 		bclr	#0,v_driverflags(a6)
 		beq.s	.bgm_loadMusic
 		lea	v_1up_ram_copy(a6),a0
 		moveq	#0,d0
-		moveq	#((v_1up_ram_copy_end-v_1up_ram_copy)/4)-1,d2
+		moveq	#((v_1up_ram_copy_end-v_1up_ram_copy)/4)-1,d1
 .saveclrloop:	move.l	d0,(a0)+
-		dbf	d2,.saveclrloop
+		dbf	d1,.saveclrloop
 		if (v_1up_ram_copy_end-v_1up_ram_copy)&2
 		move.w	d0,(a0)+
 		endif
-.bgm_loadMusic:
 	endif
-		clr.b	v_fadein_counter(a6)
-		clr.b	v_fadeout_counter(a6)
-; start going through the header
-		moveq	#0,d3		; fm instruments
-		move.w	(a3)+,d3
+.bgm_loadMusic:
+.bgm_loadJingle:
+		addq.w	#4,sp
+		pea	HandleSoundQueueEnd(pc)
+; setup PAL timer
+		moveq	#5,d0
+		btst	#6,d6					; bit 22 is the PAL slow play flag
+		beq.s	.pal_playnorm
+		moveq	#-1,d0
+.pal_playnorm:	move.b	d0,v_paltimer(a6)
+
+		move.l	v_dataptr(a6),a1
+		moveq	#0,d0
+		move.w	(a3)+,d0	; fm instruments
 		move.l	a3,a0		; doesn't effect ccr
 		bne.s	.fmuvb
-		move.l	v_dataptr(a6),a0
-		move.w	drvdata.uvbfm(a0),d3
-.fmuvb:		add.l	a0,d3
+		move.l	a1,a0
+		move.w	drvdata.uvbfm(a0),d0
+.fmuvb:		add.l	d0,a0
+		move.l	a0,-(sp)
 
-		moveq	#0,d0		; volume envelopes
-		move.w	(a3)+,d0
-		move.l	a3,a1		; doesn't effect ccr
+		move.w	(a3)+,d0	; volume envelopes
+		move.l	a3,a0		; doesn't effect ccr
 		bne.s	.volenvuvb
-		move.l	v_dataptr(a6),a1
-		move.w	drvdata.uvbvol(a1),d0
-.volenvuvb:	add.l	d0,a1
+		move.l	a1,a0
+		move.w	drvdata.uvbvol(a0),d0
+.volenvuvb:	add.l	d0,a0
+		move.l	a0,-(sp)
+
+		move.w	(a3)+,d0	; modulation envelopes
+	if __smpsModEnv
+		move.l	a3,a0		; doesn't effect ccr
+		bne.s	.modenvuvb
+		move.l	a1,a0
+		move.w	drvdata.uvbmod(a0),d0
+.modenvuvb:	add.l	d0,a0
+		move.l	a0,-(sp)
+	endif
+		move.l	sp,a1
 
 		move.w	(a3)+,d0
 		move.w	d0,v_main_tempo(a6)
 		and.w	#$FFF0,d0
 		move.w	d0,v_main_tempo_timeout(a6)
 
-		move.b	(a3)+,d4				; load tempo divider
-		moveq	#1,d5					; Note duration for first "note"
-		moveq_	1<<_playing,d6
-		btst	#5,d1
-		beq.s	.ctrlinit
-		moveq_	1<<_playing|1<<_nouservol,d6
-.ctrlinit:
+		move.b	(a3)+,d5				; load tempo divider
+		btst	#5,d6
+		sne.b	d6
+		and.b	#1<<_nouservol,d6			; enable muffle disable if bit 5 is set
+		or.b	#1<<_playing,d6				; set playing regardless
 		lea	3(a3),a4
-
 ; init allocated dac channels
 		lea	v_music_dac_tracks(a6),a5
 		lea	DACInitBytes(pc),a2
@@ -379,8 +406,8 @@ Sound_PlayBGM:
 		move.w	d0,(a0)+
 	endif
 
-		move.b	d4,TrackTempoDivider(a5)
-		move.b	d5,TrackDurationTimeout(a5)		; Set duration of first "note"
+		move.b	d5,TrackTempoDivider(a5)
+		move.b	#1,TrackDurationTimeout(a5)		; Set duration of first "note"
 		move.b	#TrackGoSubStack,TrackStackPointer(a5)
 		moveq	#0,d0
 		move.w	(a4)+,d0
@@ -390,12 +417,9 @@ Sound_PlayBGM:
 		move.b	d0,TrackDataPointer+1(a5)
 		move.b	(a4)+,TrackTranspose(a5)
 		move.b	(a4)+,TrackVolume(a5)
-
-		move.l	a1,d0
-		move.w	d0,TrackVolEnvPtr+2(a5)
-		swap	d0
-		move.b	d0,TrackVolEnvPtr+1(a5)
 		clr.b	TrackVolEnvCtrl(a5)
+		move.b	queue_volenvptr+1(a1),TrackVolEnvPtr+1(a5)
+		move.w	queue_volenvptr+2(a1),TrackVolEnvPtr+2(a5)
 
 		move.b	#$C0,TrackAMSFMSPan(a5)			; Set AMS/FMS/Panning
 		bsr.w	DACStopSample				; TODO: all this doesn't check for SFX PCM
@@ -453,8 +477,8 @@ Sound_PlayBGM:
 		move.w	d0,(a0)+
 	endif
 
-		move.b	d4,TrackTempoDivider(a5)
-		move.b	d5,TrackDurationTimeout(a5)		; Set duration of first "note"
+		move.b	d5,TrackTempoDivider(a5)
+		move.b	#1,TrackDurationTimeout(a5)		; Set duration of first "note"
 		move.b	#TrackGoSubStack,TrackStackPointer(a5)
 		moveq	#0,d0
 		move.w	(a4)+,d0
@@ -464,28 +488,24 @@ Sound_PlayBGM:
 		move.b	d0,TrackDataPointer+1(a5)
 		move.b	(a4)+,TrackTranspose(a5)
 		move.b	(a4)+,TrackVolume(a5)
-
-		move.l	a1,d0
-		move.w	d0,TrackVolEnvPtr+2(a5)
-		swap	d0
-		move.b	d0,TrackVolEnvPtr+1(a5)
 		clr.b	TrackVolEnvCtrl(a5)
-
+		move.b	queue_volenvptr+1(a1),TrackVolEnvPtr+1(a5)
+		move.w	queue_volenvptr+2(a1),TrackVolEnvPtr+2(a5)
+	if __smpsModEnv
+		move.b	queue_modenvptr+1(a1),TrackModEnvPtr+1(a5)
+		move.w	queue_modenvptr+2(a1),TrackModEnvPtr+2(a5)
+	endif
+		move.b	queue_fminstptr+1(a1),TrackFmVoicePtr+1(a5)
+		move.w	queue_fminstptr+2(a1),TrackFmVoicePtr+2(a5)
 		move.b	#$C0,TrackAMSFMSPan(a5)			; Set AMS/FMS/Panning
-		move.l	d3,d0
-		move.w	d0,TrackFmVoicePtr+2(a5)
-		swap	d0
-		move.b	d0,TrackFmVoicePtr+1(a5)
-
-		movem.l	a0/d2-d3,-(sp)
 		bsr.w	FMSilence
 		moveq_	$B4,d0					; Register for AMS/FMS/Panning
-		move.b	TrackAMSFMSPan(a5),d1			; Value to send
-		btst	#5,v_driverflags(a6)
-		beq.s	.fmstereo
-		or.b	#$C0,d1
+		moveq_	$C0,d1					; Set pan
+;		move.b	TrackAMSFMSPan(a5),d1			; Value to send
+;		btst	#5,v_driverflags(a6)
+;		beq.s	.fmstereo
+;		or.b	#$C0,d1
 .fmstereo:	bsr.w	WriteFMIorIIMain
-		movem.l	(sp)+,a0/d2-d3
 
 		add.w	#TrackFmSz,a5
 		dbf	d7,.fmloadloop
@@ -496,9 +516,7 @@ Sound_PlayBGM:
 		bcs.s	.fmallon
 .fmmute:	and.b	#1<<_sfxoverride,TrackPlaybackControl(a5)
 		move.b	(a2)+,TrackVoiceControl(a5)		; Voice control bits
-		movem.l	a0/d2-d3,-(sp)
 		bsr.w	FMSilence
-		movem.l	(sp)+,a0/d2-d3
 		add.w	#TrackFmSz,a5
 		dbf	d7,.fmmute
 .fmallon:
@@ -528,8 +546,8 @@ Sound_PlayBGM:
 		move.w	d0,(a0)+
 	endif
 
-		move.b	d4,TrackTempoDivider(a5)
-		move.b	d5,TrackDurationTimeout(a5)		; Set duration of first "note"
+		move.b	d5,TrackTempoDivider(a5)
+		move.b	#1,TrackDurationTimeout(a5)		; Set duration of first "note"
 		move.b	#TrackGoSubStack,TrackStackPointer(a5)
 		moveq	#0,d0
 		move.w	(a4)+,d0
@@ -541,12 +559,12 @@ Sound_PlayBGM:
 		move.b	(a4)+,TrackVolume(a5)
 		move.b	(a4)+,TrackModulationCtrl(a5)
 		move.b	(a4)+,TrackVolEnvCtrl(a5)
-
-		move.l	a1,d0
-		move.w	d0,TrackVolEnvPtr+2(a5)
-		swap	d0
-		move.b	d0,TrackVolEnvPtr+1(a5)
-
+		move.b	queue_volenvptr+1(a1),TrackVolEnvPtr+1(a5)
+		move.w	queue_volenvptr+2(a1),TrackVolEnvPtr+2(a5)
+	if __smpsModEnv
+		move.b	queue_modenvptr+1(a1),TrackModEnvPtr+1(a5)
+		move.w	queue_modenvptr+2(a1),TrackModEnvPtr+2(a5)
+	endif
 		bsr.w	PSGNoteOff
 		add.w	#TrackPsgSz,a5
 		dbf	d7,.psgloadloop
@@ -561,20 +579,24 @@ Sound_PlayBGM:
 		add.w	#TrackPsgSz,a5
 		dbf	d7,.psgmute
 .psgallon:
-		addq.w	#4,sp
-		bra.w	HandleSoundQueueEnd
+	if (v_music_psg_tracks_end-v_music_psg_tracks)/TrackPsgSz<4
+		move.b	#$FF,(psginput).l
+	endif
+; alright we're done
+		lea	queue_stacksize(sp),sp			; deallocate pointers
+		rts
 ; ===========================================================================
-	if __smpsJingle=1
+	if __smpsJingle
 Sound_PlaySFX_NoInit:
 		clr.b	v_sndprio(a6)
 	endif
 Sound_PlaySFX_Exit:
 		rts
 Sound_PlaySFX_SameCSFX:
-		move.b	5(a3),v_contsfx_loop(a6)		; set number of SFX tracks as the sfx loop
+		move.b	7(a3),v_contsfx_loop(a6)		; set number of SFX tracks as the sfx loop
 		rts
 Sound_PlaySFX:
-	if __smpsJingle=1
+	if __smpsJingle
 		btst	#0,v_driverflags(a6)	; Is 1-up playing?
 		bne.s	Sound_PlaySFX_NoInit	; Exit if so
 	endif
@@ -597,7 +619,7 @@ Sound_PlaySFX:
 		move.b	(a4)+,d0
 		add.l	d0,a3			; SFX data pointer
 
-		moveq	#$3F,d0
+		moveq	#$F,d0
 		and.b	d1,d0
 		beq.s	.noprio
 		cmp.b	v_sndprio(a6),d0
@@ -613,73 +635,103 @@ Sound_PlaySFX:
 		move.w	d0,v_contsfx_lastid(a6)
 		clr.b	v_contsfx_loop(a6)
 .notcontsfx:
-		moveq	#0,d0		; fm instruments
-		move.w	(a3)+,d0
+		move.l	v_dataptr(a6),a1
+		moveq	#0,d0
+		move.w	(a3)+,d0	; fm instruments
 		move.l	a3,a0		; doesn't effect ccr
 		bne.s	.fmuvb
-		move.l	v_dataptr(a6),a0
+		move.l	a1,a0
 		move.w	drvdata.uvbfm(a0),d0
 .fmuvb:		add.l	d0,a0
-	
-		moveq	#0,d0		; volume envelopes
-		move.w	(a3)+,d0
-		move.l	a3,a1		; doesn't effect ccr
+		move.l	a0,-(sp)
+
+		move.w	(a3)+,d0	; volume envelopes
+		move.l	a3,a0		; doesn't effect ccr
 		bne.s	.volenvuvb
-		move.l	v_dataptr(a6),a1
-		move.w	drvdata.uvbvol(a1),d0
-.volenvuvb:	add.l	d0,a1
+		move.l	a1,a0
+		move.w	drvdata.uvbvol(a0),d0
+.volenvuvb:	add.l	d0,a0
+		move.l	a0,-(sp)
+
+		move.w	(a3)+,d0	; modulation envelopes
+	if __smpsModEnv
+		move.l	a3,a0		; doesn't effect ccr
+		bne.s	.modenvuvb
+		move.l	a1,a0
+		move.w	drvdata.uvbmod(a0),d0
+.modenvuvb:	add.l	d0,a0
+		move.l	a0,-(sp)
+	endif
+		move.l	sp,a1
+
+		btst	#5,d1
+		sne.b	d6
+		and.b	#1<<_nouservol,d6			; enable muffle disable if bit 5 is set
+		or.b	#1<<_playing,d6				; set playing regardless
+;		btst	#4,d1
 
 		move.b	(a3)+,d5		; Dividing timing
 		moveq	#0,d7
 		move.b	(a3)+,d7		; Number of tracks (FM + PSG)
 		subq.b	#1,d7
-	if __smpsBFX=1
+	if __smpsBFX
 		btst	#7,d1
-		bne.w	Sound_PlaySFX_BSFX
-	endif
+		beq.w	Sound_PlaySFX_SFX
 ; ---------------------------------------------------------------------------
+Sound_PlaySFX_BSFX:
 .loadloop:
-		moveq	#0,d3
-		move.b	(a3),d3			; Channel assignment bits
-		move.b	d3,d4
-		bmi.s	.initpsg		; Branch if PSG
-		add.b	d3,d3
-		bpl.s	.initfm
-		add.w	#((30/2)-$40)*2,d3
-		bra.s	.initdac
-.initpsg:
-		lsr.w	#3,d3
-; TODO: hackish PSG3 fix
-		cmpi.b	#$C0,d4
-		bne.s	.init
-		move.b	#$DF,(psginput).l
-		move.b	#$FF,(psginput).l
-.initfm:
-.initdac:
-.init:
-		lea	RAM_SFXChannel(pc),a5
-		move.w	(a5,d3.w),d0
+		move.b	(a3)+,d2				; Channel assignment bits
+		smpsMakeChannelRamIndex d2,d1
+		lea	RAM_BSFXChannel(pc),a5
+		move.w	(a5,d1.w),d0
 		bne.s	.validsfxch
-		if __smpsDebug
-		SMPS_assert "Invalid SFX load, TODO print channel ID"
-		else
-		addq.w	#6,a3		; invalid channel, skip
-		bra.s	.nop
-		endif
+		SMPS_assert "Invalid BSFX load, TODO print channel ID"
 .validsfxch:
 		move.l	a6,a5
 		add.w	d0,a5
 
 		lea	RAM_BGMChannel(pc),a2
-		move.w	(a2,d3.w),d0
+		move.w	(a2,d1.w),d0
 		beq.s	.nobgmequ
 		move.l	a6,a2
 		add.w	d0,a2
 		or.b	#1<<_sfxoverride,TrackPlaybackControl(a2)
 .nobgmequ:
-	if __smpsBFX=1
+;		lea	RAM_SFXChannel(pc),a2
+;		move.w	(a2,d1.w),d0
+;		beq.s	.nosfxequ
+;		move.l	a6,a2
+;		add.w	d0,a2
+;		or.b	#1<<_sfxoverride,TrackPlaybackControl(a2)
+;.nosfxequ:
+		bsr.w	Sound_PlaySFX_Setup
+		dbf	d7,.loadloop
+		lea	queue_stacksize(sp),sp			; deallocate pointers
+		rts
+	endif
+; ---------------------------------------------------------------------------
+Sound_PlaySFX_SFX:
+.loadloop:
+		move.b	(a3)+,d2				; Channel assignment bits
+		smpsMakeChannelRamIndex d1,d2
+		lea	RAM_SFXChannel(pc),a5
+		move.w	(a5,d1.w),d0
+		bne.s	.validsfxch
+		SMPS_assert "Invalid SFX load, TODO print channel ID"
+.validsfxch:
+		move.l	a6,a5
+		add.w	d0,a5
+
+		lea	RAM_BGMChannel(pc),a2
+		move.w	(a2,d1.w),d0
+		beq.s	.nobgmequ
+		move.l	a6,a2
+		add.w	d0,a2
+		or.b	#1<<_sfxoverride,TrackPlaybackControl(a2)
+.nobgmequ:
+	if __smpsBFX
 		lea	RAM_BSFXChannel(pc),a2
-		move.w	(a2,d3.w),d0
+		move.w	(a2,d1.w),d0
 		beq.s	.nossfxequ
 		move.l	a6,a2
 		add.w	d0,a2
@@ -688,67 +740,65 @@ Sound_PlaySFX:
 	endif
 		bsr.s	Sound_PlaySFX_Setup
 		dbf	d7,.loadloop
-.nop:
+		lea	queue_stacksize(sp),sp			; deallocate pointers
 		rts
 
 Sound_PlaySFX_Setup:
-		add.b	d4,d4
+		move.b	d2,d1
+		add.b	d1,d1
 		bcs.s	.dopsg
-		bpl.s	.dofm
+		bmi.s	.dodac
+.dofm:
+		moveq	#(TrackFmSz/2)-1,d1
+		bsr.s	.do
+
+		move.b	queue_fminstptr+1(a1),TrackFmVoicePtr+1(a5)
+		move.w	queue_fminstptr+2(a1),TrackFmVoicePtr+2(a5)
+		move.b	#$C0,TrackAMSFMSPan(a5)
+;		bsr.w	FMSilence
+		moveq_	$B4,d0					; Register for AMS/FMS/Panning
+		moveq_	$C0,d1					; Set panning
+;		move.b	TrackAMSFMSPan(a5),d1			; Value to send
+;		btst	#5,v_driverflags(a6)
+;		beq.s	.fmstereo
+;		or.b	#$C0,d1
+.fmstereo:	bra.w	WriteFMIorIIMain
+
 .dodac:
-		move.l	a5,a2
-		moveq	#0,d0
 		moveq	#(TrackDacSz/2)-1,d1
-.dodac2:	move.w	d0,(a2)+
-		dbf	d1,.dodac2
 		bsr.s	.do
 
 		move.b	#$C0,TrackAMSFMSPan(a5)
 		bsr.w	DACStopSample
-		move.b	TrackAMSFMSPan(a5),d0
-		btst	#5,v_driverflags(a6)
-		beq.s	.dacstereo
-		or.b	#$C0,d0
-.dacstereo:	bsr.w	DACSetPan
-		rts
+		moveq_	$C0,d0					; Set panning
+;		move.b	TrackAMSFMSPan(a5),d0
+;		btst	#5,v_driverflags(a6)
+;		beq.s	.dacstereo
+;		or.b	#$C0,d0
+.dacstereo:	bra.w	DACSetPan
 
 .dopsg:
-		move.l	a5,a2
-		moveq	#0,d0
 		moveq	#(TrackPsgSz/2)-1,d1
-.dopsg2:	move.w	d0,(a2)+
-		dbf	d1,.dopsg2
-		bra.s	.do
-
-.dofm:
-		move.l	a5,a2
-		moveq	#0,d0
-		moveq	#(TrackFmSz/2)-1,d1
-.dofm2:		move.w	d0,(a2)+
-		dbf	d1,.dofm2
 		bsr.s	.do
 
-		move.b	#$C0,TrackAMSFMSPan(a5)
-		move.l	a0,d0
-		move.w	d0,TrackFmVoicePtr+2(a5)
-		swap	d0
-		move.b	d0,TrackFmVoicePtr+1(a5)
-
-		movem.l	a0/d2,-(sp)
-		moveq_	$B4,d0					; Register for AMS/FMS/Panning
-		move.b	TrackAMSFMSPan(a5),d1			; Value to send
-		btst	#5,v_driverflags(a6)
-		beq.s	.fmstereo
-		or.b	#$C0,d1
-.fmstereo:	bsr.w	WriteFMIorIIMain
-		movem.l	(sp)+,a0/d2
+		cmp.b	#$C0,d2
+		blo.s	.psg34
+		move.b	#$DF,(psginput).l
+		move.b	#$FF,(psginput).l
+.psg34:
 		rts
+
 .do:
-		move.b	#1<<_playing,TrackPlaybackControl(a5)
-		move.b	(a3)+,TrackVoiceControl(a5)
+		move.l	a5,a2
+		moveq	#0,d0
+.doclr:		move.w	d0,(a2)+
+		dbf	d1,.doclr
+
+		move.b	d6,TrackPlaybackControl(a5)
+		move.b	d2,TrackVoiceControl(a5)
 		move.b	(a3)+,TrackTranspose(a5)
 		move.b	(a3)+,TrackVolume(a5)
-		moveq	#0,d0					; Track data pointer, relative to start
+		;moveq	#0,d0					; Track data pointer, relative to start
 		move.b	(a3)+,d0				; u8
 		add.l	a3,d0
 		move.w	d0,TrackDataPointer+2(a5)
@@ -757,62 +807,10 @@ Sound_PlaySFX_Setup:
 		move.b	d5,TrackTempoDivider(a5)		; Initial voice control bits
 		move.b	#1,TrackDurationTimeout(a5)		; Set duration of first "note"
 		move.b	#TrackGoSubStack,TrackStackPointer(a5)
-		move.l	a1,d0
-		move.w	d0,TrackVolEnvPtr+2(a5)
-		swap	d0
-		move.b	d0,TrackVolEnvPtr+1(a5)
-		rts
-; ---------------------------------------------------------------------------
-	if __smpsBFX=1
-Sound_PlaySFX_BSFX:
-.loadloop:
-		moveq	#0,d3
-		move.b	(a3),d3			; Channel assignment bits
-		move.b	d3,d4
-		bmi.s	.initpsg		; Branch if PSG
-		add.b	d3,d3
-		bpl.s	.initfm
-		add.w	#((30/2)-$40)*2,d3
-		bra.s	.initdac
-.initpsg:
-		lsr.w	#3,d3
-; TODO: hackish PSG3 fix
-		cmpi.b	#$C0,d4
-		bne.s	.init
-		move.b	#$DF,(psginput).l
-		move.b	#$FF,(psginput).l
-.initfm:
-.initdac:
-.init:
-		lea	RAM_BSFXChannel(pc),a5
-		move.w	(a5,d3.w),d0
-		bne.s	.validsfxch
-		if __smpsDebug
-		SMPS_assert "Invalid BSFX load, TODO print channel ID"
-		else
-		addq.w	#6,a3		; invalid channel, skip
-		bra.s	.nop
-		endif
-.validsfxch:
-		move.l	a6,a5
-		add.w	d0,a5
-
-		lea	RAM_BGMChannel(pc),a2
-		move.w	(a2,d3.w),d0
-		beq.s	.nobgmequ
-		move.l	a6,a2
-		add.w	d0,a2
-		or.b	#1<<_sfxoverride,TrackPlaybackControl(a2)
-.nobgmequ:
-;		lea	RAM_SFXChannel(pc),a2
-;		move.w	(a2,d3.w),d0
-;		beq.s	.nosfxequ
-;		move.l	a6,a2
-;		add.w	d0,a2
-;		or.b	#1<<_sfxoverride,TrackPlaybackControl(a2)
-;.nosfxequ:
-		bsr.w	Sound_PlaySFX_Setup
-.nop:
-		dbf	d7,.loadloop
-		rts
+		move.b	queue_volenvptr+1(a1),TrackVolEnvPtr+1(a5)
+		move.w	queue_volenvptr+2(a1),TrackVolEnvPtr+2(a5)
+	if __smpsModEnv
+		move.b	queue_modenvptr+1(a1),TrackModEnvPtr+1(a5)
+		move.w	queue_modenvptr+2(a1),TrackModEnvPtr+2(a5)
 	endif
+		rts
