@@ -93,6 +93,7 @@ PSGUpdateFreq:
 PSGPrepareNote:
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	PSGUpdateFreq_exit
+		moveq	#0,d2
 		bsr.w	GetFrequency
 		bpl.s	.valid
 		or.b	#1<<_resting,TrackPlaybackControl(a5)

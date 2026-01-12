@@ -16,42 +16,58 @@
 ; ---------------------------------------------------------------------------
 SetupPianoRoll:
 		moveq	#0,d7
+		move.l	a0,a6
 .loop:
 ; figure out what channel ram we're using, put it in a5
-		move.l	a1,a5
-		lea	.snd(pc),a2
-		add.w	(a2,d7.w),a5
+		lea	.snd(pc),a0
+		move.w	(a0,d7.w),d0
+		bne.s	.valid
+		addq.w	#8,a6
+		bra.s	.doloop
+.valid:		lea	(a1,d0.w),a5
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		beq.s	.bgm
 		smpsMakeChannelRamIndex d0,TrackVoiceControl(a5)
-		smpsGetChannelFromRamIndex a1,d0,d1,a2,a5
+		smpsGetChannelFromRamIndex a1,d0,d1,a0,a5
 .bgm:
-; dump stuff
+; dump channel data into piano buffer
 		move.w	#$C0,d0
 		and.b	TrackVoiceControl(a5),d0
 		lsr.b	#4,d0
+		moveq_	1<<_playing|1<<_resting,d1			; if it's playing and not resting, update the frequency
+		and.b	TrackPlaybackControl(a5),d1
+		cmp.b	#1<<_playing|0<<_resting,d1
+		beq.s	.resting
+		add.w	#16,d0
+.resting:
 		jsr	.lut(pc,d0.w)
 		tst.b	TrackPlaybackControl(a5)
-		smi.b	(a0)+
-		move.b	d0,(a0)+
-		move.w	d6,(a0)+
+		smi.b	d2
+		and.b	#1<<7,d2
+		move.b	d2,(a6)+
+		move.b	d0,(a6)+
+		move.w	d6,(a6)+
 		move.b	TrackVolume(a5),d2
-		bpl.s	.volexceed
+		bpl.s	.vol
 		moveq	#$7F,d2
-.volexceed:
-		move.b	d2,(a0)+
-		move.b	d1,(a0)+
-		clr.w	(a0)+
+.vol:		move.b	d2,(a6)+
+		move.b	d1,(a6)+
+		clr.w	(a6)+
 ; loop
+.doloop:
 		addq.w	#2,d7
 		cmp.w	#.snde-.snd,d7
-		blo.s	.loop
+		blo.w	.loop
 		rts
 .lut:
-		bra.w	.fm
+		bra.w	.fm		; 0
 		bra.w	.pcm
 		bra.w	.psg
 		bra.w	.psg3
+		bra.w	.fm_rest	; 16
+		bra.w	.pcm_rest
+		bra.w	.psg_rest
+		bra.w	.psg3_rest
 
 .snd:		dc.w v_music_fm1_track
 		dc.w v_music_fm2_track
@@ -62,23 +78,24 @@ SetupPianoRoll:
 		dc.w v_music_psg1_track
 		dc.w v_music_psg2_track
 		dc.w v_music_psg3_track
-		dc.w v_music_psg3_track;v_music_psg4_track
+		dc.w 0;v_music_psg4_track
 		dc.w v_music_dac1_track
-		dc.w v_music_dac1_track;v_music_dac2_track
+		dc.w 0;v_music_dac2_track
 .snde:
+		even
 ; ---------------------------------------------------------------------------
 ; PSG frequencies range from $3FF-$000 (higher is lower pitch)
 ; Margin of error is necessary due to detune/modulation/portamento
 .psg3:
-.psg:
-		moveq	#-1,d1
+.psg:		moveq	#1,d2
 		bsr.w	GetFrequency
-		bmi.s	.restnote
+		bmi.s	.psg_rest
 		and.w	#$3FF,d6
-		lea	PSGFrequencies(pc),a2
+		lea	PSGFrequencies(pc),a0
+		move.w	(a0)+,d2
 		moveq	#$5F,d0
-.psgl:		move.w	(a2)+,d3
-		move.w	(a2),d2
+.psgl:		move.w	d2,d3
+		move.w	(a0)+,d2
 		sub.w	d2,d3
 		lsr.w	#1,d3
 		add.w	d2,d3
@@ -86,41 +103,53 @@ SetupPianoRoll:
 		dble	d0,.psgl
 		if __smpsDebug
 		bgt.s	.psger1
-		lea	PSGFrequenciesEnd-2(pc),a3
-		cmp.l	a3,a2
+		lea	PSGFrequenciesEnd(pc),a3
+		cmp.l	a3,a0
 		bhi.s	.psger2
 		endif
 		neg.w	d0
 		add.w	#$5F,d0
+		moveq	#-1,d1
 		rts
 .psger1:	SMPS_assert "Piano PSG error 1"
 .psger2:	SMPS_assert "Piano PSG error 2"
+.psg_rest:
+.psg3_rest:
+		moveq	#-1,d6
+		moveq	#-1,d0
+		moveq	#-1,d1
+		rts
 ; ---------------------------------------------------------------------------
 .pcm:
+		move.w	TrackSavedDAC(a5),d6
+		moveq	#-1,d0
 		move.b	TrackAMSFMSPan(a5),d1	; ........ RL......
 		ext.w	d1			; RRRRRRRR RL......
 		add.b	d1,d1			; RRRRRRRR L......0
 		smi.b	d1			; RRRRRRRR LLLLLLLL
 		lsr.w	#4,d1			; ....RRRR RRRRLLLL
-		move.w	TrackSavedDAC(a5),d6
-.restnote:
-		moveq	#-1,d0
 		rts
-; ---------------------------------------------------------------------------
-; FM frequencies range from $0000-$3FFF (lower is lower pitch)
-; Margin of error is necessary due to detune/modulation/portamento
-.fm:		move.b	TrackAMSFMSPan(a5),d1	; ........ RL......
+.pcm_rest:
+.fm_rest:
+		moveq	#-1,d0
+		moveq	#-1,d6
+		move.b	TrackAMSFMSPan(a5),d1	; ........ RL......
 		ext.w	d1			; RRRRRRRR RL......
 		add.b	d1,d1			; RRRRRRRR L......0
 		smi.b	d1			; RRRRRRRR LLLLLLLL
 		lsr.w	#4,d1			; ....RRRR RRRRLLLL
+		rts
+; ---------------------------------------------------------------------------
+; FM frequencies range from $0000-$3FFF (lower is lower pitch)
+; Margin of error is necessary due to detune/modulation/portamento
+.fm:		moveq	#1,d2
 		bsr.w	GetFrequency
-		bmi.s	.restnote
+		bmi.s	.fm_rest
 		and.w	#$3FFF,d6
-		lea	FMFrequencies(pc),a2
+		lea	FMFrequencies(pc),a0
 		moveq	#$5F,d0
-.fml:		move.w	(a2)+,d2
-		move.w	(a2),d3
+.fml:		move.w	(a0)+,d2
+		move.w	(a0),d3
 		sub.w	d2,d3
 		lsr.w	#1,d3
 		add.w	d2,d3
@@ -129,11 +158,16 @@ SetupPianoRoll:
 		if __smpsDebug
 		blt.s	.fmer1
 		lea	FMFrequenciesEnd-2(pc),a3
-		cmp.l	a3,a2
+		cmp.l	a3,a0
 		bhi.s	.fmer2
 		endif
 		neg.w	d0
 		add.w	#$5F,d0
+		move.b	TrackAMSFMSPan(a5),d1	; ........ RL......
+		ext.w	d1			; RRRRRRRR RL......
+		add.b	d1,d1			; RRRRRRRR L......0
+		smi.b	d1			; RRRRRRRR LLLLLLLL
+		lsr.w	#4,d1			; ....RRRR RRRRLLLL
 		rts
 .fmer1:		SMPS_assert "Piano FM error 1"
 .fmer2:		SMPS_assert "Piano FM error 2"

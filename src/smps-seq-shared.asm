@@ -115,6 +115,8 @@ DoModulation:
 .z80_locret:
 		;rts
 ; ===========================================================================
+; INPUT
+; d2.b = frequency-related algorithm updater, 0 to update them, 1 to not
 ; OUTPUT
 ; d6.w = note, rest 
 ; ccr = n-bit clear (bpl) if valid frequency was found
@@ -122,17 +124,19 @@ DoModulation:
 GetFrequency_Rest:
 		rts
 GetFrequency:
+; base frequency
 		move.w	TrackFreq(a5),d6			; Get current note frequency
 		bmi.s	GetFrequency_Rest
-.cont:
+; detune
 		move.b	TrackDetune(a5),d0 			; Get detune value
 		ext.w	d0
 		add.w	d0,d6					; Add note frequency
+; modulation algorithm
 		move.b	TrackModulationCtrl(a5),d0
-		bpl.s	.nomod
+		bpl.s	.nomodalgo
 		add.w	TrackModulationVal(a5),d6
-.nomod:
-; TODO: modulation envolopes
+.nomodalgo:
+; modulation envelopes
 		;move.b	TrackModulationCtrl(a5),d0
 		and.w	#$3F,d0
 		beq.s	.nomodenv
@@ -170,6 +174,8 @@ GetFrequency:
 		ext.w	d1
 .gotmodenv2:
 		add.w	d1,d6
+		tst.b	d2					; we're just updating the frequency dont change the index
+		bne.s	.nomodenv
 		move.b	d0,TrackModEnvIndex(a5)
 	else
 		SMPS_assert "Driver disabled Modulation Envelopes"
@@ -242,6 +248,8 @@ GetFrequency:
 		endif
 		bra.w	.loop
 .Rest:
+		tst.b	d2					; we're just updating the frequency dont mute the audio again
+		bne.s	.RestEnd
 		pea	.RestEnd(pc)
 		move.b	TrackVoiceControl(a5),d0
 		add.b	d0,d0

@@ -116,6 +116,7 @@ FMUpdateFreq:
 FMPrepareNote:
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	FMUpdateFreq_exit
+		moveq	#0,d2
 		bsr.w	GetFrequency
 		bpl.s	.valid
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
