@@ -1081,7 +1081,7 @@ SMPS_MusicIndex_Exit:
 ; - if FM4 has both a bsfx and sfx, the bsfx will not play, but persists and will continue to play
 ;   after the sfx is done
 ; ---------------------------------------------------------------------------
-sfxdef macro flagprio,flagbsfx,flagcsfx,loc,cmpid
+sfxdef macro flagprio,flagbsfx,flagcsfx,flagnomuffle,loc,cmpid
 	if "flagprio"=="START"
 musidtrack set flagcsfx
 flagbsfx	equ musidtrack
@@ -1092,7 +1092,7 @@ flagbsfx	equ musidtrack
 musidtrack set -1
 musidoff set 0
 	else
-	dc.b  flagbsfx<<7|flagcsfx<<6|(flagprio)&$F
+	dc.b  flagbsfx<<7|flagcsfx<<6|flagnomuffle<<5|(flagprio)&$F
 	dc.w  loc-SMPS_SoundIndex
 cmpid	equ musidtrack
 	shared cmpid
@@ -1101,55 +1101,55 @@ musidtrack set musidtrack+1
 	endm
 SMPS_SoundIndex:
 	sfxdef START,sfx__First,bgm__Last
-	sfxdef 0,0,0,SoundA0,sfx_Jump
-	sfxdef 0,0,0,SoundA1,sfx_Lamppost
-	sfxdef 0,0,0,SoundA3,sfx_Death
-	sfxdef 0,0,0,SoundA4,sfx_Skid
-	sfxdef 0,0,0,SoundA6,sfx_HitSpikes
-	sfxdef 0,0,0,SoundA7,sfx_Push
-	sfxdef 0,0,0,SoundA8,sfx_SSGoal
-	sfxdef 0,0,0,SoundA9,sfx_SSItem
-	sfxdef 0,0,0,SoundAA,sfx_Splash
-	sfxdef 0,0,0,SoundAC,sfx_HitBoss
-	sfxdef 0,0,0,SoundAD,sfx_Bubble
-	sfxdef 0,0,0,SoundAE,sfx_Fireball
-	sfxdef 0,0,0,SoundAF,sfx_Shield
-	sfxdef 0,0,0,SoundB0,sfx_Saw
-	sfxdef 0,0,0,SoundB1,sfx_Electric
-	sfxdef 0,0,0,SoundB2,sfx_Drown
-	sfxdef 0,0,0,SoundB3,sfx_Flamethrower
-	sfxdef 0,0,0,SoundB4,sfx_Bumper
-	sfxdef 0,0,0,SoundB5,sfx_Ring
-	sfxdef 0,0,0,SoundB6,sfx_SpikesMove
-	sfxdef 0,0,0,SoundB7,sfx_Rumbling
-	sfxdef 0,0,0,SoundB9,sfx_Collapse
-	sfxdef 0,0,0,SoundBA,sfx_SSGlass
-	sfxdef 0,0,0,SoundBB,sfx_Door
-	sfxdef 0,0,0,SoundBC,sfx_Teleport
-	sfxdef 0,0,0,SoundBD,sfx_ChainStomp
-	sfxdef 0,0,0,SoundBE,sfx_Roll
-	sfxdef 0,0,0,SoundBF,sfx_Continue
-	sfxdef 0,0,0,SoundC0,sfx_Basaran
-	sfxdef 0,0,0,SoundC1,sfx_BreakItem
-	sfxdef 0,0,0,SoundC2,sfx_Warning
-	sfxdef 0,0,0,SoundC3,sfx_GiantRing
-	sfxdef 0,0,0,SoundC4,sfx_Bomb
-	sfxdef 0,0,0,SoundC5,sfx_Cash
-	sfxdef 0,0,0,SoundC6,sfx_RingLoss
-	sfxdef 0,0,0,SoundC7,sfx_ChainRise
-	sfxdef 0,0,0,SoundC8,sfx_Burning
-	sfxdef 0,0,0,SoundC9,sfx_Bonus
-	sfxdef 0,0,0,SoundCA,sfx_EnterSS
-	sfxdef 0,0,0,SoundCB,sfx_WallSmash
-	sfxdef 0,0,0,SoundCC,sfx_Spring
-	sfxdef 0,0,0,SoundCD,sfx_Switch
-	sfxdef 0,0,0,SoundCE,sfx_RingLeft
-	sfxdef 0,0,0,SoundCF,sfx_Signpost
-	sfxdef 0,0,0,SfxRevUp,sfx_RevUp
-	sfxdef 0,0,0,SfxRevRel,sfx_RevRel
-	sfxdef 0,1,0,BsfxWaterfall,bsfx_Waterfall
-	sfxdef 0,0,1,CsfxWindQuiet,csfx_WindQuiet
-	sfxdef 0,0,0,SfxTest,sfx_Test
+	sfxdef $0,0,0,0,SoundA0,sfx_Jump
+	sfxdef $3,0,0,0,SoundA1,sfx_Lamppost
+	sfxdef $3,0,0,0,SoundA3,sfx_Death
+	sfxdef $3,0,0,0,SoundA4,sfx_Skid
+	sfxdef $3,0,0,0,SoundA6,sfx_HitSpikes
+	sfxdef $3,0,0,0,SoundA7,sfx_Push
+	sfxdef $3,0,0,0,SoundA8,sfx_SSGoal
+	sfxdef $3,0,0,0,SoundA9,sfx_SSItem
+	sfxdef $2,0,0,0,SoundAA,sfx_Splash
+	sfxdef $3,0,0,0,SoundAC,sfx_HitBoss
+	sfxdef $3,0,0,1,SoundAD,sfx_Bubble
+	sfxdef $1,0,0,0,SoundAE,sfx_Fireball
+	sfxdef $3,0,0,0,SoundAF,sfx_Shield
+	sfxdef $3,0,0,0,SoundB0,sfx_Saw
+	sfxdef $1,0,0,0,SoundB1,sfx_Electric
+	sfxdef $3,0,0,1,SoundB2,sfx_Drown
+	sfxdef $1,0,0,0,SoundB3,sfx_Flamethrower
+	sfxdef $3,0,0,0,SoundB4,sfx_Bumper
+	sfxdef $3,0,0,0,SoundB5,sfx_Ring
+	sfxdef $3,0,0,0,SoundB6,sfx_SpikesMove
+	sfxdef $3,0,0,0,SoundB7,sfx_Rumbling
+	sfxdef $3,0,0,0,SoundB9,sfx_Collapse
+	sfxdef $3,0,0,0,SoundBA,sfx_SSGlass
+	sfxdef $3,0,0,0,SoundBB,sfx_Door
+	sfxdef $3,0,0,0,SoundBC,sfx_Teleport
+	sfxdef $3,0,0,0,SoundBD,sfx_ChainStomp
+	sfxdef $3,0,0,0,SoundBE,sfx_Roll
+	sfxdef $F,0,0,0,SoundBF,sfx_Continue
+	sfxdef $1,0,0,0,SoundC0,sfx_Basaran
+	sfxdef $3,0,0,0,SoundC1,sfx_BreakItem
+	sfxdef $3,0,0,1,SoundC2,sfx_Warning
+	sfxdef $3,0,0,0,SoundC3,sfx_GiantRing
+	sfxdef $3,0,0,0,SoundC4,sfx_Bomb
+	sfxdef $3,0,0,0,SoundC5,sfx_Cash
+	sfxdef $3,0,0,0,SoundC6,sfx_RingLoss
+	sfxdef $3,0,0,0,SoundC7,sfx_ChainRise
+	sfxdef $3,0,0,0,SoundC8,sfx_Burning
+	sfxdef $3,0,0,0,SoundC9,sfx_Bonus
+	sfxdef $3,0,0,0,SoundCA,sfx_EnterSS
+	sfxdef $3,0,0,0,SoundCB,sfx_WallSmash
+	sfxdef $3,0,0,0,SoundCC,sfx_Spring
+	sfxdef $3,0,0,0,SoundCD,sfx_Switch
+	sfxdef $3,0,0,0,SoundCE,sfx_RingLeft
+	sfxdef $3,0,0,0,SoundCF,sfx_Signpost
+	sfxdef $0,0,0,0,SfxRevUp,sfx_RevUp
+	sfxdef $0,0,0,0,SfxRevRel,sfx_RevRel
+	sfxdef $0,1,0,1,BsfxWaterfall,bsfx_Waterfall
+	sfxdef $0,0,1,0,CsfxWindQuiet,csfx_WindQuiet
+	sfxdef $0,0,0,0,SfxTest,sfx_Test
 	sfxdef END,sfx__Last
 SMPS_SoundIndex_Exit:
 	even
