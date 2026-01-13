@@ -993,26 +993,17 @@ cfStopTrack:
 		addq.w	#8,sp						; stop processing this channel
 		and.b	#(1<<_playing|1<<_noattack)!$FF,TrackPlaybackControl(a5)
 		smpsMakeChannelRamIndex d3,TrackVoiceControl(a5)
-; check which channel we're using
-		lea	RAM_SFXChannel(pc),a3
-		move.w	(a3,d3.w),d0
-		beq.s	.notsfx
-		move.l	a6,a3
-		adda.w	d0,a3
-		cmp.l	a5,a3
-		bne.s	.notsfx
-		clr.b	v_sndprio(a6)					; Clear priority
-		bra.s	.nosfx
-.notsfx:
 ; find parallel channels to restore
 		lea	RAM_SFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.nosfx
 		move.l	a6,a3
 		adda.w	d0,a3
-		cmp.l	a5,a3
-		bne.s	.nosfx
-		tst.b	TrackPlaybackControl(a3)
+		cmp.l	a5,a3						; if we're stopping the SFX channel...
+		bne.s	.notsfx						; ...clear SFX priority and check other channels
+		clr.b	v_sndprio(a6)
+		bra.s	.nosfx
+.notsfx:	tst.b	TrackPlaybackControl(a3)			; restore SFX if track is playing
 		bmi.s	.restore
 .nosfx:
 	if __smpsBFX=1
@@ -1021,9 +1012,9 @@ cfStopTrack:
 		beq.s	.nobsfx
 		move.l	a6,a3
 		adda.w	d0,a3
-		cmp.l	a5,a3
-		bne.s	.nobsfx
-		tst.b	TrackPlaybackControl(a3)
+		cmp.l	a5,a3						; if we're stopping the BSFX channel...
+		beq.s	.nobsfx						; ...check other channels
+		tst.b	TrackPlaybackControl(a3)			; restore BSFX if track is playing
 		bmi.s	.restore
 .nobsfx:
 	endif
@@ -1032,10 +1023,10 @@ cfStopTrack:
 		beq.s	.nobgm
 		move.l	a6,a3
 		adda.w	d0,a3
-		cmp.l	a5,a3
-		bne.s	.nobgm
-		tst.b	TrackPlaybackControl(a3)			; Is track playing?
-		bmi.s	.restore					; Branch if not
+		cmp.l	a5,a3						; if we're stopping the BGM channel...
+		beq.s	.nobgm						; ...check other channels
+		tst.b	TrackPlaybackControl(a3)			; restore BGM if track is playing
+		bmi.s	.restore
 .nobgm:
 ; no channel to restore, just turn the current one off
 		move.b	TrackVoiceControl(a5),d0			; Get voice control bits
