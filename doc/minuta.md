@@ -38,6 +38,11 @@ on smps-68k, the note plays for the last saved time, rest occurs for the new tim
 on smps-z80, the note plays for the last saved time, rest occurs for the new time, next time plays the previous note
 smps-dusted follows smps-68k logic
 
+rest on PCM is inconsistent
+- on smps-68k it doesn't stop the dac, but it's common to see drivers add that feature
+- on smps-z80 it doesn't stop the dac
+- on smps-dusted it stops the dac
+
 ## smps-dusted features
 smps-dusted supports additional features that no others possess
 

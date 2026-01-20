@@ -18,3 +18,10 @@ Excludes
 - Sonic 1 hard-coded block pushing sound flag
 - Sonic 2 hard-coded CPZ chemical balls play/not-play flag
 - Sonic 2 hard-coded spindash pitch increase (a non hard-coded method from Sonic 3 is provided)
+
+## Special Thanks
+Alex Field | Disassembling Sonic 2 Simon Wai
+Flamewing | Disassembling/compiling Sonic 3D Blasts OST
+Clownacy | Clone Driver, "Dual-Clown"
+Undying-Star | Flicky sounds
+Tomatowave | Beta testing

@@ -15,10 +15,54 @@ moveq_ macro val,reg
 	!moveq	#(-(((val)&(1<<7))<<1))|(val),reg
 	endm
 ; ---------------------------------------------------------------------------
+cmddef macro command,cmpid
+command equ cmpid
+	shared command
+	endm
+
+musidtrack set -1
+musidoff set 0
+musdef macro flag1up,flagpalslow,flagnomuffle,loc,cmpid
+	if "flag1up"=="START"
+musidtrack set 1
+musidoff set (*)
+flagpalslow	equ musidtrack
+	shared flagpalslow
+	elseif "flag1up"=="END"
+flagpalslow	equ musidtrack
+	shared flagpalslow
+musidtrack set -1
+musidoff set 0
+	else
+	dc.l (flag1up)<<31|(flagpalslow)<<30|(flagnomuffle)<<29|(loc-SMPS_MusicIndex)&$FFFFFF
+cmpid	equ musidtrack
+	shared cmpid
+musidtrack set musidtrack+1
+	endif
+	endm
+
+sfxdef macro flagprio,flagbsfx,flagcsfx,flagnomuffle,loc,cmpid
+	if "flagprio"=="START"
+musidtrack set flagcsfx
+flagbsfx	equ musidtrack
+	shared flagbsfx
+	elseif "flagprio"=="END"
+flagbsfx	equ musidtrack
+	shared flagbsfx
+musidtrack set -1
+musidoff set 0
+	else
+	dc.b  flagbsfx<<7|flagcsfx<<6|flagnomuffle<<5|(flagprio)&$F
+	dc.w  loc-SMPS_SoundIndex
+cmpid	equ musidtrack
+	shared cmpid
+musidtrack set musidtrack+1
+	endif
+	endm
+; ---------------------------------------------------------------------------
 	include "src/smps-def.asm"
-	include "def-smps2asm.asm"
-	include "smps-ids.asm"
+	include "_smps2asm.asm"
 	org 0
-	include "inc-bgmsfx.asm"
+	include "_sndbank1.asm"
 ; ---------------------------------------------------------------------------
 	end

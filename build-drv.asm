@@ -16,7 +16,7 @@ moveq_ macro val,reg
 	endm
 ; ---------------------------------------------------------------------------
 	include "src/smps-def.asm"
-	include "def-smps2asm.asm"
+	include "_smps2asm.asm"
 	org 0
 	include "src/smps-main.asm"
 ; ---------------------------------------------------------------------------

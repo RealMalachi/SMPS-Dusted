@@ -18,7 +18,11 @@ samplerate	equ samplequeueid
 samplequeueid	equ musidbase1+musidtrack
 		shared samplequeueid
 		endif
-		if "sampleseqid"<>""
+
+		if "sampleseqid"==""
+		elseif (musidbase2+musidtrack)>=$E0
+		fatal "ERROR: sampleseqid ($\{musidbase2+musidtrack}) exceeds valid SMPS sequence IDs ($E0)"
+		else
 sampleseqid	equ musidbase2+musidtrack
 		endif
 musidtrack	set musidtrack+1

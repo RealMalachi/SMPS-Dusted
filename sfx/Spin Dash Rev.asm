@@ -1,13 +1,13 @@
-Sound60_SpindashRev_Header:
+Sound_SpindashRevUp_Header:
 	smpsHeaderStartSong 2, 1
-	smpsHeaderVoice     Sound60_SpindashRev_Voices
+	smpsHeaderVoice     Sound_SpindashRevUp_Voices
 	smpsHeaderTempoSFX  $01
 	smpsHeaderChanSFX   $01
 
-	smpsHeaderSFXChannel cFM5, Sound60_SpindashRev_FM5,	$FE, $00
+	smpsHeaderSFXChannel cFM5, Sound_SpindashRevUp_FM5,	$FE, $00
 
 ; FM5 Data
-Sound60_SpindashRev_FM5:
+Sound_SpindashRevUp_FM5:
 	smpsRevUp
 	smpsSetvoice        $00
 	smpsModSet          $00, $01, $20, $F6
@@ -15,13 +15,13 @@ Sound60_SpindashRev_FM5:
 	smpsModOff
 	dc.b	nG6, $18, smpsNoAttack
 
-Sound60_SpindashRev_Loop00:
+Sound_SpindashRevUp_Loop00:
 	dc.b	$04, smpsNoAttack
 	smpsAlterVol        $03
-	smpsLoop            $00, $10, Sound60_SpindashRev_Loop00
+	smpsLoop            $00, $10, Sound_SpindashRevUp_Loop00
 	smpsStop
 
-Sound60_SpindashRev_Voices:
+Sound_SpindashRevUp_Voices:
 ;	Voice $00
 ;	$34
 ;	$00, $0C, $03, $09, 	$9F, $8F, $8C, $95, 	$00, $00, $00, $00
