@@ -2,17 +2,12 @@
 ; INPUT
 ; a0 = driver data
 ; a1 = driver ram
-; d0.w = allocated ram size (init will lock up if it doesn't have enough)
 ; TRASHES: d0-a6
 ; ---------------------------------------------------------------------------
 InitDriver:
 .startaddr	= v_startofram
 .endaddr	= v_endofram
 .clrLen		= .endaddr-.startaddr
-		cmp.w	#v_endofram,d0
-		bhs.s	.itsfine
-		SMPS_assert "SMPS requires $400 bytes of ram but was allocated () bytes, TODO print specific ram number"
-.itsfine:
 		lea	.startaddr(a1),a2
 		moveq	#0,d0
 	if (.clrLen)/4<>0
