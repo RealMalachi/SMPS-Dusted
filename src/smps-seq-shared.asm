@@ -1003,7 +1003,8 @@ cfStopTrack:
 		bne.s	.notsfx						; ...clear SFX priority and check other channels
 		clr.b	v_sndprio(a6)
 		bra.s	.nosfx
-.notsfx:	tst.b	TrackPlaybackControl(a3)			; restore SFX if track is playing
+.notsfx:	and.b	#(1<<_sfxoverride)!$FF,TrackPlaybackControl(a3)
+		tst.b	TrackPlaybackControl(a3)			; restore SFX if track is playing
 		bmi.s	.restore
 .nosfx:
 	if __smpsBFX=1
@@ -1014,6 +1015,7 @@ cfStopTrack:
 		adda.w	d0,a3
 		cmp.l	a5,a3						; if we're stopping the BSFX channel...
 		beq.s	.nobsfx						; ...check other channels
+		and.b	#(1<<_sfxoverride)!$FF,TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)			; restore BSFX if track is playing
 		bmi.s	.restore
 .nobsfx:
@@ -1025,6 +1027,7 @@ cfStopTrack:
 		adda.w	d0,a3
 		cmp.l	a5,a3						; if we're stopping the BGM channel...
 		beq.s	.nobgm						; ...check other channels
+		and.b	#(1<<_sfxoverride)!$FF,TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)			; restore BGM if track is playing
 		bmi.s	.restore
 .nobgm:
@@ -1040,7 +1043,6 @@ cfStopTrack:
 
 ; found channel to restore, initiate the new one
 .restore:
-		and.b	#(1<<_sfxoverride)!$FF,TrackPlaybackControl(a3)
 		or.b	#1<<_resting,TrackPlaybackControl(a3)
 		move.b	TrackVoiceControl(a5),d0			; Get voice control bits
 		add.b	d0,d0
