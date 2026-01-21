@@ -1393,7 +1393,11 @@ SMPS_SampleTable:
 	pcmdef	DPCM,	MuffledSnare,		dMuffledSnare,		pcm_MuffledSnare,		19000
 	pcmdef	DPCM,	CrashCymbalS3,		dCrashCymbal,		pcm_CrashCymbal,		17000
 	pcmdef	DPCM,	RideCymbal,		dRideCymbal,		pcm_RideCymbal,			13500
-	; metal hits
+	pcmdef	DPCM,	MetalHit,		dLowMetalHit,		pcm_LowMetalHit,		9000
+	pcmdef	DPCM,	MetalHit,		dMetalHit,		pcm_MetalHit,			7375
+	pcmdef	DPCM,	HighMetalHit,		dHighMetalHit,		pcm_HighMetalHit,		15000
+	pcmdef	DPCM,	HigherMetalHit,		dHigherMetalHit,	pcm_HigherMetalHit,		13000
+	pcmdef	DPCM,	HigherMetalHit,		dMidMetalHit,		pcm_MidMetalHit,		10000
 	pcmdef	DPCM,	ClapS3,			dClapS3,		pcm_ClapS3,			15000
 	pcmdef	DPCM,	ElectricTomS3,		dElectricHighTom,	pcm_ElectricHighTom,		20500
 	pcmdef	DPCM,	ElectricTomS3,		dElectricMidTom,	pcm_ElectricMidTom,		16000
@@ -1428,11 +1432,6 @@ SMPS_SampleTable:
 dKickHey		= dKickS3
 dOddSnareKick		= dSnareS3
 dKickExtraBass		= dKickS3
-dHighMetalHit		= dMidTimpaniS3
-dHigherMetalHit		= dHiTimpaniS3
-dMetalHit		= dLowTimpaniS3
-dMidMetalHit		= dLowTimpaniS3
-dLowMetalHit		= dVLowTimpani
 dQuickGlassCrash	= dIntroKick
 dGlassCrashKick		= dIntroKick
 dGlassCrashSnare	= dIntroKick
@@ -2112,6 +2111,9 @@ BgmS3DCredits:	include "bgm/sonic3D/Credits.asm"
 	pcminc TimpaniS3, "pcm/sonic3/TimpaniS3.dpcm"
 	pcminc ClapS3, "pcm/sonic3/ClapS3.dpcm"
 	pcminc TomS3, "pcm/sonic3/TomS3.dpcm"
+	pcminc MetalHit, "pcm/sonic3/MetalHit.dpcm"
+	pcminc HighMetalHit, "pcm/sonic3/HighMetalHit.dpcm"
+	pcminc HigherMetalHit, "pcm/sonic3/HigherMetalHit.dpcm"
 	pcminc EchoedClapHitS3, "pcm/sonic3/EchoedClapHitS3.dpcm"
 	pcminc EchoedClapHitSK, "pcm/sonic3/EchoedClapHitSK.dpcm"
 	pcminc CrashCymbalS3, "pcm/sonic3/CrashCymbalS3.dpcm"
