@@ -5,14 +5,14 @@
 ; piano ram is channel x 8 bytes in length
 ; channels (there's 12): FM1, FM2, FM3, FM4, FM5, FM6, PSG1, PSG2, PSG3, PSG4, DAC1, DAC2
 ; per-channel ram is as follows (dots are undefined):
-; - E.....SS - [E]Enabled [S]Sound effect, 0=bgm 1=sfx 2=bsfx
+; - EP....SS - [E]Enabled, [P]Played note, [S]Sound effect, 0=bgm 1=sfx 2=bsfx
 ; - RNNNNNNN - note(approx), rest
 ; - FFFFFFFF - frequency/sample MSB
 ; - ffffffff - frequency/sample LSB
 ; - 0VVVVVVV - volume
 ; - RRRRLLLL - pan
-; - 00000000 - reserved 1
-; - 00000000 - reserved 2
+; - TTTTTTTT - duration time
+; - 00000000 - reserved
 ; ---------------------------------------------------------------------------
 SetupPianoRoll:
 		moveq	#0,d7
@@ -23,13 +23,21 @@ SetupPianoRoll:
 		move.w	(a0,d7.w),d0
 		bne.s	.valid
 		addq.w	#8,a6
-		bra.s	.doloop
+		bra.w	.doloop
 .valid:		lea	(a1,d0.w),a5
+		moveq	#0,d5
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		beq.s	.bgm
+		moveq	#1,d5
 		smpsMakeChannelRamIndex d0,TrackVoiceControl(a5)
 		smpsGetChannelFromRamIndex a1,d0,d1,a0,a5
 .bgm:
+		moveq_	1<<_playing,d0					; bit 7
+		and.b	TrackPlaybackControl(a5),d0
+		if _playing<>7
+		fatal "The _playing flag in TrackPlaybackControl isn't 7 but the piano roll expects it to be, add code to account for that"
+		endif
+		or.b	d0,d5
 ; dump channel data into piano buffer
 		move.w	#$C0,d0
 		and.b	TrackVoiceControl(a5),d0
@@ -41,10 +49,7 @@ SetupPianoRoll:
 		add.w	#16,d0
 .resting:
 		jsr	.lut(pc,d0.w)
-		tst.b	TrackPlaybackControl(a5)
-		smi.b	d2
-		and.b	#1<<7,d2
-		move.b	d2,(a6)+
+		move.b	d5,(a6)+
 		move.b	d0,(a6)+
 		move.w	d6,(a6)+
 		move.b	TrackVolume(a5),d2
@@ -52,7 +57,8 @@ SetupPianoRoll:
 		moveq	#$7F,d2
 .vol:		move.b	d2,(a6)+
 		move.b	d1,(a6)+
-		clr.w	(a6)+
+		move.b	TrackDurationTimeout(a5),(a6)+
+		clr.b	(a6)+
 ; loop
 .doloop:
 		addq.w	#2,d7
