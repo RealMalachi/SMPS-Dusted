@@ -225,15 +225,18 @@ WriteFMIorII:
 		bne.s	.fm2				; Branch if for part II
 	if __smpsDebug
 		cmp.b	#2,d2
-		bhi.s	.assert
+		bls.s	.ass1
+		SMPS_assert "WriteFMIorII: Invalid FM-1 channel, TODO: print channel"
+.ass1:
 	endif
 		add.b	d0,d2				; Add in voice control bits
 		bra.s	WriteFMI.chcont
-.assert:	SMPS_assert "WriteFMIorII: Invalid FM channel, TODO: print channel"
 .fm2:
 	if __smpsDebug
 		cmp.b	#2,d2
-		bhi.s	.assert
+		bls.s	.ass2
+		SMPS_assert "WriteFMIorII: Invalid FM-2 channel, TODO: print channel"
+.ass2:
 	endif
 		add.b	d0,d2
 		bra.s	WriteFMII.chcont

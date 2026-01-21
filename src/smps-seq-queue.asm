@@ -676,7 +676,7 @@ Sound_PlaySFX:
 Sound_PlaySFX_BSFX:
 .loadloop:
 		move.b	(a3)+,d2				; Channel assignment bits
-		smpsMakeChannelRamIndex d2,d1
+		smpsMakeChannelRamIndex d1,d2
 		lea	RAM_BSFXChannel(pc),a5
 		move.w	(a5,d1.w),d0
 		bne.s	.validsfxch
