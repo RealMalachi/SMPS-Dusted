@@ -34,7 +34,7 @@ flagpalslow	equ musidtrack
 musidtrack set -1
 musidoff set 0
 	else
-	dc.l (flag1up)<<31|(flagpalslow)<<30|(flagnomuffle)<<29|(loc-SMPS_MusicIndex)&$FFFFFF
+	dc.l (flag1up<>0)<<31|(flagpalslow<>0)<<30|(flagnomuffle<>0)<<29|(loc-((*)+4))&$FFFFFF
 cmpid	equ musidtrack
 	shared cmpid
 musidtrack set musidtrack+1
@@ -52,8 +52,7 @@ flagbsfx	equ musidtrack
 musidtrack set -1
 musidoff set 0
 	else
-	dc.b  flagbsfx<<7|flagcsfx<<6|flagnomuffle<<5|(flagprio)&$F
-	dc.w  loc-SMPS_SoundIndex
+	dc.w  flagprio<<8|(flagbsfx<>0)<<7|(flagcsfx<>0)<<6|(flagnomuffle<>0)<<5,loc-((*)+4)
 cmpid	equ musidtrack
 	shared cmpid
 musidtrack set musidtrack+1

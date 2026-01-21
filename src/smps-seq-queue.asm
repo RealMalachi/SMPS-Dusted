@@ -272,11 +272,10 @@ Sound_PlayBGM:
 		move.w	d7,d0
 		add.l	d0,d0
 		add.l	d0,d0
-		move.l	a3,a4
-		add.l	d0,a4
+		add.l	d0,a3
 
-		move.b	(a4),d6
-		move.l	(a4),d0
+		move.b	(a3),d6
+		move.l	(a3)+,d0
 		add.l	d0,a3				; a3 now points to song header
 ; misc initiation
 		clr.b	v_fadein_counter(a6)
@@ -604,28 +603,24 @@ Sound_PlaySFX:
 		moveq	#0,d0
 		move.w	drvdata.sfx(a3),d0
 		add.l	d0,a3
-		;moveq	#0,d0			; x3
+		;moveq	#0,d0			; x4
 		move.w	d7,d0
-		move.l	d0,d1
-		add.l	d1,d0
-		add.l	d1,d0
-		move.l	a3,a4
-		add.l	d0,a4
+		add.l	d0,d0
+		add.l	d0,d0
+		add.l	d0,a3
 
-		move.b	(a4)+,d1		; u8 commands
-		moveq	#0,d0			; u16 offset
-		move.b	(a4)+,-(sp)
-		move.w	(sp)+,d0
-		move.b	(a4)+,d0
-		add.l	d0,a3			; SFX data pointer
-
-		moveq	#$F,d0
-		and.b	d1,d0
+		move.b	(a3)+,d0		; sfx priority
 		beq.s	.noprio
 		cmp.b	v_sndprio(a6),d0
 		blo.s	Sound_PlaySFX_Exit
 		move.b	d0,v_sndprio(a6)
-.noprio:
+.noprio:	move.b	(a3)+,d1		; commands
+		moveq	#0,d0			; u16 offset relative to the end of the sound effects index
+		move.b	(a3)+,-(sp)
+		move.w	(sp)+,d0
+		move.b	(a3)+,d0
+		add.l	d0,a3
+
 		btst	#6,d1
 		beq.s	.notcontsfx
 		move.w	d7,d0
