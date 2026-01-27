@@ -25,7 +25,7 @@ SetDuration:
 		move.b	d5,TrackDurationTimeout(a5)			; Save duration timeout
 		rts
 ; ===========================================================================
-FinishTrackUpdate:
+DACFinishTrackUpdate:
 		move.l	a4,d0
 		move.w	d0,TrackDataPointer+2(a5)
 		swap	d0
@@ -33,7 +33,20 @@ FinishTrackUpdate:
 		move.b	TrackSavedDuration(a5),TrackDurationTimeout(a5)	; Reset note timeout
 		moveq	#1<<_noattack,d0
 		and.b	TrackPlaybackControl(a5),d0
-		bne.s	.locret
+		bne.s	.exit
+		move.b	TrackNoteTimeoutMaster(a5),TrackNoteTimeout(a5)	; Reset note fill timeout
+		clr.b	TrackVolEnvIndex(a5)				; Reset volume envelope index
+.exit:		rts
+PSGFinishTrackUpdate:
+FMFinishTrackUpdate:
+		move.l	a4,d0
+		move.w	d0,TrackDataPointer+2(a5)
+		swap	d0
+		move.b	d0,TrackDataPointer+1(a5)
+		move.b	TrackSavedDuration(a5),TrackDurationTimeout(a5)	; Reset note timeout
+		moveq	#1<<_noattack,d0
+		and.b	TrackPlaybackControl(a5),d0
+		bne.s	.exit
 		move.b	TrackNoteTimeoutMaster(a5),TrackNoteTimeout(a5)	; Reset note fill timeout
 		clr.b	TrackVolEnvIndex(a5)				; Reset volume envelope index
 	if __smpsModEnv
@@ -51,8 +64,7 @@ FinishTrackUpdate:
 		move.b	d0,TrackModulationSteps(a5)			; Then store
 		clr.w	TrackModulationVal(a5)				; Reset frequency change
 .nomod:
-.locret:
-		rts
+.exit:		rts
 ; ===========================================================================
 NoteTimeoutUpdate:
 		subq.b	#1,TrackNoteTimeout(a5)				; Update note fill timeout
@@ -66,6 +78,8 @@ NoteTimeoutUpdate:
 		add.b	d0,d0
 		bcs.w	SendPSGNoteOff
 		bpl.w	FMNoteOff					; also checks for noattack
+		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
 		bra.w	DACStopSample
 .already:	clr.b	TrackNoteTimeout(a5)				; make sure it doesn't overflow
 .exit:		rts
@@ -255,6 +269,8 @@ GetFrequency:
 		add.b	d0,d0
 		bcs.w	PSGNoteOff
 		bpl.w	FMNoteOff
+		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
 		bra.w	DACStopSample
 .RestEnd:
 		moveq	#-1,d6
@@ -265,6 +281,10 @@ GetFrequency:
 		SMPS_assert "Error: Modulation envelope command exceeds the table, TODO: print command"
 	endif
 ; ===========================================================================
+DoVolEnv_IncEnv:
+		addq.b	#1,TrackVolEnvIndex(a5)			; Increment volume envelope index
+		rts
+; ---------------------------------------------------------------------------
 VolEnvCommands_SizeAssert:
 	;	lsr.b	#1,d0					; reobtain id
 	;	tas.b	d0					; 1<<7
@@ -295,12 +315,9 @@ VolEnvCommands:
 		add.b	d0,d0
 		bcs.w	PSGNoteOff
 		bpl.w	FMNoteOff
+		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
 		bra.w	DACStopSample
-; ---------------------------------------------------------------------------
-DoVolEnv_IncEnv:
-		addq.b	#1,TrackVolEnvIndex(a5)			; Increment volume envelope index
-UpdateVolume_exit:
-		rts
 ; ---------------------------------------------------------------------------
 UpdateVolume:
 		moveq	#0,d1
@@ -342,7 +359,9 @@ SetVolume:
 		bcs.s	.psgvol
 		bpl.s	.fmvol
 .pcmvol:
-		lsr.w	#3,d0
+		move.b	d0,d1
+		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
 		bra.w	DACSetVolume
 .checktimeout:
 	if (TrackNoteTimeoutMaster=TrackNoteTimeout+1)&&(TrackNoteTimeout&1=0)
@@ -483,6 +502,7 @@ cfExtCmd:
 		dc.w  cfxPanAuto-.lut				; cPanAuto
 		dc.w  cfxPanningAMSFMS-.lut			; cxPanAMSFMS
 		dc.w  cfxSetLFO-.lut				; cxSetLFO
+		dc.w  cfxSetLFOSens-.lut			; cxSetLFOSens
 		dc.w  cfxSetCommunication-.lut			; cxCommunicate
 		dc.w  cfxFadeInToPrevious-.lut			; cxSongFadeIn
 		dc.w  cfxUnk-.lut				; cxSpecialFM3
@@ -507,6 +527,39 @@ cfExtCmd:
 cfxUnk:
 cfUnk:		
 		SMPS_assert "Invalid sequence control flag, TODO print cf"
+; ===========================================================================
+; set the global modulation and channels sensitivity
+cfxSetLFO:
+		cmp.b	#$40,TrackVoiceControl(a5)
+		bhs.s	.notfm
+		moveq_	$22,d0
+		move.b	(a4)+,d1
+		bsr.w	WriteFMI
+		moveq_	%11000000,d1			; Change AMS/FMS, retain panning
+		and.b	TrackAMSFMSPan(a5),d1
+		or.b	(a4)+,d1
+		move.b	d1,TrackAMSFMSPan(a5)
+		btst	#5,v_driverflags(a6)
+		beq.s	.stereo
+		or.b	#%11000000,d1
+.stereo:
+		bra.w	cfxSetPanAMSFMS
+.notfm:		SMPS_assert "cfxSetLFO: Non-FM channel using FM command, TODO: print channel"
+; ---------------------------------------------------------------------------
+; only set the channels sensitivity
+cfxSetLFOSens:
+		cmp.b	#$40,TrackVoiceControl(a5)
+		bhs.s	.notfm
+		moveq_	%11000000,d1			; Change AMS/FMS, retain panning
+		and.b	TrackAMSFMSPan(a5),d1
+		or.b	(a4)+,d1
+		move.b	d1,TrackAMSFMSPan(a5)
+		btst	#5,v_driverflags(a6)
+		beq.s	.stereo
+		or.b	#%11000000,d1
+.stereo:
+		bra.w	cfxSetPanAMSFMS
+.notfm:		SMPS_assert "cfxSetLFOSensitivity: Non-FM channel using FM command, TODO: print channel"
 ; ===========================================================================
 cfPanRight:
 		moveq_	$40,d1
@@ -538,7 +591,8 @@ cfxSetPanAMSFMS:
 		moveq_	$B4,d0				; Command to set AMS/FMS/panning
 		bra.w	WriteFMIorIIMain
 ; ---------------------------------------------------------------------------
-.pcm:		move.b	d1,d0
+.pcm:		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
 		bra.w	DACSetPan
 ; ---------------------------------------------------------------------------
 .psg:
@@ -616,6 +670,7 @@ cfNoteTimeout:
 		move.b	d1,TrackNoteTimeout(a5)
 		move.b	d1,TrackNoteTimeoutMaster(a5)
 		rts
+; ---------------------------------------------------------------------------
 ; timeout is the u8 result of parameter x tempo divider. It's highly prone to overflowing
 cfNoteTimeoutZ80:
 		moveq	#0,d0
@@ -631,9 +686,11 @@ cfAddTranspose:
 		move.b	(a4)+,d0
 		add.b	d0,TrackTranspose(a5)
 		rts
+; ---------------------------------------------------------------------------
 cfSetTranspose:
 		move.b	(a4)+,TrackTranspose(a5)
 		rts
+; ---------------------------------------------------------------------------
 ; RAND16 % (from-to) + to
 cfxRandPitch:
 		moveq	#0,d0
@@ -650,7 +707,7 @@ cfxRandPitch:
 cfSetTempoDivider:
 		move.b	(a4)+,TrackTempoDivider(a5)
 		rts
-
+; ---------------------------------------------------------------------------
 cfxSetTempoDividerAll:
 		if __smpsDebug=1
 ; ensure that it's a bgm track using this bgm exclusive command
@@ -681,8 +738,8 @@ cfxSetTempoDividerAll:
 		move.b	d0,.val(a6)
 	set .val,.val+TrackPsgSz
 	endr
-
 		rts
+; ---------------------------------------------------------------------------
 cfxSetTempoMod:
 		if __smpsDebug=1
 ; ensure that it's a bgm track using this bgm exclusive command
@@ -707,9 +764,11 @@ cfxSetTempoMod:
 ; ===========================================================================
 cfxPlaySampleID:
 		move.b	(a4)+,-(sp)
-		move.w	(sp)+,d0
-		move.b	(a4)+,d0
-		move.w	d0,TrackSavedDAC(a5)
+		move.w	(sp)+,d1
+		move.b	(a4)+,d1
+		move.w	d1,TrackSavedDAC(a5)
+		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
 		bra.w	DACQueueSample
 ; ===========================================================================
 cfSetFMVoice:
@@ -821,7 +880,7 @@ cfModulation68K:
 		move.b	d0,TrackModulationSteps(a5)		; ... before being stored
 		clr.w	TrackModulationVal(a5)			; Total accumulated modulation frequency change
 		rts
-
+; ---------------------------------------------------------------------------
 cfModulationZ80:
 ; As noted in Clone Driver, envelope clear is important for S3 miniboss theme
 		move.b	#1<<7|1<<6,TrackModulationCtrl(a5)
@@ -830,18 +889,19 @@ cfModulationZ80:
 		move.b	d0,TrackModulationPtr(a5)
 		addq.w	#4,a4
 		rts
-
+; ---------------------------------------------------------------------------
 cfEnableModulation:
 		or.b	#1<<7,TrackModulationCtrl(a5)
 		rts
-
+; ---------------------------------------------------------------------------
 cfDisableModulation:
 		and.b	#(1<<7)!$FF,TrackModulationCtrl(a5)
 		rts
-
+; ---------------------------------------------------------------------------
 cfxModChg:
 		move.b	(a4)+,TrackModulationCtrl(a5)
 		rts
+; ---------------------------------------------------------------------------
 cfxModChg2:
 		move.b	(a4)+,d1	; PSG mod
 		move.b	(a4)+,d2	; FM mod
@@ -1039,7 +1099,9 @@ cfStopTrack:
 		;bpl.s	.fm
 .fm:		bra.w	FMNoteOff
 .psg:		bra.w	PSGNoteOff
-.dac:		bra.w	DACStopSample
+.dac:		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
+		bra.w	DACStopSample
 
 ; found channel to restore, initiate the new one
 .restore:
@@ -1063,7 +1125,9 @@ cfStopTrack:
 		or.b	#$E0,d0						; ...set noise tone
 .r_psgnoise:	move.b	d0,(psginput).l
 .r_psgnah:	rts
-.r_dac:		bra.w	DACStopSample
+.r_dac:		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
+		bra.w	DACStopSample
 ; TODO: like fm I think you need to set pan
 ; ===========================================================================
 cfxRevUp:
@@ -1170,19 +1234,6 @@ cfxPlayID:
 		bne.s	.full
 		move.w	d0,-(a3)
 .full:		rts
-; ===========================================================================
-cfxSetLFO:
-		move.b	TrackVoiceControl(a5),d0
-		bmi.s	.psg
-		moveq_	$22,d0
-		move.b	(a4)+,d1
-		bsr.w	WriteFMI
-		moveq_	%11000000,d1			; Change AMS/FMS, retain panning
-		and.b	TrackAMSFMSPan(a5),d1
-		or.b	(a4)+,d1
-		bra.w	cfxSetPanAMSFMS
-.psg:
-		SMPS_assert "cfxSetLFO: PSG usage of an FM command, TODO: print channel"
 ; ===========================================================================
 ; cfxToggleAltFreqMode:
 ;cfxSetFreqMode1:

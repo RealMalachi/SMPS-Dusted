@@ -90,8 +90,13 @@ RenderAssert:
 	bra.w	.cmd_nextline					; $01 ; ASCII 0A, line feed (next line)
 	bra.w	.cmd_nextprint					; $02 ; new assert
 	bra.w	.cmd_nextprintline				; $03 ; new assert and line
-	bra.w	.cmd_regprint					; $04 ; Register print
+	bra.w	.cmd_regprint					; $04 ; Print register
+	bra.w	.cmd_regdataprint				; $04 ; Print data relative to address from register
 .cmdlute:
+; okay we're done here, show's over
+.cmd_exit:
+	move.w	#$8100|%01000100,(a5)				; enable screen display
+	bra.s	*
 ; TODO: safety, a lot of it
 .cmd_nextprint:
 	move.l	(a1)+,a0					; get assert text
@@ -103,12 +108,43 @@ RenderAssert:
 	moveq	#0,d0
 	add.l	#vdpCommDelta(64*2),d3
 	bra.w	.lineloop
+.cmd_regdataprint:	; register, offset, size
+	clr.w	d1
+	move.b	(a0)+,d1
+	lsl.w	#2,d1
+	move.l	(sp,d1.w),a1
+	clr.w	d1
+	move.b	(a0)+,d1
+	move.l	(a1,d1.w),d1
+	moveq	#8,d2
+	move.b	(a0)+,d2
+	bra.s	.cmd_regdataprint_cont
 .cmd_regprint:
+	clr.w	d1
+	move.b	(a0)+,d1
+	lsl.w	#2,d1
+	move.l	(sp,d1.w),d1
+	moveq	#8,d2
+.cmd_regdataprint_cont:
+	add.w	d2,d0
+	cmp.w	#36,d0
+	blo.s	.cmd_regprint_goon
+	move.w	d2,d0
+	add.l	#vdpCommDelta(64*2),d3
+	move.l	d3,(a5)
+.cmd_regprint_goon:
+; TODO: size based on size
+	rept 8
+	rol.l	#4,d1
+	moveq	#$F,d2						; copy d1 to d2
+	and.b	d1,d2						; remove high nybble
+	cmp.b	#$A,d2						; convert hex nybble to ascii
+	ble.s	.num
+	addq.b	#7,d2						; letters ; ('A'-'0')-$A = 7
+.num:	add.b	#'0',d2						; numbers ; val+'0'
+	move.w	d2,(a4)
+	endr
 	bra.w	.loop
-.cmd_exit:
-; okay we're done here, show's over
-	move.w	#$8100|%01000100,(a5)				; enable screen display
-	bra.s	*
 .headertext:	dc.b "SMPS Assert Error:",1,"====================================",2
 	even
 

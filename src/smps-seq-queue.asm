@@ -167,13 +167,13 @@ Cmd_SetBitFlag_Mono:
 		and.b	TrackPlaybackControl(a5),d0
 		cmp.b	#1<<_playing|0<<_sfxoverride,d0
 		bne.s	.dacnext
-		moveq_	$B4,d0
+		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
 		move.b	TrackAMSFMSPan(a5),d1
 		btst	#5,v_driverflags(a6)
 		beq.s	.dacstereo
 		or.b	#$C0,d1				; force mono
-.dacstereo:	move.b	d1,d0
-		bsr.w	DACSetPan
+.dacstereo:	bsr.w	DACSetPan
 .dacnext:	lea	TrackDacSz(a5),a5
 		dbf	d7,.dacloop
 		rts
@@ -239,9 +239,9 @@ Cmd_SetBitFlag_Muffle:
 		rts
 ; ===========================================================================
 Sound_PlayPCM:
-		add.w	#$81,d7
-		move.w	d7,d0
-		bra.w	DACQueueSampleSFX
+		move.w	d7,d1
+		moveq_	1|1<<7,d0
+		bra.w	DACQueueSample
 ; ===========================================================================
 DACInitBytes:	dc.b $40, $41
 ; notice the 0, 1, 2 then 4, 5, 6
@@ -408,6 +408,7 @@ Sound_PlayBGM:
 		move.b	d5,TrackTempoDivider(a5)
 		move.b	#1,TrackDurationTimeout(a5)		; Set duration of first "note"
 		move.b	#TrackGoSubStack,TrackStackPointer(a5)
+		move.w	#-1,TrackFreq(a5)
 		moveq	#0,d0
 		move.w	(a4)+,d0
 		add.l	a4,d0
@@ -420,13 +421,19 @@ Sound_PlayBGM:
 		move.b	queue_volenvptr+1(a1),TrackVolEnvPtr+1(a5)
 		move.w	queue_volenvptr+2(a1),TrackVolEnvPtr+2(a5)
 
-		move.b	#$C0,TrackAMSFMSPan(a5)			; Set AMS/FMS/Panning
+		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
 		bsr.w	DACStopSample				; TODO: all this doesn't check for SFX PCM
-		move.b	TrackAMSFMSPan(a5),d0
-		btst	#5,v_driverflags(a6)
-		beq.s	.dacstereo
-		or.b	#$C0,d0
-.dacstereo:	bsr.w	DACSetPan
+
+		move.b	#$C0,TrackAMSFMSPan(a5)			; Set AMS/FMS/Panning
+		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
+;		move.b	TrackAMSFMSPan(a5),d1
+;		btst	#5,v_driverflags(a6)
+;		beq.s	.dacstereo
+;		or.b	#$C0,d1
+		moveq_	$C0,d1
+.dacstereo:	bsr.w	DACSetPan 
 
 		add.w	#TrackDacSz,a5
 		dbf	d7,.dacloadloop
@@ -446,6 +453,8 @@ Sound_PlayBGM:
 		bcs.s	.dacallon
 .dacmute:	and.b	#1<<_sfxoverride,TrackPlaybackControl(a5)
 		move.b	(a2)+,TrackVoiceControl(a5)		; Voice control bits
+		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
 		bsr.w	DACStopSample				; TODO: all this doesn't check for SFX PCM
 		add.w	#TrackDacSz,a5
 		dbf	d7,.dacmute
@@ -479,6 +488,7 @@ Sound_PlayBGM:
 		move.b	d5,TrackTempoDivider(a5)
 		move.b	#1,TrackDurationTimeout(a5)		; Set duration of first "note"
 		move.b	#TrackGoSubStack,TrackStackPointer(a5)
+		move.w	#-1,TrackFreq(a5)
 		moveq	#0,d0
 		move.w	(a4)+,d0
 		add.l	a4,d0
@@ -548,6 +558,7 @@ Sound_PlayBGM:
 		move.b	d5,TrackTempoDivider(a5)
 		move.b	#1,TrackDurationTimeout(a5)		; Set duration of first "note"
 		move.b	#TrackGoSubStack,TrackStackPointer(a5)
+		move.w	#-1,TrackFreq(a5)
 		moveq	#0,d0
 		move.w	(a4)+,d0
 		add.l	a4,d0
@@ -763,13 +774,18 @@ Sound_PlaySFX_Setup:
 		moveq	#(TrackDacSz/2)-1,d1
 		bsr.s	.do
 
-		move.b	#$C0,TrackAMSFMSPan(a5)
+		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
 		bsr.w	DACStopSample
-		moveq_	$C0,d0					; Set panning
-;		move.b	TrackAMSFMSPan(a5),d0
+
+		move.b	#$C0,TrackAMSFMSPan(a5)
+		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
+;		move.b	TrackAMSFMSPan(a5),d1
 ;		btst	#5,v_driverflags(a6)
 ;		beq.s	.dacstereo
-;		or.b	#$C0,d0
+;		or.b	#$C0,d1
+		moveq_	$C0,d1					; Set panning
 .dacstereo:	bra.w	DACSetPan
 
 .dopsg:
@@ -802,6 +818,7 @@ Sound_PlaySFX_Setup:
 		move.b	d5,TrackTempoDivider(a5)		; Initial voice control bits
 		move.b	#1,TrackDurationTimeout(a5)		; Set duration of first "note"
 		move.b	#TrackGoSubStack,TrackStackPointer(a5)
+		move.w	#-1,TrackFreq(a5)
 		move.b	queue_volenvptr+1(a1),TrackVolEnvPtr+1(a5)
 		move.w	queue_volenvptr+2(a1),TrackVolEnvPtr+2(a5)
 	if __smpsModEnv

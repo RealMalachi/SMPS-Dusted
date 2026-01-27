@@ -271,6 +271,8 @@ v_soundqueue2:			ds.w 1
 v_soundqueue_end:		ds.b 0
 
 v_random:			ds.w 1
+
+v_pcmsfx:			ds.b 1
 	ds.b (*)&1	; word-alignment
 v_startofvariables:		ds.b 0
 v_sndprio:			ds.b 1	; sound priority

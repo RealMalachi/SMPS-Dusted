@@ -446,33 +446,56 @@ MegaPCM_LoadSampleTable:
 .Str_MissingDataChunk:		SMPS_assertascii "WAVE error: Failed to locate 'data' chunk"
 	even
 ; ===========================================================================
-; OUTPUT: d0 = 0 if not playing, non-zero if so ; TODO: use ccr zero bit?
-DACCheckIfPlaying:
-		rts
-; ===========================================================================
 ; INPUT: a1 = driver ram
 DACGuard:
 DACUnguard:
 		rts
 ; ===========================================================================
-; INPUT: d0.w = sample, from $81 to $FF ; $00 is resume, $01 is stop, $02 is pause
-DACQueueSample:
-DACQueueSampleSFX:
+DACUpdateSFX:
+		tst.b	v_pcmsfx(a6)
+		beq.s	.exit
 		SMPS_stopZ80
 		SMPS_waitZ80
-		move.b	d0, MPCM_Z80_RAM+Z_MPCM_CommandInput
+		move.b	MPCM_Z80_RAM+Z_MPCM_LoopId,d0
+		lsl.w	#8,d0
+		move.b	MPCM_Z80_RAM+Z_MPCM_CommandInput,d0
+		SMPS_startZ80
+		cmp.w	#Z_MPCM_LoopId.IDLE<<8|0,d0
+		bne.s	.exit
+		clr.b	v_pcmsfx(a6)
+.exit:
+		rts
+; ===========================================================================
+DACQueueSample:
+		tst.b	d0
+		bmi.s	.sfx
+		tst.b	v_pcmsfx(a6)
+		bne.s	.exit
+		SMPS_stopZ80
+		add.w	#$81,d1
+		SMPS_waitZ80
+		move.b	d1, MPCM_Z80_RAM+Z_MPCM_CommandInput
+		SMPS_startZ80
+.exit:		rts
+.sfx:		SMPS_stopZ80
+		add.w	#$81,d1
+		bset	d0,v_pcmsfx(a6)
+		SMPS_waitZ80
+		move.b	d1, MPCM_Z80_RAM+Z_MPCM_CommandInput
+		move.b	#$00, MPCM_Z80_RAM+Z_MPCM_VolumeInput
+		move.b	#$C0, MPCM_Z80_RAM+Z_MPCM_PanInput
 		SMPS_startZ80
 		rts
 ; ===========================================================================
-; INPUT:
 DACStopSample:
+		tst.b	v_pcmsfx(a6)
+		bne.s	.exit
 		SMPS_stopZ80
 		SMPS_waitZ80
 		move.b	#Z_MPCM_COMMAND_STOP, MPCM_Z80_RAM+Z_MPCM_CommandInput
 		SMPS_startZ80
-		rts
+.exit:		rts
 ; ===========================================================================
-; INPUT:
 DACPauseSample:
 		SMPS_stopZ80
 		SMPS_waitZ80
@@ -480,28 +503,28 @@ DACPauseSample:
 		SMPS_startZ80
 		rts
 ; ===========================================================================
-; INPUT:
 DACResumeSample:
 		SMPS_stopZ80
 		SMPS_waitZ80
-		move.b	#0, MPCM_Z80_RAM+Z_MPCM_CommandInput	; I don't know, ask vladik
+		move.b	#Z_MPCM_COMMAND_RESUME, MPCM_Z80_RAM+Z_MPCM_CommandInput
 		SMPS_startZ80
 		rts
 ; ===========================================================================
-; INPUT: d0.b = pan, 0 is silent, 40 is left, 80 is right, C0 is centre
 DACSetPan:
+		tst.b	v_pcmsfx(a6)
+		bne.s	.exit
 		SMPS_stopZ80
 		SMPS_waitZ80
-		move.b	d0, MPCM_Z80_RAM+Z_MPCM_PanInput
-;		move.b	d0, MPCM_Z80_RAM+Z_MPCM_SFXPanInput
+		move.b	d1, MPCM_Z80_RAM+Z_MPCM_PanInput
 		SMPS_startZ80
-		rts
+.exit:		rts
 ; ===========================================================================
-; INPUT: d0.w = volume, 0 is loudest, F is quietest (silent?)
 DACSetVolume:
+		tst.b	v_pcmsfx(a6)
+		bne.s	.exit
 		SMPS_stopZ80
+		lsr.b	#3,d1
 		SMPS_waitZ80
-		move.b	d0, MPCM_Z80_RAM+Z_MPCM_VolumeInput
-;		move.b	d0, MPCM_Z80_RAM+Z_MPCM_SFXVolumeInput
+		move.b	d1, MPCM_Z80_RAM+Z_MPCM_VolumeInput
 		SMPS_startZ80
-		rts
+.exit:		rts

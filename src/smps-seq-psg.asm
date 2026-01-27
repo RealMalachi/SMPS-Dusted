@@ -5,9 +5,8 @@ PSGUpdateTrack:
 		bsr.s	PSGDoNext
 		btst	#_resting,TrackPlaybackControl(a5)
 		bne.s	.locret
-		bsr.w	PSGPrepareNote
 		bsr.w	DoVolEnv				; bsr is necessary for stack reasons, see `VolEnvCommands`
-		rts
+		bra.w	PSGPrepareNote
 ; ---------------------------------------------------------------------------
 .notegoing:	btst	#_resting,TrackPlaybackControl(a5)
 		bne.s	.locret
@@ -37,11 +36,11 @@ PSGDoNext:
 		move.b	(a4)+,d5
 		bpl.s	.gotnotetime
 		subq.w	#1,a4
-		bra.w	FinishTrackUpdate
+		bra.w	PSGFinishTrackUpdate
 .gotnotetime:	tst.w	TrackFreq(a5)
 		bpl.s	.norest
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
-.norest:	pea	FinishTrackUpdate(pc)
+.norest:	pea	PSGFinishTrackUpdate(pc)
 		bra.w	SetDuration
 ; ---------------------------------------------------------------------------
 .gotonlytime:	tst.w	TrackFreq(a5)
@@ -52,7 +51,7 @@ PSGDoNext:
 	else
 ; note-rest-time-time
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
-		pea	FinishTrackUpdate(pc)
+		pea	PSGFinishTrackUpdate(pc)
 		bra.w	SetDuration
 	endif
 ; ===========================================================================
@@ -66,11 +65,10 @@ PSGSetFreq:
 	endif
 		add.b	d5,d5					; Also clear sign bit
 		move.w	PSGFrequencies(pc,d5.w),TrackFreq(a5)	; Set new frequency
-		bra.w	FinishTrackUpdate
-.rest:		or.b	#1<<_resting,TrackPlaybackControl(a5)	; Set 'track at rest' bit
-		move.w	#-1,TrackFreq(a5)			; Invalidate note frequency
-		pea	PSGNoteOff(pc)
-		bra.w	FinishTrackUpdate
+		rts
+.rest:		or.b	#1<<_resting,TrackPlaybackControl(a5)
+		move.w	#-1,TrackFreq(a5)
+		bra.w	PSGNoteOff
 .assert:	SMPS_assert "PSGSetFreq: invalid frequency, TODO: print freq id"
 ; ===========================================================================
 ; PSG Note Values: c-0 to a-6

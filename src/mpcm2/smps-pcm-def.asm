@@ -58,28 +58,42 @@ MPCM_YM2612_D1:		equ	$A04003
 ; Z80 equates
 ; ------------------------------------------------------------------------------
 
-Z_MPCM_DriverReady:		equ $1fc3
 Z_MPCM_CommandInput:		equ $1fc2
+Z_MPCM_DriverReady:		equ $1fc3
 Z_MPCM_VolumeInput:		equ $1fc4
 Z_MPCM_SFXVolumeInput:		equ $1fc5
 Z_MPCM_PanInput:		equ $1fc6
 Z_MPCM_SFXPanInput:		equ $1fc7
-Z_MPCM_LoopId:			equ $1fdd
+
+Z_MPCM_ActiveSample:		equ $1fd1
 Z_MPCM_ActiveSamplePitch:	equ $1fdc
+
+Z_MPCM_LoopId:			equ $1fdd
+.IDLE:				equ $01
+.PAUSE:				equ $02
+.PCM:				equ $10
+.PCM_TURBO:			equ $18
+.DPCM:				equ $20
+.CALIBRATION:			equ $80
+
 Z_MPCM_VBlankActive:		equ $1fe2
 Z_MPCM_CalibrationApplied:	equ $1fe3
 Z_MPCM_CalibrationScore_ROM:	equ $1fe4
 Z_MPCM_CalibrationScore_RAM:	equ $1fe6
 Z_MPCM_LastErrorCode:		equ $1fe8
 Z_MPCM_SampleTable:		equ $1976
+
 Z_MPCM_COMMAND_STOP:		equ $1
 Z_MPCM_COMMAND_PAUSE:		equ $2
+Z_MPCM_COMMAND_RESUME:		equ $0
+
 Z_MPCM_LOOP_IDLE:		equ $1
 Z_MPCM_LOOP_PAUSE:		equ $2
 Z_MPCM_LOOP_PCM:		equ $10
 Z_MPCM_LOOP_PCM_TURBO:		equ $18
 Z_MPCM_LOOP_DPCM:		equ $20
 Z_MPCM_LOOP_CALIBRATION:	equ $80
+
 Z_MPCM_ERROR__BAD_INTERRUPT:	equ $2
 Z_MPCM_ERROR__BAD_SAMPLE_TYPE:	equ $1
 Z_MPCM_ERROR__UNKNOWN_COMMAND:	equ $80

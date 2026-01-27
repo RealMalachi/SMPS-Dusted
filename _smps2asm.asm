@@ -129,6 +129,7 @@ cxWriteFM2		ds.b 1		; cfxWriteFMII
 cxPanAuto		ds.b 1		; cfxUnk
 cxPanAMSFMS		ds.b 1		; cfxPanningAMSFMS
 cxSetLFO		ds.b 1		; cfxSetLFO
+cxSetLFOSens		ds.b 1		; cfxSetLFOSens
 cxCommunicate		ds.b 1		; cfSetCommunication
 cxSongFadeIn		ds.b 1		; cfxFadeInToPrevious
 cxSpecialFM3		ds.b 1		; cfxUnk
@@ -396,7 +397,10 @@ smpsPanRight macro
 ;	dc.b cExtCmd,cxPanAuto,$00
 ;	endm
 smpsSetLFO macro enable,amsfms
-	dc.b	cExtCmd,cxSetLFO,enable,amsfms&$3F
+	dc.b	cExtCmd,cxSetLFO,enable,amsfms&$37
+	endm
+smpsSetLFOSens macro amsfms
+	dc.b	cExtCmd,cxSetLFOSens,amsfms&$37
 	endm
 
 ; Set channel detune to val

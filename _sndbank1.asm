@@ -1028,6 +1028,7 @@ SMPS_UVB_FM:
 ; ---------------------------------------------------------------------------
 SMPS_MusicIndex:
 	musdef START,bgm__First
+	musdef 0,0,0,BgmTest,bgm_Test
 	musdef 0,0,0,BgmSoccer,bgm_Soccer
 
 	musdef 0,0,0,BgmS1Title,bgm_S1Title
@@ -1422,8 +1423,8 @@ SMPS_SampleTable:
 	pcmdef	DPCM,	FinalFightMetalCrash,	dFinalFightMetalCrash,	pcm_FinalFightMetalCrash,	14000	; TODO: pretty sure it's the wrong HZ rate
 	pcmdef	DPCM,	IntroKick,		dIntroKick,		pcm_IntroKick,			9750
 ; Extra
-	pcmdef	PCM,	SegaPCM,		dSegaChant,		pcm_SegaChant,			16000,	FLAGS_SFX
-;	pcmdef	PCM,	Rizzmas,		dRizzmas,		pcm_Rizzmas,			,	FLAGS_SFX
+	pcmdef	PCM,	SegaPCM,		dSegaChant,		pcm_SegaChant,			16000
+;	pcmdef	PCM,	Rizzmas,		dRizzmas,		pcm_Rizzmas
 ; ============= type	expected pcm		sequence id end label	queue id end label
 	pcmdef	END,	MegaPCM2,		d__Last,		pcm__Last
 
@@ -1775,6 +1776,8 @@ SfxS2BE0:	include "sfx/sonic2-wai/E0 - Spin Dash Rev.asm"
 ; ---------------------------------------------------------------------------
 ; Music data
 ; ---------------------------------------------------------------------------
+BgmTest:	include "bgm/_tester.asm"
+		even
 BgmSoccer:	include "bgm/MDSoccer-Title.asm"
 		even
 

@@ -8,8 +8,8 @@ FMUpdateTrack:
 		bsr.s	FMDoNext
 		btst	#_resting,TrackPlaybackControl(a5)
 		bne.s	.locret
-		bsr.w	FMPrepareNote
 		bsr.w	DoVolEnv				; bsr is necessary for stack reasons, see `VolEnvCommands`
+		bsr.w	FMPrepareNote
 		bra.w	FMNoteOn
 ; ---------------------------------------------------------------------------
 .notegoing:	btst	#_resting,TrackPlaybackControl(a5)
@@ -36,16 +36,15 @@ FMDoNext:
 		pea	.noteloop(pc)
 		bra.w	CoordFlag				; manipulates stack
 ; ---------------------------------------------------------------------------
-.gotnote:	bsr.w	FMNoteOff
-		bsr.s	FMSetFreq
+.gotnote:	bsr.s	FMSetFreq
 		move.b	(a4)+,d5
 		bpl.s	.gotnotetime
 		subq.w	#1,a4
-		bra.w	FinishTrackUpdate
+		bra.w	FMFinishTrackUpdate
 .gotnotetime:	tst.w	TrackFreq(a5)
 		bpl.s	.norest
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
-.norest:	pea	FinishTrackUpdate(pc)
+.norest:	pea	FMFinishTrackUpdate(pc)
 		bra.w	SetDuration
 ; ---------------------------------------------------------------------------
 .gotonlytime:	bsr.w	FMNoteOff
@@ -57,13 +56,13 @@ FMDoNext:
 	else
 ; note-rest-time-time
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
-		pea	FinishTrackUpdate(pc)
+		pea	FMFinishTrackUpdate(pc)
 		bra.w	SetDuration
 	endif
 ; ===========================================================================
 FMSetFreq:
-; Unlike PSGSetFreq, this uses a 1-based index. This is a long standing oddity with SMPS
-; If frequency index is transpose is -1, it can reach the last frequency
+; Unlike PSGSetFreq, this uses a 1-based index. This is a long standing oddity with SMPS-68K
+; If note nC0 is played and transpose is -1, it can reach the last frequency
 		subi.b	#$80,d5					; Make it a 1-based index
 		beq.s	.rest
 		add.b	TrackTranspose(a5),d5			; Add track transposition
@@ -73,10 +72,10 @@ FMSetFreq:
 	endif
 		add.b	d5,d5					; Clear high byte and sign bit
 		move.w	FMFrequencies(pc,d5.w),TrackFreq(a5)	; Store new frequency
-		rts
+		bra.w	FMNoteOff
 .rest:		or.b	#1<<_resting,TrackPlaybackControl(a5)
-		move.w	#-1,TrackFreq(a5)			; Clear frequency
-		bra.w	FinishTrackUpdate
+		move.w	#-1,TrackFreq(a5)
+		bra.w	FMNoteOff
 .assert:	SMPS_assert "FMSetFreq: invalid frequency, TODO: print freq id"
 ; ===========================================================================
 ; FM Note Values: b-0 to a#8

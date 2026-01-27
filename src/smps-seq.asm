@@ -58,13 +58,13 @@ HandlePause:
 		and.b	TrackPlaybackControl(a5),d0
 		cmp.b	#1<<_playing|0<<_sfxoverride,d0
 		bne.s	.unp_dacnext
-		moveq_	$B4,d0				; Command to set AMS/FMS/panning
+		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
 		move.b	TrackAMSFMSPan(a5),d1		; Get value from track RAM
 		btst	#5,v_driverflags(a6)
 		beq.s	.unp_dacstereo
 		or.b	#$C0,d1				; force mono
-.unp_dacstereo:	move.b	d1,d0
-		bsr.w	DACSetPan
+.unp_dacstereo:	bsr.w	DACSetPan
 .unp_dacnext:	lea	TrackDacSz(a5),a5
 		dbf	d7,.unp_fmloop
 		rts
@@ -103,6 +103,7 @@ HandlePause:
 		bsr.w	DACResumeSample
 		;bra.s	.playmusic
 .playmusic:
+		bsr.w	DACUpdateSFX
 
 HandleFading:
 		tst.b	v_fadeout_counter(a6)

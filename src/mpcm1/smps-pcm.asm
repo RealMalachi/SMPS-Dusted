@@ -149,9 +149,7 @@ DACLoadBank:
 		SMPS_startZ80
 		rts
 ; ===========================================================================
-; OUTPUT: d0 = 0 if not playing, non-zero if so ; TODO: use ccr zero bit?
-DACCheckIfPlaying:
-		moveq	#0,d0
+DACUpdateSFX:
 		rts
 ; ---------------------------------------------------------------------------
 ; INPUT: a1 = driver ram
@@ -164,34 +162,32 @@ DACUnguard:
 		rts
 ; ---------------------------------------------------------------------------
 DACQueueSample:
-DACQueueSampleSFX:
 		SMPS_stopZ80
+		add.w	#$81,d1
 		SMPS_waitZ80
-		move.b	d0,($A00000+Z_MPCM_CommandInput).l
+		move.b	d1,($A00000+Z_MPCM_CommandInput).l
 		SMPS_startZ80
 		rts
 DACPauseSample:
 		SMPS_stopZ80
 		SMPS_waitZ80
-		move.b	#$7F,($A00000+Z_MPCM_CommandInput).l		; pause DAC
+		move.b	#$7F,($A00000+Z_MPCM_CommandInput).l
 		SMPS_startZ80
 		rts
 DACResumeSample:
 		SMPS_stopZ80
 		SMPS_waitZ80
-		move.b	#0,($A00000+Z_MPCM_CommandInput).l		; resume DAC
+		move.b	#0,($A00000+Z_MPCM_CommandInput).l
 		SMPS_startZ80
 		rts
 DACStopSample:
 		SMPS_stopZ80
 		SMPS_waitZ80
-		move.b	#$80,($A00000+Z_MPCM_CommandInput).l		; stop DAC
+		move.b	#$80,($A00000+Z_MPCM_CommandInput).l
 		SMPS_startZ80
 		rts
-; INPUT
-; d0 = pan
 DACSetPan:
-		moveq_	$B6,d1
+		moveq_	$B6,d0
 		bra.w	WriteFMII
 DACSetVolume:
 		rts
