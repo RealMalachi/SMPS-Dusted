@@ -49,14 +49,14 @@ SMPS_ModEnvIndex:
 	smpsEnvTable SMPS_ModEnvIndex_m07,mEnv_07
 	smpsEnvTable SMPS_ModEnvIndex_m08,mEnv_08
 	smpsEnvTable END
-SMPS_ModEnvIndex_m02:	smpsModEnv $00
-SMPS_ModEnvIndex_m01:	smpsModEnv $01,$02,$01,$00,-$01,-$02,-$03,-$04,-$03,-$02,-$01,REST
-SMPS_ModEnvIndex_m03:	smpsModEnv $00,$00,$00,$00,$13,$26,$39,$4C,$5F,$72,$7F,$72,REST
-SMPS_ModEnvIndex_m04:	smpsModEnv $01,$02,$03,$02,$01,$00,-$01,-$02,-$03,-$02,-$01,$00,INDEX,0
-SMPS_ModEnvIndex_m05:	smpsModEnv $00,$00,$01,$03,$01,$00,-$01,-$03,-$01,$00,INDEX,2
-SMPS_ModEnvIndex_m06:	smpsModEnv $00,$00,$00,$00,  0, 10, 20, 30,  20,  10,   0, -10, -20, -30, -20, -10,INDEX,4
-SMPS_ModEnvIndex_m07:	smpsModEnv $00,$00,$00,$00, 22, 44, 66, 44,  22,   0, -22, -44, -66, -44, -22,INDEX,3
-SMPS_ModEnvIndex_m08:	smpsModEnv $01,$02,$03,$04,$03,$02,$01,$00,-$01,-$02,-$03,-$04,-$03,-$02,-$01,$00,INDEX,1
+SMPS_ModEnvIndex_m02:	smpsEnvMod $00
+SMPS_ModEnvIndex_m01:	smpsEnvMod $01,$02,$01,$00,-$01,-$02,-$03,-$04,-$03,-$02,-$01,REST
+SMPS_ModEnvIndex_m03:	smpsEnvMod $00,$00,$00,$00,$13,$26,$39,$4C,$5F,$72,$7F,$72,REST
+SMPS_ModEnvIndex_m04:	smpsEnvMod $01,$02,$03,$02,$01,$00,-$01,-$02,-$03,-$02,-$01,$00,INDEX,0
+SMPS_ModEnvIndex_m05:	smpsEnvMod $00,$00,$01,$03,$01,$00,-$01,-$03,-$01,$00,INDEX,2
+SMPS_ModEnvIndex_m06:	smpsEnvMod $00,$00,$00,$00,  0, 10, 20, 30,  20,  10,   0, -10, -20, -30, -20, -10,INDEX,4
+SMPS_ModEnvIndex_m07:	smpsEnvMod $00,$00,$00,$00, 22, 44, 66, 44,  22,   0, -22, -44, -66, -44, -22,INDEX,3
+SMPS_ModEnvIndex_m08:	smpsEnvMod $01,$02,$03,$04,$03,$02,$01,$00,-$01,-$02,-$03,-$04,-$03,-$02,-$01,$00,INDEX,1
 
 ; ---------------------------------------------------------------------------
 ; Universal Volume Envelopes
@@ -119,89 +119,88 @@ SMPS_VolEnvIndex:
 	smpsEnvTable SMPS_VolEnvIndex_s27,sTone_27
 	smpsEnvTable END
 
-SMPS_VolEnvIndex_f01:	smpsVolEnvPsg $00,$00,$00,$01,$01,$01,$02,$02,$02,$03,$03,$03,$04,$04,$04,$05,$05,$05,$06,$06,$06,$07,HOLD
-SMPS_VolEnvIndex_f02:	smpsVolEnvPsg $00,$02,$04,$06,$08,$10,HOLD
-SMPS_VolEnvIndex_f03:	smpsVolEnvPsg $00,$00,$01,$01,$02,$02,$03,$03,$04,$04,$05,$05,$06,$06,$07,$07,HOLD
-SMPS_VolEnvIndex_f04:	smpsVolEnvPsg $00,$00,$02,$03,$04,$04,$05,$05,$05,$06,HOLD
-SMPS_VolEnvIndex_f05:	smpsVolEnvPsg $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01
-			smpsVolEnvPsg $01,$01,$01,$01,$01,$01,$01,$01,$02,$02,$02,$02,$02,$02,$02,$02
-			smpsVolEnvPsg $03,$03,$03,$03,$03,$03,$03,$03,$04,HOLD
-SMPS_VolEnvIndex_f06:	smpsVolEnvPsg $03,$03,$03,$02,$02,$02,$02,$01,$01,$01,$00,$00,$00,$00,HOLD
-SMPS_VolEnvIndex_f07:	smpsVolEnvPsg $00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$02,$02,$02,$02,$02
-			smpsVolEnvPsg $03,$03,$03,$04,$04,$04,$05,$05,$05,$06,$07,HOLD
-SMPS_VolEnvIndex_f08:	smpsVolEnvPsg $00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$02,$02,$02,$02,$02,$02
-			smpsVolEnvPsg $03,$03,$03,$03,$03,$04,$04,$04,$04,$04,$05,$05,$05,$05,$05,$06
-			smpsVolEnvPsg $06,$06,$06,$06,$07,$07,$07,HOLD
-SMPS_VolEnvIndex_f09:	smpsVolEnvPsg $00,$01,$02,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$0D,$0E,$0F,HOLD
-SMPS_VolEnvIndex_f0A:	smpsVolEnvPsg $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01
-			smpsVolEnvPsg $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
-			smpsVolEnvPsg $01,$01,$01,$01,$01,$01,$01,$01,$02,$02,$02,$02,$02,$02,$02,$02
-			smpsVolEnvPsg $02,$02,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$04,HOLD
-SMPS_VolEnvIndex_f0B:	smpsVolEnvPsg $04,$04,$04,$03,$03,$03,$02,$02,$02,$01,$01,$01,$01,$01,$01,$01
-			smpsVolEnvPsg $02,$02,$02,$02,$02,$03,$03,$03,$03,$03,$04,HOLD
-SMPS_VolEnvIndex_f0C:	smpsVolEnvPsg $04,$04,$03,$03,$02,$02,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
-			smpsVolEnvPsg $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$02,$02,$02,$02,$02,$02
-			smpsVolEnvPsg $02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$03,$03
-			smpsVolEnvPsg $03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03
-			smpsVolEnvPsg $03,$03,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04
-			smpsVolEnvPsg $04,$04,$04,$04,$04,$04,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05
-			smpsVolEnvPsg $05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$06,$06,$06,$06,$06,$06
-			smpsVolEnvPsg $06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$07,HOLD
-SMPS_VolEnvIndex_f0D:	smpsVolEnvPsg $0E,$0D,$0C,$0B,$0A,$09,$08,$07,$06,$05,$04,$03,$02,$01,$00,HOLD
+SMPS_VolEnvIndex_f01:	smpsEnvVolPsg $00,$00,$00,$01,$01,$01,$02,$02,$02,$03,$03,$03,$04,$04,$04,$05,$05,$05,$06,$06,$06,$07,HOLD
+SMPS_VolEnvIndex_f02:	smpsEnvVolPsg $00,$02,$04,$06,$08,$10,HOLD
+SMPS_VolEnvIndex_f03:	smpsEnvVolPsg $00,$00,$01,$01,$02,$02,$03,$03,$04,$04,$05,$05,$06,$06,$07,$07,HOLD
+SMPS_VolEnvIndex_f04:	smpsEnvVolPsg $00,$00,$02,$03,$04,$04,$05,$05,$05,$06,HOLD
+SMPS_VolEnvIndex_f05:	smpsEnvVolPsg $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01
+			smpsEnvVolPsg $01,$01,$01,$01,$01,$01,$01,$01,$02,$02,$02,$02,$02,$02,$02,$02
+			smpsEnvVolPsg $03,$03,$03,$03,$03,$03,$03,$03,$04,HOLD
+SMPS_VolEnvIndex_f06:	smpsEnvVolPsg $03,$03,$03,$02,$02,$02,$02,$01,$01,$01,$00,$00,$00,$00,HOLD
+SMPS_VolEnvIndex_f07:	smpsEnvVolPsg $00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$02,$02,$02,$02,$02
+			smpsEnvVolPsg $03,$03,$03,$04,$04,$04,$05,$05,$05,$06,$07,HOLD
+SMPS_VolEnvIndex_f08:	smpsEnvVolPsg $00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$02,$02,$02,$02,$02,$02
+			smpsEnvVolPsg $03,$03,$03,$03,$03,$04,$04,$04,$04,$04,$05,$05,$05,$05,$05,$06
+			smpsEnvVolPsg $06,$06,$06,$06,$07,$07,$07,HOLD
+SMPS_VolEnvIndex_f09:	smpsEnvVolPsg $00,$01,$02,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$0D,$0E,$0F,HOLD
+SMPS_VolEnvIndex_f0A:	smpsEnvVolPsg $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01
+			smpsEnvVolPsg $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
+			smpsEnvVolPsg $01,$01,$01,$01,$01,$01,$01,$01,$02,$02,$02,$02,$02,$02,$02,$02
+			smpsEnvVolPsg $02,$02,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$04,HOLD
+SMPS_VolEnvIndex_f0B:	smpsEnvVolPsg $04,$04,$04,$03,$03,$03,$02,$02,$02,$01,$01,$01,$01,$01,$01,$01
+			smpsEnvVolPsg $02,$02,$02,$02,$02,$03,$03,$03,$03,$03,$04,HOLD
+SMPS_VolEnvIndex_f0C:	smpsEnvVolPsg $04,$04,$03,$03,$02,$02,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
+			smpsEnvVolPsg $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$02,$02,$02,$02,$02,$02
+			smpsEnvVolPsg $02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$03,$03
+			smpsEnvVolPsg $03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03
+			smpsEnvVolPsg $03,$03,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04
+			smpsEnvVolPsg $04,$04,$04,$04,$04,$04,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05
+			smpsEnvVolPsg $05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$06,$06,$06,$06,$06,$06
+			smpsEnvVolPsg $06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$07,HOLD
+SMPS_VolEnvIndex_f0D:	smpsEnvVolPsg $0E,$0D,$0C,$0B,$0A,$09,$08,$07,$06,$05,$04,$03,$02,$01,$00,HOLD
 
-SMPS_VolEnvIndex_s01:	smpsVolEnvPsg $02,REST
-SMPS_VolEnvIndex_s02:	smpsVolEnvPsg $00,$02,$04,$06,$08,$10,REST
-SMPS_VolEnvIndex_s03:	smpsVolEnvPsg $02,$01,$00,$00,$01,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$03,$03,$03,$04,$04,$04,$05,HOLD
-SMPS_VolEnvIndex_s04:	smpsVolEnvPsg $00,$00,$02,$03,$04,$04,$05,$05,$05,$06,$06,HOLD
-SMPS_VolEnvIndex_s05:	smpsVolEnvPsg $03,$00,$01,$01,$01,$02,$03,$04,$04,$05,HOLD
-SMPS_VolEnvIndex_s06:	smpsVolEnvPsg $00,$00,$01,$01,$02,$03,$04,$05,$05,$06,$08,$07,$07,$06,HOLD
-SMPS_VolEnvIndex_s07:	smpsVolEnvPsg $01,$0C,$03,$0F,$02,$07,$03,$0F,RESET
-SMPS_VolEnvIndex_s08:	smpsVolEnvPsg $00,$00,$00,$02,$03,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0E,$0F,HOLD
-SMPS_VolEnvIndex_s09:	smpsVolEnvPsg $03,$02,$01,$01,$00,$00,$01,$02,$03,$04,HOLD
-SMPS_VolEnvIndex_s0A:	smpsVolEnvPsg $01,$00,$00,$00,$00,$01,$01,$01,$02,$02,$02,$03,$03,$03,$03,$04,$04,$04,$05,$05,HOLD
-SMPS_VolEnvIndex_s0B:	smpsVolEnv    $10,$20,$30,$40,$30,$20,$10,$00,$7F,RESET	; ...,-$10,RESET
-SMPS_VolEnvIndex_s0C:	smpsVolEnvPsg $00,$00,$01,$01,$03,$03,$04,$05,REST
-SMPS_VolEnvIndex_s0D:	smpsVolEnvPsg $00,HOLD
-SMPS_VolEnvIndex_s0E:	smpsVolEnvPsg $02,REST
-SMPS_VolEnvIndex_s0F:	smpsVolEnvPsg $00,$02,$04,$06,$08,$7F,REST
-SMPS_VolEnvIndex_s10:	smpsVolEnvPsg $09,$09,$09,$08,$08,$08,$07,$07,$07,$06,$06,$06,$05,$05,$05,$04
-			smpsVolEnvPsg $04,$04,$03,$03,$03,$02,$02,$02,$01,$01,$01,$00,$00,$00,HOLD
-SMPS_VolEnvIndex_s11:	smpsVolEnvPsg $01,$01,$01,$00,$00,$00,HOLD
-SMPS_VolEnvIndex_s12:	smpsVolEnvPsg $03,$00,$01,$01,$01,$02,$03,$04,$04,$05,HOLD
-SMPS_VolEnvIndex_s13:	smpsVolEnvPsg $00,$00,$01,$01,$02,$03,$04,$05,$05,$06,$08,$07,$07,$06,HOLD
-SMPS_VolEnvIndex_s14:	smpsVolEnvPsg $0A,$05,$00,$04,$08,REST
-SMPS_VolEnvIndex_s15:	smpsVolEnvPsg $00,$00,$00,$02,$03,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0E,$0F,REST
-SMPS_VolEnvIndex_s16:	smpsVolEnvPsg $03,$02,$01,$01,$00,$00,$01,$02,$03,$04,HOLD
-SMPS_VolEnvIndex_s17:	smpsVolEnvPsg $01,$00,$00,$00,$00,$01,$01,$01,$02,$02,$02,$03,$03,$03,$03,$04
-			smpsVolEnvPsg $04,$04,$05,$05,HOLD
-SMPS_VolEnvIndex_s18:	smpsVolEnv    $10,$20,$30,$40,$30,$20,$10,$00,$10,$20,$30,$40,$30,$20,$10,$00
-			smpsVolEnv    $10,$20,$30,$40,$30,$20,$10,$00,RESET
-SMPS_VolEnvIndex_s19:	smpsVolEnvPsg $00,$00,$01,$01,$03,$03,$04,$05,REST
-SMPS_VolEnvIndex_s1A:	smpsVolEnv    $00,$02,$04,$06,$08,$16,REST
-SMPS_VolEnvIndex_s1B:	smpsVolEnvPsg $00,$00,$01,$01,$03,$03,$04,$05,REST
-SMPS_VolEnvIndex_s1C:	smpsVolEnvPsg $04,$04,$04,$04,$03,$03,$03,$03,$02,$02,$02,$02,$01,$01,$01,$01,REST
-
-SMPS_VolEnvIndex_s1D:	smpsVolEnvPsg $00,$00,$00,$00,$01,$01,$01,$01,$02,$02,$02,$02,$03,$03,$03,$03
-			smpsVolEnvPsg $04,$04,$04,$04,$05,$05,$05,$05,$06,$06,$06,$06,$07,$07,$07,$07
-			smpsVolEnvPsg $08,$08,$08,$08,$09,$09,$09,$09,$0A,$0A,$0A,$0A,HOLD
-SMPS_VolEnvIndex_s1E:	smpsVolEnvPsg $00,$0A,REST
-SMPS_VolEnvIndex_s1F:	smpsVolEnvPsg $00,$02,$04,HOLD
-SMPS_VolEnvIndex_s20:	smpsVolEnv    $30,$20,$10,$00,$00,$00,$00,$00,$08,$10,$20,$30, HOLD
-SMPS_VolEnvIndex_s21:	smpsVolEnvPsg $00,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$06,$06,$06,$08,$08
-			smpsVolEnvPsg $0A,REST
-SMPS_VolEnvIndex_s22:	smpsVolEnvPsg $00,$02,$03,$04,$06,$07,HOLD
-SMPS_VolEnvIndex_s23:	smpsVolEnvPsg $02,$01,$00,$00,$00,$02,$04,$07,HOLD
-SMPS_VolEnvIndex_s24:	smpsVolEnvPsg $0F,$01,$05,REST
-SMPS_VolEnvIndex_s25:	smpsVolEnvPsg $08,$06,$02,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$0D,$0E,$0F,$10,REST
-SMPS_VolEnvIndex_s26:	smpsVolEnvPsg $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01
-			smpsVolEnvPsg $01,$01,$01,$01,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$03,$03
-			smpsVolEnvPsg $03,$03,$03,$03,$03,$03,$03,$03,$04,$04,$04,$04,$04,$04,$04,$04
-			smpsVolEnvPsg $04,$04,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$06,$06,$06,$06
-			smpsVolEnvPsg $06,$06,$06,$06,$06,$06,$07,$07,$07,$07,$07,$07,$07,$07,$07,$07
-			smpsVolEnvPsg $08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$09,$09,$09,$09,$09,$09
-			;smpsVolEnvPsg $09,$09		; S3A has these two extra ticks
-			smpsVolEnvPsg $09,$09,REST
-SMPS_VolEnvIndex_s27:	smpsVolEnvPsg $00,$02,$02,$02,$03,$03,$03,$04,$04,$04,$05,$05,REST
+SMPS_VolEnvIndex_s01:	smpsEnvVolPsg $02,REST
+SMPS_VolEnvIndex_s02:	smpsEnvVolPsg $00,$02,$04,$06,$08,$10,REST
+SMPS_VolEnvIndex_s03:	smpsEnvVolPsg $02,$01,$00,$00,$01,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$03,$03,$03,$04,$04,$04,$05,HOLD
+SMPS_VolEnvIndex_s04:	smpsEnvVolPsg $00,$00,$02,$03,$04,$04,$05,$05,$05,$06,$06,HOLD
+SMPS_VolEnvIndex_s05:	smpsEnvVolPsg $03,$00,$01,$01,$01,$02,$03,$04,$04,$05,HOLD
+SMPS_VolEnvIndex_s06:	smpsEnvVolPsg $00,$00,$01,$01,$02,$03,$04,$05,$05,$06,$08,$07,$07,$06,HOLD
+SMPS_VolEnvIndex_s07:	smpsEnvVolPsg $01,$0C,$03,$0F,$02,$07,$03,$0F,RESET
+SMPS_VolEnvIndex_s08:	smpsEnvVolPsg $00,$00,$00,$02,$03,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0E,$0F,HOLD
+SMPS_VolEnvIndex_s09:	smpsEnvVolPsg $03,$02,$01,$01,$00,$00,$01,$02,$03,$04,HOLD
+SMPS_VolEnvIndex_s0A:	smpsEnvVolPsg $01,$00,$00,$00,$00,$01,$01,$01,$02,$02,$02,$03,$03,$03,$03,$04,$04,$04,$05,$05,HOLD
+SMPS_VolEnvIndex_s0B:	smpsEnvVol    $10,$20,$30,$40,$30,$20,$10,$00,$7F,RESET	; ...,-$10,RESET
+SMPS_VolEnvIndex_s0C:	smpsEnvVolPsg $00,$00,$01,$01,$03,$03,$04,$05,REST
+SMPS_VolEnvIndex_s0D:	smpsEnvVolPsg $00,HOLD
+SMPS_VolEnvIndex_s0E:	smpsEnvVolPsg $02,REST
+SMPS_VolEnvIndex_s0F:	smpsEnvVolPsg $00,$02,$04,$06,$08,$7F,REST
+SMPS_VolEnvIndex_s10:	smpsEnvVolPsg $09,$09,$09,$08,$08,$08,$07,$07,$07,$06,$06,$06,$05,$05,$05,$04
+			smpsEnvVolPsg $04,$04,$03,$03,$03,$02,$02,$02,$01,$01,$01,$00,$00,$00,HOLD
+SMPS_VolEnvIndex_s11:	smpsEnvVolPsg $01,$01,$01,$00,$00,$00,HOLD
+SMPS_VolEnvIndex_s12:	smpsEnvVolPsg $03,$00,$01,$01,$01,$02,$03,$04,$04,$05,HOLD
+SMPS_VolEnvIndex_s13:	smpsEnvVolPsg $00,$00,$01,$01,$02,$03,$04,$05,$05,$06,$08,$07,$07,$06,HOLD
+SMPS_VolEnvIndex_s14:	smpsEnvVolPsg $0A,$05,$00,$04,$08,REST
+SMPS_VolEnvIndex_s15:	smpsEnvVolPsg $00,$00,$00,$02,$03,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0E,$0F,REST
+SMPS_VolEnvIndex_s16:	smpsEnvVolPsg $03,$02,$01,$01,$00,$00,$01,$02,$03,$04,HOLD
+SMPS_VolEnvIndex_s17:	smpsEnvVolPsg $01,$00,$00,$00,$00,$01,$01,$01,$02,$02,$02,$03,$03,$03,$03,$04
+			smpsEnvVolPsg $04,$04,$05,$05,HOLD
+SMPS_VolEnvIndex_s18:	smpsEnvVol    $10,$20,$30,$40,$30,$20,$10,$00,$10,$20,$30,$40,$30,$20,$10,$00
+			smpsEnvVol    $10,$20,$30,$40,$30,$20,$10,$00,RESET
+SMPS_VolEnvIndex_s19:	smpsEnvVolPsg $00,$00,$01,$01,$03,$03,$04,$05,REST
+SMPS_VolEnvIndex_s1A:	smpsEnvVol    $00,$02,$04,$06,$08,$16,REST
+SMPS_VolEnvIndex_s1B:	smpsEnvVolPsg $00,$00,$01,$01,$03,$03,$04,$05,REST
+SMPS_VolEnvIndex_s1C:	smpsEnvVolPsg $04,$04,$04,$04,$03,$03,$03,$03,$02,$02,$02,$02,$01,$01,$01,$01,REST
+SMPS_VolEnvIndex_s1D:	smpsEnvVolPsg $00,$00,$00,$00,$01,$01,$01,$01,$02,$02,$02,$02,$03,$03,$03,$03
+			smpsEnvVolPsg $04,$04,$04,$04,$05,$05,$05,$05,$06,$06,$06,$06,$07,$07,$07,$07
+			smpsEnvVolPsg $08,$08,$08,$08,$09,$09,$09,$09,$0A,$0A,$0A,$0A,HOLD
+SMPS_VolEnvIndex_s1E:	smpsEnvVolPsg $00,$0A,REST
+SMPS_VolEnvIndex_s1F:	smpsEnvVolPsg $00,$02,$04,HOLD
+SMPS_VolEnvIndex_s20:	smpsEnvVol    $30,$20,$10,$00,$00,$00,$00,$00,$08,$10,$20,$30, HOLD
+SMPS_VolEnvIndex_s21:	smpsEnvVolPsg $00,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$06,$06,$06,$08,$08
+			smpsEnvVolPsg $0A,REST
+SMPS_VolEnvIndex_s22:	smpsEnvVolPsg $00,$02,$03,$04,$06,$07,HOLD
+SMPS_VolEnvIndex_s23:	smpsEnvVolPsg $02,$01,$00,$00,$00,$02,$04,$07,HOLD
+SMPS_VolEnvIndex_s24:	smpsEnvVolPsg $0F,$01,$05,REST
+SMPS_VolEnvIndex_s25:	smpsEnvVolPsg $08,$06,$02,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$0D,$0E,$0F,$10,REST
+SMPS_VolEnvIndex_s26:	smpsEnvVolPsg $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01
+			smpsEnvVolPsg $01,$01,$01,$01,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$03,$03
+			smpsEnvVolPsg $03,$03,$03,$03,$03,$03,$03,$03,$04,$04,$04,$04,$04,$04,$04,$04
+			smpsEnvVolPsg $04,$04,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$06,$06,$06,$06
+			smpsEnvVolPsg $06,$06,$06,$06,$06,$06,$07,$07,$07,$07,$07,$07,$07,$07,$07,$07
+			smpsEnvVolPsg $08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$09,$09,$09,$09,$09,$09
+;			smpsEnvVolPsg $09,$09		; S3A has these two extra ticks
+			smpsEnvVolPsg $09,$09,REST
+SMPS_VolEnvIndex_s27:	smpsEnvVolPsg $00,$02,$02,$02,$03,$03,$03,$04,$04,$04,$05,$05,REST
 
 ; ---------------------------------------------------------------------------
 ; FM Universal Voice Bank

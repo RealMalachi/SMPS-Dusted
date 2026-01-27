@@ -836,7 +836,7 @@ envtableid := envtableid+1
 	endif
 	endm
 
-smpsVolEnv macro data,data2
+smpsEnvVol macro data,data2
 	if "data"==""
 	elseif "data"=="RESET"
 	dc.b	$80
@@ -858,10 +858,10 @@ smpsVolEnv macro data,data2
 		dc.b	data
 		endif
 	shift
-	smpsVolEnv ALLARGS
+	smpsEnvVol ALLARGS
 	endif
 	endm
-smpsVolEnvPsg macro data,data2
+smpsEnvVolPsg macro data,data2
 	if "data"==""
 	elseif "data"=="RESET"
 	dc.b	$80
@@ -883,11 +883,11 @@ smpsVolEnvPsg macro data,data2
 		dc.b	data<<3
 		endif
 	shift
-	smpsVolEnvPsg ALLARGS
+	smpsEnvVolPsg ALLARGS
 	endif
 	endm
 
-smpsModEnv macro data,data2
+smpsEnvMod macro data,data2
 	if "data"==""
 	elseif "data"=="RESET"
 	dc.b	$80,$10
@@ -911,20 +911,20 @@ smpsModEnv macro data,data2
 		dc.b	data
 		endif
 	shift
-	smpsModEnv ALLARGS
+	smpsEnvMod ALLARGS
 	endif
 	endm
 ; ---------------------------------------------------------------------------
 ; Macros for FM instruments
 ; Voices - Feedback
 smpsVcFeedback macro val
-vcFeedback set val
+	set vcFeedback,val
 	endm
 
 ; Voices - Algorithm
 ; This is also being used to set values we can't be certain will be defined beforehand
 smpsVcAlgorithm macro val
-vcAlgorithm set val
+	set vcAlgorithm,val
 	set vcSSG1,0
 	set vcSSG2,0
 	set vcSSG3,0
@@ -932,18 +932,11 @@ vcAlgorithm set val
 	endm
 
 smpsVcUnusedBits macro val,d1r1,d1r2,d1r3,d1r4
-vcUnusedBits set val
-	if ("d1r1"<>"")&&("d1r2"<>"")&&("d1r3"<>"")&&("d1r4"<>"")
-		set vcD1R1Unk,d1r1<<5
-		set vcD1R2Unk,d1r2<<5
-		set vcD1R3Unk,d1r3<<5
-		set vcD1R4Unk,d1r4<<5
-	else
-		set vcD1R1Unk,0
-		set vcD1R2Unk,0
-		set vcD1R3Unk,0
-		set vcD1R4Unk,0
-	endif
+	set vcUnusedBits,val
+	set vcD1R1Unk,d1r1
+	set vcD1R2Unk,d1r2
+	set vcD1R3Unk,d1r3
+	set vcD1R4Unk,d1r4
 	endm
 
 ; Voices - Detune
@@ -996,7 +989,7 @@ smpsVcAmpMod macro op1,op2,op3,op4
 	endif
 	endm
 
-; Voices - First Decay Rate
+; Voices - Decay Rate, sometimes known as First Decay Rate
 smpsVcDecayRate1 macro op1,op2,op3,op4
 	set vcD1R1,op1
 	set vcD1R2,op2
@@ -1004,7 +997,7 @@ smpsVcDecayRate1 macro op1,op2,op3,op4
 	set vcD1R4,op4
 	endm
 
-; Voices - Second Decay Rate
+; Voices - Sustain Rate, sometimes known as Second Decay Rate
 smpsVcDecayRate2 macro op1,op2,op3,op4
 	set vcD2R1,op1
 	set vcD2R2,op2
@@ -1012,7 +1005,7 @@ smpsVcDecayRate2 macro op1,op2,op3,op4
 	set vcD2R4,op4
 	endm
 
-; Voices - Decay Level
+; Voices - Sustain Level, sometimes known as Decay Level
 smpsVcDecayLevel macro op1,op2,op3,op4
 	set vcDL1,op1
 	set vcDL2,op2
@@ -1067,10 +1060,10 @@ smpsVcTotalLevel macro op1,op2,op3,op4
 		set vcTL3,op3
 		set vcTL4,op4
 	endif
-		dc.b	(vcUnusedBits<<6)+(vcFeedback<<3)+vcAlgorithm
+		dc.b	(vcFeedback<<3)+vcAlgorithm
 		dc.b	(vcDT4<<4)+vcCF4       ,(vcDT3<<4)+vcCF3       ,(vcDT2<<4)+vcCF2       ,(vcDT1<<4)+vcCF1
 		dc.b	(vcRS4<<6)+vcAR4       ,(vcRS3<<6)+vcAR3       ,(vcRS2<<6)+vcAR2       ,(vcRS1<<6)+vcAR1
-		dc.b	vcAM4|vcD1R4|vcD1R4Unk ,vcAM3|vcD1R3|vcD1R3Unk ,vcAM2|vcD1R2|vcD1R2Unk ,vcAM1|vcD1R1|vcD1R1Unk
+		dc.b	vcAM4|vcD1R4           ,vcAM3|vcD1R3           ,vcAM2|vcD1R2           ,vcAM1|vcD1R1
 		dc.b	vcD2R4                 ,vcD2R3                 ,vcD2R2                 ,vcD2R1
 		dc.b	(vcDL4<<4)+vcRR4       ,(vcDL3<<4)+vcRR3       ,(vcDL2<<4)+vcRR2       ,(vcDL1<<4)+vcRR1
 		dc.b	(vcSSG4<<4)|vcSSG2     ,(vcSSG3<<4)|vcSSG1
