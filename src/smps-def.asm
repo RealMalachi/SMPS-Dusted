@@ -126,15 +126,23 @@ SMPS_assert macro
 		else
 		pea	.t(pc)
 		bra.w	RenderAssert
-.t:		dc.b ALLARGS,0
+.t:		SMPS_assertascii ALLARGS
 		even
 		endif
 	else
 	illegal
 	endif
 	endm
-SMPS_assertascii macro
-	dc.b ALLARGS,0
+SMPS_assertascii macro thing1,thing2
+	if __smpsDebug
+		dc.b thing1
+		if ARGCOUNT<>1
+		shift
+		SMPS_assertascii ALLARGS
+		else
+		dc.b 0		; terminator
+		endif
+	endif
 	endm
 
 ; VDP/DMA

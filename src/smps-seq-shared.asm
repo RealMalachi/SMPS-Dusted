@@ -1111,12 +1111,14 @@ cfStopTrack:
 		bcs.s	.r_psg
 		bmi.s	.r_dac
 		;bpl.s	.r_fm
-.r_fm:		bsr.w	FMNoteOff
+.r_fm:
+		bsr.w	FMNoteOff
 		exg.l	a3,a5
 		bsr.w	SetVoicePan
 		move.l	a3,a5
 		rts
-.r_psg:		bsr.w	PSGNoteOff
+.r_psg:
+		bsr.w	PSGNoteOff
 		move.b	TrackVoiceControl(a3),d0			; If PSG4...
 		cmp.b	#$E0,d0
 		bhs.s	.r_psgnoise
@@ -1125,10 +1127,20 @@ cfStopTrack:
 		or.b	#$E0,d0						; ...set noise tone
 .r_psgnoise:	move.b	d0,(psginput).l
 .r_psgnah:	rts
-.r_dac:		moveq	#$3F,d0
+.r_dac:
+		exg.l	a3,a5
+		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
-		bra.w	DACStopSample
-; TODO: like fm I think you need to set pan
+		bsr.w	DACStopSample
+		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
+		move.b	TrackAMSFMSPan(a5),d1
+		btst	#5,v_driverflags(a6)
+		beq.s	.stereo
+		or.b	#$C0,d1
+.stereo:	bsr.w	DACSetPan
+		exg.l	a3,a5
+		rts
 ; ===========================================================================
 cfxRevUp:
 		move.b	v_revving_pitch(a6),d0

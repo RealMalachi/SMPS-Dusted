@@ -74,17 +74,28 @@ Cmd_FadeIn:
 		dbf	d7,.loop
 		rts
 ; ---------------------------------------------------------------------------
+; no bits set stops all sound
+; bit 0 set stops BGM
+; bit 1 set stops SFX
+; bit 2 set stops Background SFX (BSFX)
+; bit 3 set stops PCM SFX (PSFX)
 Cmd_StopSound:
 	if __smpsBFX
-		cmp.b	#1<<3,d7
+		moveq_	~%00001111,d0
 	else
-		cmp.b	#1<<2,d7
+		moveq_	~%00001011,d0
 	endif
-		blo.s	.valid
+		and.b	d7,d0
+		beq.s	.valid
 		SMPS_assert "Invalid channel stop command, TODO: print bitfield"
 .valid:
 		tst.b	d7
 		beq.w	StopAllSound
+		btst	#3,d7
+		beq.s	.notpsfx
+		moveq	#-1,d0
+		bsr.w	DACStopSampleSFX
+.notpsfx:
 		btst	#1,d7
 		beq.s	.notsfx
 		bsr.w	StopSFX
@@ -240,8 +251,8 @@ Cmd_SetBitFlag_Muffle:
 ; ===========================================================================
 Sound_PlayPCM:
 		move.w	d7,d1
-		moveq_	1|1<<7,d0
-		bra.w	DACQueueSample
+		moveq	#0,d0
+		bra.w	DACQueueSampleSFX
 ; ===========================================================================
 DACInitBytes:	dc.b $40, $41
 ; notice the 0, 1, 2 then 4, 5, 6

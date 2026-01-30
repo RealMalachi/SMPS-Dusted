@@ -54,8 +54,13 @@ Mus_TestBgm_DAC_Loop3:
 	smpsPanCentre
 ; pcm panenv test (TODO)
 
-; pcm modulation (TODO)
+; pcm modulation test (TODO)
+; pcm modenv test (TODO)
 
+; post-sfx restoration test
+	smpsPanLeft
+	smpsSetVol $40
+	dc.b	dSegaChant, $7F, dSegaChant, $7F
 ; alright we're done
 	smpsStop
 

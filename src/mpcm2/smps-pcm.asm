@@ -433,7 +433,7 @@ MegaPCM_LoadSampleTable:
 	dc.l	(MPCM_ST_WAVE_MISSING_DATA_CHUNK<<24)	| .Str_MissingDataChunk-.Str_UnknownError
 	dc.b	$FF
 ; ------------------------------------------------------------------------------
-.Str_Description:		dc.b "MegaPCM2 Error Description:",3
+.Str_Description:		SMPS_assertascii "MegaPCM2 Error Description:",3
 .Str_UnknownError:		SMPS_assertascii "Unknown error code"
 .Str_TooManySamples:		SMPS_assertascii "Too many samples in table"
 .Str_UnknownSampleType:		SMPS_assertascii "Unknown sample type or missing end marker. Please use one of: TYPE_PCM, TYPE_DPCM, TYPE_PCM_TURBO, TYPE_NONE"
@@ -451,9 +451,25 @@ DACGuard:
 DACUnguard:
 		rts
 ; ===========================================================================
+DACPauseSample:
+		SMPS_stopZ80
+		SMPS_waitZ80
+		move.b	#Z_MPCM_COMMAND_PAUSE, MPCM_Z80_RAM+Z_MPCM_CommandInput
+		SMPS_startZ80
+		rts
+; ---------------------------------------------------------------------------
+DACResumeSample:
+		SMPS_stopZ80
+		SMPS_waitZ80
+		move.b	#Z_MPCM_COMMAND_RESUME, MPCM_Z80_RAM+Z_MPCM_CommandInput
+		SMPS_startZ80
+		rts
+; ===========================================================================
+DACUpdateSFX_Exit:
+		rts
 DACUpdateSFX:
 		tst.b	v_pcmsfx(a6)
-		beq.s	.exit
+		beq.s	DACUpdateSFX_Exit
 		SMPS_stopZ80
 		SMPS_waitZ80
 		move.b	MPCM_Z80_RAM+Z_MPCM_LoopId,d0
@@ -461,14 +477,31 @@ DACUpdateSFX:
 		move.b	MPCM_Z80_RAM+Z_MPCM_CommandInput,d0
 		SMPS_startZ80
 		cmp.w	#Z_MPCM_LoopId.IDLE<<8|0,d0
-		bne.s	.exit
+		bne.s	DACUpdateSFX_Exit
 		clr.b	v_pcmsfx(a6)
-.exit:
-		rts
+;		bra.s	DACRestoreFromSFX
+; ---------------------------------------------------------------------------
+DACRestoreFromSFX:
+	if ((v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz)=1
+		lea	v_music_dac_tracks(a6),a5
+		tst.b	TrackPlaybackControl(a5)
+	else
+		lea	v_music_dac_tracks-TrackDacSz(a6),a5
+		moveq	#((v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz)-1,d7
+.bgmdacloop:	add.w	#TrackDacSz,a5
+		tst.b	TrackPlaybackControl(a5)
+		dbmi	d7,.bgmdacloop
+	endif
+		bpl.s	DACUpdateSFX_Exit
+		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
+		move.b	TrackAMSFMSPan(a5),d1
+		btst	#5,v_driverflags(a6)
+		beq.s	.stereo
+		or.b	#$C0,d1
+.stereo:	bra.w	DACSetPan
 ; ===========================================================================
 DACQueueSample:
-		tst.b	d0
-		bmi.s	.sfx
 		tst.b	v_pcmsfx(a6)
 		bne.s	.exit
 		SMPS_stopZ80
@@ -477,9 +510,11 @@ DACQueueSample:
 		move.b	d1, MPCM_Z80_RAM+Z_MPCM_CommandInput
 		SMPS_startZ80
 .exit:		rts
-.sfx:		SMPS_stopZ80
+; ---------------------------------------------------------------------------
+DACQueueSampleSFX:
+		SMPS_stopZ80
 		add.w	#$81,d1
-		bset	d0,v_pcmsfx(a6)
+		st.b	v_pcmsfx(a6)
 		SMPS_waitZ80
 		move.b	d1, MPCM_Z80_RAM+Z_MPCM_CommandInput
 		move.b	#$00, MPCM_Z80_RAM+Z_MPCM_VolumeInput
@@ -495,20 +530,14 @@ DACStopSample:
 		move.b	#Z_MPCM_COMMAND_STOP, MPCM_Z80_RAM+Z_MPCM_CommandInput
 		SMPS_startZ80
 .exit:		rts
-; ===========================================================================
-DACPauseSample:
+; ---------------------------------------------------------------------------
+DACStopSampleSFX:
 		SMPS_stopZ80
+		clr.b	v_pcmsfx(a6)
 		SMPS_waitZ80
-		move.b	#Z_MPCM_COMMAND_PAUSE, MPCM_Z80_RAM+Z_MPCM_CommandInput
+		move.b	#Z_MPCM_COMMAND_STOP, MPCM_Z80_RAM+Z_MPCM_CommandInput
 		SMPS_startZ80
-		rts
-; ===========================================================================
-DACResumeSample:
-		SMPS_stopZ80
-		SMPS_waitZ80
-		move.b	#Z_MPCM_COMMAND_RESUME, MPCM_Z80_RAM+Z_MPCM_CommandInput
-		SMPS_startZ80
-		rts
+		bra.w	DACRestoreFromSFX
 ; ===========================================================================
 DACSetPan:
 		tst.b	v_pcmsfx(a6)
@@ -518,6 +547,9 @@ DACSetPan:
 		move.b	d1, MPCM_Z80_RAM+Z_MPCM_PanInput
 		SMPS_startZ80
 .exit:		rts
+; ---------------------------------------------------------------------------
+DACSetPanSFX:
+		illegal
 ; ===========================================================================
 DACSetVolume:
 		tst.b	v_pcmsfx(a6)
@@ -528,3 +560,6 @@ DACSetVolume:
 		move.b	d1, MPCM_Z80_RAM+Z_MPCM_VolumeInput
 		SMPS_startZ80
 .exit:		rts
+; ---------------------------------------------------------------------------
+DACSetVolumeSFX:
+		illegal

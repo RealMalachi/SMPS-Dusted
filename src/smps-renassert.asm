@@ -145,7 +145,7 @@ RenderAssert:
 	move.w	d2,(a4)
 	endr
 	bra.w	.loop
-.headertext:	dc.b "SMPS Assert Error:",1,"====================================",2
+.headertext:	SMPS_assertascii "SMPS Assert Error:",1,"====================================",2
 	even
 
 ErrorFontTable:
