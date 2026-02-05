@@ -476,7 +476,7 @@ DACUpdateSFX:
 		lsl.w	#8,d0
 		move.b	MPCM_Z80_RAM+Z_MPCM_CommandInput,d0
 		SMPS_startZ80
-		cmp.w	#Z_MPCM_LoopId.IDLE<<8|0,d0
+		cmp.w	#Z_MPCM_LOOP_IDLE<<8|0,d0
 		bne.s	DACUpdateSFX_Exit
 		clr.b	v_pcmsfx(a6)
 ;		bra.s	DACRestoreFromSFX
