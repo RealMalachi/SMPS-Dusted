@@ -335,8 +335,8 @@ SetVoice:
 		bsr.w	WriteFMIorII
 		dbf	d3,.loop
 		btst	#4,v_driverflags(a6)		; if SSG-EG is disabled, uhh, disable it.
-		bne.s	SendVoiceSSG.locret
-		bra.s	SendVoiceSSG.gotptr
+		beq.s	SendVoiceSSG.gotptr
+		rts
 ; volume is handled later by DoVolEnv and UpdateVolume
 ;.nossg:
 ;		bra.w	SendVoiceTL
