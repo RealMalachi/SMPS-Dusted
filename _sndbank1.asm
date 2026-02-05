@@ -1387,9 +1387,9 @@ SMPS_SampleTable:
 ; S3/K/D ; god I hate the naming inconsistencies
 	pcmdef	DPCM,	SnareS3,		dSnareS3,		pcm_SnareS3,			19000
 	pcmdef	DPCM,	TomS3,			dHighTom,		pcm_HighTom,			11500
-	pcmdef	DPCM,	TomS3,			dMidTomS3,		pcm_MidTomS3,			9000 
-	pcmdef	DPCM,	TomS3,			dLowTomS3,		pcm_LowTomS3,			7500 
-	pcmdef	DPCM,	TomS3,			dFloorTomS3,		pcm_FloorTomS3,			6500 
+	pcmdef	DPCM,	TomS3,			dMidTomS3,		pcm_MidTomS3,			9000
+	pcmdef	DPCM,	TomS3,			dLowTomS3,		pcm_LowTomS3,			7500
+	pcmdef	DPCM,	TomS3,			dFloorTomS3,		pcm_FloorTomS3,			6500
 	pcmdef	DPCM,	KickS3,			dKickS3,		pcm_KickS3,			19000
 	pcmdef	DPCM,	MuffledSnare,		dMuffledSnare,		pcm_MuffledSnare,		19000
 	pcmdef	DPCM,	CrashCymbalS3,		dCrashCymbal,		pcm_CrashCymbal,		17000
@@ -1414,12 +1414,47 @@ SMPS_SampleTable:
 	pcmdef	DPCM,	QuickLooseSnare,	dQuickLooseSnare,	pcm_QuickLooseSnare,		12500
 	pcmdef	DPCM,	Click,			dClick,			pcm_Click,			13500
 	pcmdef	DPCM,	PowerKick,		dPowerKick,		pcm_PowerKick,			8000
-	; $9E ; quick glass crash, glass crash snare, glass crash, glash smash kick, glash smash crash
+	pcmdef	DPCM,	QuickGlassCrash,	dQuickGlassCrash,	pcm_QuickGlassCrash,		8000
+	pcmdef	DPCM,	GlassCrashSnare,	dGlassCrashSnare,	pcm_GlassCrashSnare,		12500
+	pcmdef	DPCM,	GlassCrash,		dGlassCrash,		pcm_GlassCrash,			12500
+	pcmdef	DPCM,	GlassCrashKick,		dGlassCrashKick,	pcm_GlassCrashKick,		13500
+	pcmdef	DPCM,	QuietGlassCrash,	dQuietGlassCrash,	pcm_QuietGlassCrash,		13500
+	pcmdef	DPCM,	OddSnareKick,		dOddSnareKick,		pcm_OddSnareKick,		8000
+	pcmdef	DPCM,	KickExtraBass,		dKickExtraBass,		pcm_KickExtraBass,		8000
+	pcmdef	DPCM,	ComeOn,			dComeOn,		pcm_ComeOn,			12500
+	pcmdef	DPCM,	DanceSnare,		dDanceSnare,		pcm_DanceSnare,			14000
+	pcmdef	DPCM,	LooseKick,		dLooseKick,		pcm_LooseKick,			8000
+	pcmdef	DPCM,	ModLooseKick,		dModLooseKick,		pcm_ModLooseKick,		8000
+	pcmdef	DPCM,	Woo,			dWoo,			pcm_Woo,			12500
+	pcmdef	DPCM,	Go,			dGo,			pcm_Go,				13500
+	pcmdef	DPCM,	SnareGo,		dSnareGo,		pcm_SnareGo,			12000
+	pcmdef	DPCM,	PowerTom,		dPowerTom,		pcm_PowerTom,			17000
+	pcmdef	DPCM,	WoodBlock,		dHiWoodBlock,		pcm_HiWoodBlock,		10500
+	pcmdef	DPCM,	WoodBlock,		dLowWoodBlock,		pcm_LowWoodBlock,		8000
+	pcmdef	DPCM,	HitDrum,		dHiHitDrum,		pcm_HiHitDrum,			14000
+	pcmdef	DPCM,	HitDrum,		dLowHitDrum,		pcm_LowHitDrum,			9750
 	pcmdef	DPCM,	MetalCrashHit,		dMetalCrashHit,		pcm_MetalCrashHit,		8000
 	pcmdef	DPCM,	EchoedClapHitSK,	dEchoedClapHit,		pcm_EchoedClapHit,		8500
 	pcmdef	DPCM,	EchoedClapHitSK,	dLowerEchoedClapHit,	pcm_LowerEchoedClapHit,		6500
 	pcmdef	DPCM,	EchoedClapHitS3,	dEchoedClapHitS3,	pcm_EchoedClapHitS3,		8500
 	pcmdef	DPCM,	EchoedClapHitS3,	dLowerEchoedClapHitS3,	pcm_LowerEchoedClapHitS3,	6500
+	pcmdef	DPCM,	PowerKickHit,		dHipHopHitKick,		pcm_HipHopHitKick,		12500
+	pcmdef	DPCM,	HipHopHitPowerKick,	dHipHopHitPowerKick,	pcm_HipHopHitPowerKick,		12500
+	pcmdef	DPCM,	BassHey,		dBassHey,		pcm_BassHey,			12500
+	pcmdef	DPCM,	DanceStyleKick,		dDanceStyleKick,	pcm_DanceStyleKick,		8000
+	pcmdef	DPCM,	HipHopHitKick,		dHipHopHitKick2,	pcm_HipHopHitKick2,		12500
+	pcmdef	DPCM,	HipHopHitKick,		dHipHopHitKick3,	pcm_HipHopHitKick3,		12500
+	pcmdef	DPCM,	ReverseFadingWind,	dReverseFadingWind,	pcm_ReverseFadingWind,		8000
+	pcmdef	DPCM,	ScratchS3,		dScratchS3,		pcm_ScratchS3,			8000
+	pcmdef	DPCM,	LooseSnareNoise,	dLooseSnareNoise,	pcm_LooseSnareNoise,		8000
+	pcmdef	DPCM,	PowerKick2,		dPowerKick2,		pcm_PowerKick2,			12500
+	pcmdef	DPCM,	CrashingNoiseWoo,	dCrashingNoiseWoo,	pcm_CrashingNoiseWoo,		12500
+	pcmdef	DPCM,	QuickHit,		dQuickHit,		pcm_QuickHit,			7250
+	pcmdef	DPCM,	KickHey,		dKickHey,		pcm_KickHey,			13000
+	pcmdef	DPCM,	PowerKickHit,		dPowerKickHit,		pcm_PowerKickHit,		11000
+	pcmdef	DPCM,	PowerKickHit,		dLowPowerKickHit,	pcm_LowPowerKickHit,		10000
+	pcmdef	DPCM,	PowerKickHit,		dLowerPowerKickHit,	pcm_LowerPowerKickHit,		9750
+	pcmdef	DPCM,	PowerKickHit,		dLowestPowerKickHit,	pcm_LowestPowerKickHit,		13000
 ; S3D
 	pcmdef	DPCM,	FinalFightMetalCrash,	dFinalFightMetalCrash,	pcm_FinalFightMetalCrash,	14000	; TODO: pretty sure it's the wrong HZ rate
 	pcmdef	DPCM,	IntroKick,		dIntroKick,		pcm_IntroKick,			9750
@@ -1428,40 +1463,6 @@ SMPS_SampleTable:
 ;	pcmdef	PCM,	Rizzmas,		dRizzmas,		pcm_Rizzmas
 ; ============= type	expected pcm		sequence id end label	queue id end label
 	pcmdef	END,	MegaPCM2,		d__Last,		pcm__Last
-
-; TODO: god documenting all the names is such a slog
-dKickHey		= dKickS3
-dOddSnareKick		= dSnareS3
-dKickExtraBass		= dKickS3
-dQuickGlassCrash	= dIntroKick
-dGlassCrashKick		= dIntroKick
-dGlassCrashSnare	= dIntroKick
-dQuietGlassCrash	= dIntroKick
-dGlassCrash		= dIntroKick
-dQuickHit		= dClick
-dDanceStyleKick		= dKickS3
-dModLooseKick		= dKickS3
-dPowerTom		= dMidTomS3
-dCrashingNoiseWoo	= dSegaChant
-dWoo			= dSegaChant
-dComeOn			= dSegaChant
-dGo			= dSegaChant
-dSnareGo		= dSegaChant
-dReverseFadingWind	= dFinalFightMetalCrash
-dLooseSnareNoise	= dSnareS3
-dBassHey		= dFinalFightMetalCrash
-dHipHopHitKick3		= dKickS3
-dHipHopHitKick		= dKickS3
-dHiHitDrum		= dSnareS3
-dLowHitDrum		= dSnareS3
-dHiWoodBlock		= dMidTimpaniS3
-dLowWoodBlock		= dMidTimpaniS3
-dScratchS3		= dScratch
-dHipHopHitPowerKick	= dKickS3
-dPowerKickHit		= dKickS3
-dLowPowerKickHit	= dKickS3
-dLowerPowerKickHit	= dKickS3
-dLowestPowerKickHit	= dKickS3
 
 ; ---------------------------------------------------------------------------
 ; Sound effect data
@@ -2101,38 +2102,68 @@ BgmS3DCredits:	include "bgm/sonic3D/Credits.asm"
 ; PCM data
 ; ---------------------------------------------------------------
 	pcminc START
-	pcminc Kick, "pcm/sonic2/Kick.dpcm"
-	pcminc Snare, "pcm/sonic2/Snare.pcm"
-	pcminc Timpani, "pcm/sonic2/Timpani.dpcm"
-	pcminc Clap, "pcm/sonic2/Clap.dpcm"
-	pcminc Tom, "pcm/sonic2/Tom.pcm"
-	pcminc Scratch, "pcm/sonic2/Scratch.dpcm"
-	pcminc Bongo, "pcm/sonic2/Bongo.dpcm"
+	pcminc Kick,			"pcm/sonic2/Kick.dpcm"
+	pcminc Snare,			"pcm/sonic2/Snare.pcm"
+	pcminc Timpani,			"pcm/sonic2/Timpani.dpcm"
+	pcminc Clap,			"pcm/sonic2/Clap.dpcm"
+	pcminc Tom,			"pcm/sonic2/Tom.pcm"
+	pcminc Scratch,			"pcm/sonic2/Scratch.dpcm"
+	pcminc Bongo,			"pcm/sonic2/Bongo.dpcm"
 
-	pcminc KickS3, "pcm/sonic3/KickS3.dpcm"
-	pcminc SnareS3, "pcm/sonic3/SnareS3.dpcm"
-	pcminc TimpaniS3, "pcm/sonic3/TimpaniS3.dpcm"
-	pcminc ClapS3, "pcm/sonic3/ClapS3.dpcm"
-	pcminc TomS3, "pcm/sonic3/TomS3.dpcm"
-	pcminc MetalHit, "pcm/sonic3/MetalHit.dpcm"
-	pcminc HighMetalHit, "pcm/sonic3/HighMetalHit.dpcm"
-	pcminc HigherMetalHit, "pcm/sonic3/HigherMetalHit.dpcm"
-	pcminc EchoedClapHitS3, "pcm/sonic3/EchoedClapHitS3.dpcm"
-	pcminc EchoedClapHitSK, "pcm/sonic3/EchoedClapHitSK.dpcm"
-	pcminc CrashCymbalS3, "pcm/sonic3/CrashCymbalS3.dpcm"
-	pcminc ElectricTomS3, "pcm/sonic3/ElectricTomS3.dpcm"
-	pcminc PitchSnareS3, "pcm/sonic3/PitchSnareS3.dpcm"
-	pcminc MuffledSnare, "pcm/sonic3/MuffledSnare.dpcm"
-	pcminc RideCymbal, "pcm/sonic3/RideCymbal.dpcm"
-	pcminc QuickLooseSnare, "pcm/sonic3/QuickLooseSnare.dpcm"
-	pcminc Click, "pcm/sonic3/Click.dpcm"
-	pcminc PowerKick, "pcm/sonic3/PowerKick.dpcm"
-	pcminc MetalCrashHit, "pcm/sonic3/MetalCrashHit.dpcm"
-	pcminc IntroKick, "pcm/sonic3d/IntroKick.dpcm"
-	pcminc FinalFightMetalCrash, "pcm/sonic3d/FinalFightMetalCrash.dpcm"
+	pcminc SnareS3,			"pcm/sonic3/SnareS3.dpcm"
+	pcminc TomS3,			"pcm/sonic3/TomS3.dpcm"
+	pcminc KickS3,			"pcm/sonic3/KickS3.dpcm"
+	pcminc MuffledSnare,		"pcm/sonic3/MuffledSnare.dpcm"
+	pcminc CrashCymbalS3,		"pcm/sonic3/CrashCymbalS3.dpcm"
+	pcminc RideCymbal,		"pcm/sonic3/RideCymbal.dpcm"
+	pcminc MetalHit,		"pcm/sonic3/MetalHit.dpcm"
+	pcminc HighMetalHit,		"pcm/sonic3/HighMetalHit.dpcm"
+	pcminc HigherMetalHit,		"pcm/sonic3/HigherMetalHit.dpcm"
+	pcminc ClapS3,			"pcm/sonic3/ClapS3.dpcm"
+	pcminc ElectricTomS3,		"pcm/sonic3/ElectricTomS3.dpcm"
+	pcminc PitchSnareS3,		"pcm/sonic3/PitchSnareS3.dpcm"
+	pcminc TimpaniS3,		"pcm/sonic3/TimpaniS3.dpcm"
+	pcminc QuickLooseSnare,		"pcm/sonic3/QuickLooseSnare.dpcm"
+	pcminc Click,			"pcm/sonic3/Click.dpcm"
+	pcminc PowerKick,		"pcm/sonic3/PowerKick.dpcm"
+	pcminc QuickGlassCrash,		"pcm/sonic3/QuickGlassCrash.dpcm"
+	pcminc GlassCrashSnare,		"pcm/sonic3/GlassCrashSnare.dpcm"
+	pcminc GlassCrash,		"pcm/sonic3/GlassCrash.dpcm"
+	pcminc GlassCrashKick,		"pcm/sonic3/GlassCrashKick.dpcm"
+	pcminc QuietGlassCrash,		"pcm/sonic3/QuietGlassCrash.dpcm"
+	pcminc OddSnareKick,		"pcm/sonic3/OddSnareKick.dpcm"
+	pcminc KickExtraBass,		"pcm/sonic3/KickExtraBass.dpcm"
+	pcminc ComeOn,			"pcm/sonic3/ComeOn.dpcm"
+	pcminc DanceSnare,		"pcm/sonic3/DanceSnare.dpcm"
+	pcminc LooseKick,		"pcm/sonic3/LooseKick.dpcm"
+	pcminc ModLooseKick,		"pcm/sonic3/ModLooseKick.dpcm"
+	pcminc Woo,			"pcm/sonic3/Woo.dpcm"
+	pcminc Go,			"pcm/sonic3/Go.dpcm"
+	pcminc SnareGo,			"pcm/sonic3/SnareGo.dpcm"
+	pcminc PowerTom,		"pcm/sonic3/PowerTom.dpcm"
+	pcminc WoodBlock,		"pcm/sonic3/WoodBlock.dpcm"
+	pcminc HitDrum,			"pcm/sonic3/HitDrum.dpcm"
+	pcminc MetalCrashHit,		"pcm/sonic3/MetalCrashHit.dpcm"
+	pcminc EchoedClapHitSK,		"pcm/sonic3/EchoedClapHitSK.dpcm"
+	pcminc EchoedClapHitS3,		"pcm/sonic3/EchoedClapHitS3.dpcm"
+	pcminc PowerKickHit,		"pcm/sonic3/PowerKickHit.dpcm"
+	pcminc HipHopHitPowerKick,	"pcm/sonic3/HipHopHitPowerKick.dpcm"
+	pcminc BassHey,			"pcm/sonic3/BassHey.dpcm"
+	pcminc DanceStyleKick,		"pcm/sonic3/DanceStyleKick.dpcm"
+	pcminc HipHopHitKick,		"pcm/sonic3/HipHopHitKick.dpcm"
+	pcminc ReverseFadingWind,	"pcm/sonic3/ReverseFadingWind.dpcm"
+	pcminc ScratchS3,		"pcm/sonic3/ScratchS3.dpcm"
+	pcminc LooseSnareNoise,		"pcm/sonic3/LooseSnareNoise.dpcm"
+	pcminc PowerKick2,		"pcm/sonic3/PowerKick2.dpcm"
+	pcminc CrashingNoiseWoo,	"pcm/sonic3/CrashingNoiseWoo.dpcm"
+	pcminc QuickHit,		"pcm/sonic3/QuickHit.dpcm"
+	pcminc KickHey,			"pcm/sonic3/KickHey.dpcm"
 
-	pcminc SegaPCM, "pcm/Sega.pcm"
-;	pcminc Rizzmas, "pcm/rizzmas.wav"
+	pcminc IntroKick,		"pcm/sonic3d/IntroKick.dpcm"
+	pcminc FinalFightMetalCrash,	"pcm/sonic3d/FinalFightMetalCrash.dpcm"
+
+	pcminc SegaPCM,			"pcm/Sega.pcm"
+;	pcminc Rizzmas,			"pcm/rizzmas.wav"
 	pcminc END
 ; ---------------------------------------------------------------
 	even
