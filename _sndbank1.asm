@@ -1439,6 +1439,177 @@ SMPS_SoundIndex:
 	sfxdef $70,0,0,0,SfxCdDE,	sfx_CdDE
 	sfxdef $00,0,0,0,SfxCdDF,	sfx_CdDF
 
+	sfxdef $00,0,0,0,SfxS333, sfxS3_RingRight
+	sfxdef $00,0,0,0,SfxS334, sfxS3_RingLeft
+	sfxdef $00,0,0,0,SfxS335, sfxS3_Death
+	sfxdef $00,0,0,0,SfxS336, sfxS3_Skid
+	sfxdef $00,0,0,0,SfxS337, sfxS3_SpikeHit
+	sfxdef $00,0,0,0,SfxS338, sfxS3_Bubble
+	sfxdef $00,0,0,0,SfxS339, sfxS3_Splash
+	sfxdef $00,0,0,0,SfxS33A, sfxS3_Shield
+	sfxdef $00,0,0,0,SfxS33B, sfxS3_Drown
+	sfxdef $00,0,0,0,SfxS33C, sfxS3_Roll
+	sfxdef $00,0,0,0,SfxS33D, sfxS3_Break
+	sfxdef $00,0,0,0,SfxS33E, sfxS3_FireShield
+	sfxdef $00,0,0,0,SfxS33F, sfxS3_BubbleShield
+	sfxdef $00,0,0,0,SfxS340, sfxS3_UnknownShield
+	sfxdef $00,0,0,0,SfxS341, sfxS3_LightningShield
+	sfxdef $00,0,0,0,SfxS342, sfxS3_InstaAttack
+	sfxdef $00,0,0,0,SfxS343, sfxS3_FireAttack
+	sfxdef $00,0,0,0,SfxS344, sfxS3_BubbleAttack
+	sfxdef $00,0,0,0,SfxS345, sfxS3_ElectricAttack
+	sfxdef $00,0,0,0,SfxS346, sfxS3_Whistle
+	sfxdef $00,0,0,0,SfxS347, sfxS3_SandwallRise
+	sfxdef $00,0,0,0,SfxS348, sfxS3_Blast
+	sfxdef $00,0,0,0,SfxS349, sfxS3_Thump
+	sfxdef $00,0,0,0,SfxS34A, sfxS3_Grab
+	sfxdef $00,0,0,0,SfxS34B, sfxS3_WaterfallSplash
+	sfxdef $00,0,0,0,SfxS34C, sfxS3_GlideLand
+	sfxdef $00,0,0,0,SfxS34D, sfxS3_Projectile
+	sfxdef $00,0,0,0,SfxS34E, sfxS3_MissileExplode
+	sfxdef $00,0,0,0,SfxS34F, sfxS3_FlamethrowerQuiet
+	sfxdef $00,0,0,0,SfxS350, sfxS3_BossActivate
+	sfxdef $00,0,0,0,SfxS351, sfxS3_MissileThrow
+	sfxdef $00,0,0,0,SfxS352, sfxS3_SpikeMove
+	sfxdef $00,0,0,0,SfxS353, sfxS3_Charging
+	sfxdef $00,0,0,0,SfxS354, sfxS3_BossLaser
+	sfxdef $00,0,0,0,SfxS355, sfxS3_BlockConveyor
+	sfxdef $00,0,0,0,SfxS356, sfxS3_FlipBridge
+	sfxdef $00,0,0,0,SfxS357, sfxS3_Geyser
+	sfxdef $00,0,0,0,SfxS358, sfxS3_FanLatch
+	sfxdef $00,0,0,0,SfxS359, sfxS3_Collapse
+	sfxdef $00,0,0,0,SfxS35A, sfxS3_UnknownCharge
+	sfxdef $00,0,0,0,SfxS35B, sfxS3_Switch
+	sfxdef $00,0,0,0,SfxS35C, sfxS3_MechaSpark
+	sfxdef $00,0,0,0,SfxS35D, sfxS3_FloorThump
+	sfxdef $00,0,0,0,SfxS35E, sfxS3_Laser
+	sfxdef $00,0,0,0,SfxS35F, sfxS3_Crash
+	sfxdef $00,0,0,0,SfxS360, sfxS3_BossZoom
+	sfxdef $00,0,0,0,SfxS361, sfxS3_BossHitFloor
+	sfxdef $00,0,0,0,SfxS362, sfxS3_Jump
+	sfxdef $00,0,0,0,SfxS363, sfxS3_Starpost
+	sfxdef $00,0,0,0,SfxS364, sfxS3_PulleyGrab
+	sfxdef $00,0,0,0,SfxS365, sfxS3_BlueSphere
+	sfxdef $00,0,0,0,SfxS366, sfxS3_AllSpheres
+	sfxdef $00,0,0,0,SfxS367, sfxS3_LevelProjectile
+	sfxdef $00,0,0,0,SfxS368, sfxS3_Perfect
+	sfxdef $00,0,0,0,SfxS369, sfxS3_PushBlock
+	sfxdef $00,0,0,0,SfxS36A, sfxS3_Goal
+	sfxdef $00,0,0,0,SfxS36B, sfxS3_ActionBlock
+	sfxdef $00,0,0,0,SfxS36C, sfxS3_Splash2
+	sfxdef $00,0,0,0,SfxS36D, sfxS3_UnknownShift
+	sfxdef $00,0,0,0,SfxS36E, sfxS3_BossHit
+	sfxdef $00,0,0,0,SfxS36F, sfxS3_Rumble2
+	sfxdef $00,0,0,0,SfxS370, sfxS3_LavaBall
+	sfxdef $00,0,0,0,SfxS371, sfxS3_Shield2
+	sfxdef $00,0,0,0,SfxS372, sfxS3_Hoverpad
+	sfxdef $00,0,0,0,SfxS373, sfxS3_Transporter
+	sfxdef $00,0,0,0,SfxS374, sfxS3_TunnelBooster
+	sfxdef $00,0,0,0,SfxS375, sfxS3_BalloonPlatform
+	sfxdef $00,0,0,0,SfxS376, sfxS3_TrapDoor
+	sfxdef $00,0,0,0,SfxS377, sfxS3_Balloon
+	sfxdef $00,0,0,0,SfxS378, sfxS3_GravityMachine
+	sfxdef $00,0,0,0,SfxS379, sfxS3_Lightning
+	sfxdef $00,0,0,0,SfxS37A, sfxS3_BossMagma
+	sfxdef $00,0,0,0,SfxS37B, sfxS3_SmallBumpers
+	sfxdef $00,0,0,0,SfxS37C, sfxS3_ChainTension
+	sfxdef $00,0,0,0,SfxS37D, sfxS3_UnknownPump
+	sfxdef $00,0,0,0,SfxS37E, sfxS3_GroundSlide
+	sfxdef $00,0,0,0,SfxS37F, sfxS3_FrostPuff
+	sfxdef $00,0,0,0,SfxS380, sfxS3_IceSpikes
+	sfxdef $00,0,0,0,SfxS381, sfxS3_TubeLauncher
+	sfxdef $00,0,0,0,SfxS382, sfxS3_SandSplash
+	sfxdef $00,0,0,0,SfxS383, sfxS3_BridgeCollapse
+	sfxdef $00,0,0,0,SfxS384, sfxS3_UnknownPowerUp
+	sfxdef $00,0,0,0,SfxS385, sfxS3_UnknownPowerDown
+	sfxdef $00,0,0,0,SfxS386, sfxS3_Alarm
+	sfxdef $00,0,0,0,SfxS387, sfxS3_MushroomBounce
+	sfxdef $00,0,0,0,SfxS388, sfxS3_PulleyMove
+	sfxdef $00,0,0,0,SfxS389, sfxS3_WeatherMachine
+	sfxdef $00,0,0,0,SfxS38A, sfxS3_Bouncy
+	sfxdef $00,0,0,0,SfxS38B, sfxS3_ChopTree
+	sfxdef $00,0,0,0,SfxS38C, sfxS3_ChopStuck
+	sfxdef $00,0,0,0,SfxS38D, sfxS3_UnknownFlutter
+	sfxdef $00,0,0,0,SfxS38E, sfxS3_UnknownRevving
+	sfxdef $00,0,0,0,SfxS38F, sfxS3_DoorOpen
+	sfxdef $00,0,0,0,SfxS390, sfxS3_DoorMove
+	sfxdef $00,0,0,0,SfxS391, sfxS3_DoorClose
+	sfxdef $00,0,0,0,SfxS392, sfxS3_GhostAppear
+	sfxdef $00,0,0,0,SfxS393, sfxS3_BossRecovery
+	sfxdef $00,0,0,0,SfxS394, sfxS3_ChainTick
+	sfxdef $00,0,0,0,SfxS395, sfxS3_BossHand
+	sfxdef $00,0,0,0,SfxS396, sfxS3_MechaLand
+	sfxdef $00,0,0,0,SfxS397, sfxS3_EnemyBreath
+	sfxdef $00,0,0,0,SfxS398, sfxS3_BossProjectile
+	sfxdef $00,0,0,0,SfxS399, sfxS3_UnknownPlink
+	sfxdef $00,0,0,0,SfxS39A, sfxS3_SpringLatch
+	sfxdef $00,0,0,0,SfxS39B, sfxS3_ThumpBoss
+	sfxdef $00,0,0,0,SfxSK9B, sfxSK_ThumpBoss
+	sfxdef $00,0,0,0,SfxS39C, sfxS3_SuperEmerald
+	sfxdef $00,0,0,0,SfxS39D, sfxS3_Targeting
+	sfxdef $00,0,0,0,SfxS39E, sfxS3_Clank
+	sfxdef $00,0,0,0,SfxS39F, sfxS3_SuperTransform
+	sfxdef $00,0,0,0,SfxS3A0, sfxS3_MissileShoot
+	sfxdef $00,0,0,0,SfxS3A1, sfxS3_UnknownOminous
+	sfxdef $00,0,0,0,SfxS3A2, sfxS3_FloorLauncher
+	sfxdef $00,0,0,0,SfxS3A3, sfxS3_GravityLift
+	sfxdef $00,0,0,0,SfxS3A4, sfxS3_MechaTransform
+	sfxdef $00,0,0,0,SfxS3A5, sfxS3_UnknownRise
+	sfxdef $00,0,0,0,SfxS3A6, sfxS3_LaunchGrab
+	sfxdef $00,0,0,0,SfxS3A7, sfxS3_LaunchReady
+	sfxdef $00,0,0,0,SfxS3A8, sfxS3_EnergyZap
+	sfxdef $00,0,0,0,SfxS3A9, sfxS3_AirDing
+	sfxdef $00,0,0,0,SfxS3AA, sfxS3_Bumper
+	sfxdef $00,0,0,0,SfxS3AB, sfxS3_Spindash
+	sfxdef $00,0,0,0,SfxS3AC, sfxS3_Continue
+	sfxdef $00,0,0,0,SfxS3AD, sfxS3_LaunchGo
+	sfxdef $00,0,0,0,SfxS3AE, sfxS3_Flipper
+	sfxdef $00,0,0,0,SfxS3AF, sfxS3_EnterSS
+	sfxdef $00,0,0,0,SfxS3B0, sfxS3_Register
+	sfxdef $00,0,0,0,SfxS3B1, sfxS3_Spring
+	sfxdef $00,0,0,0,SfxS3B2, sfxS3_Error
+	sfxdef $00,0,0,0,SfxS3B3, sfxS3_BigRing
+	sfxdef $00,0,0,0,SfxS3B4, sfxS3_Explode
+	sfxdef $00,0,0,0,SfxS3B5, sfxS3_Diamonds
+	sfxdef $00,0,0,0,SfxS3B6, sfxS3_Dash
+	sfxdef $00,0,0,0,SfxS3B7, sfxS3_SlotMachine
+	sfxdef $00,0,0,0,SfxS3B8, sfxS3_Signpost
+	sfxdef $00,0,0,0,SfxS3B9, sfxS3_RingLoss
+	sfxdef $00,0,0,0,SfxS3BA, sfxS3_Flying
+	sfxdef $00,0,0,0,SfxS3BB, sfxS3_FlyTired
+	sfxdef $00,0,1,0,CsfxS3BC,csfxS3_SlideSkidLoud
+	sfxdef $00,0,1,0,CsfxS3BD,csfxS3_LargeShip
+	sfxdef $00,0,1,0,CsfxS3BE,csfxS3_RobotnikSiren
+	sfxdef $00,0,1,0,CsfxS3BF,csfxS3_BossRotate
+	sfxdef $00,0,1,0,CsfxS3C0,csfxS3_FanBig
+	sfxdef $00,0,1,0,CsfxS3C1,csfxS3_FanSmall
+	sfxdef $00,0,1,0,CsfxS3C2,csfxS3_FlamethrowerLoud
+	sfxdef $00,0,1,0,CsfxS3C3,csfxS3_GravityTunnel
+	sfxdef $00,0,1,0,CsfxS3C4,csfxS3_BossPanic
+	sfxdef $00,0,1,0,CsfxS3C5,csfxS3_UnknownSpin
+	sfxdef $00,0,1,0,CsfxS3C6,csfxS3_WaveHover
+	sfxdef $00,0,1,0,CsfxS3C7,csfxS3_CannonTurn
+	sfxdef $00,0,1,0,CsfxS3C8,csfxS3_SlideSkidQuiet
+	sfxdef $00,0,1,0,CsfxS3C9,csfxS3_SpikeBalls
+	sfxdef $00,0,1,0,CsfxS3CA,csfxS3_LightTunnel
+	sfxdef $00,0,1,0,CsfxS3CB,csfxS3_Rumble
+	sfxdef $00,0,1,0,CsfxS3CC,csfxS3_BigRumble
+	sfxdef $00,0,1,0,CsfxS3CD,csfxS3_DeathEggRiseLoud
+	sfxdef $00,0,1,0,CsfxS3CE,csfxS3_WindQuiet
+	sfxdef $00,0,1,0,CsfxS3CF,csfxS3_WindLoud
+	sfxdef $00,0,1,0,CsfxS3D0,csfxS3_Rising
+	sfxdef $00,0,1,0,CsfxS3D1,csfxS3_UnknownFlutter2
+	sfxdef $00,0,1,0,CsfxS3D2,csfxS3_GumballTab
+	sfxdef $00,0,1,0,CsfxS3D3,csfxS3_DeathEggRiseQuiet
+	sfxdef $00,0,1,0,CsfxS3D4,csfxS3_TurbineHum
+	sfxdef $00,0,1,0,CsfxS3D5,csfxS3_LavaFall
+	sfxdef $00,0,1,0,CsfxS3D6,csfxS3_UnknownZap
+	sfxdef $00,0,1,0,CsfxS3D7,csfxS3_ConveyorPlatform
+	sfxdef $00,0,1,0,CsfxS3D8,csfxS3_UnknownSaw
+	sfxdef $00,0,1,0,CsfxS3D9,csfxS3_MagneticSpike
+	sfxdef $00,0,1,0,CsfxS3DA,csfxS3_LeafBlower
+	sfxdef $00,0,1,0,CsfxS3DB,csfxS3_WaterSkid
+
 	sfxdef END,sfx__Last
 SMPS_SoundIndex_Exit:
 	even
@@ -2020,6 +2191,349 @@ SfxCdDE:	include "sfx/soniccd/DE.asm"
 		even
 SfxCdDF:	include "sfx/soniccd/DF.asm"
 		even
+
+SfxS3B9:	include "sfx/sonic3/B9.asm"	; shares patch with 33
+		even
+SfxS334:	include "sfx/sonic3/34.asm"	; shares patch with 33
+		even
+SfxS333:	include "sfx/sonic3/33.asm"
+		even
+SfxS335:	include "sfx/sonic3/35.asm"
+		even
+SfxS336:	include "sfx/sonic3/36.asm"
+		even
+SfxS337:	include "sfx/sonic3/37.asm"
+		even
+SfxS338:	include "sfx/sonic3/38.asm"
+		even
+SfxS357:	include "sfx/sonic3/57.asm"	; shares patch with 39
+		even
+SfxS36C:	include "sfx/sonic3/6C.asm"	; shares patch with 39
+		even
+SfxS339:	include "sfx/sonic3/39.asm"
+		even
+SfxS371:	include "sfx/sonic3/71.asm"	; shares patch with 3A
+		even
+SfxS33A:	include "sfx/sonic3/3A.asm"
+		even
+SfxS33B:	include "sfx/sonic3/3B.asm"
+		even
+SfxS33C:	include "sfx/sonic3/3C.asm"
+		even
+SfxS33D:	include "sfx/sonic3/3D.asm"
+		even
+SfxS33F:	include "sfx/sonic3/3F.asm"	; shares patch with 3E
+		even
+SfxS340:	include "sfx/sonic3/40.asm"	; shares patch with 3E
+		even
+SfxS341:	include "sfx/sonic3/41.asm"	; shares patch with 3E
+		even
+SfxS33E:	include "sfx/sonic3/3E.asm"
+		even
+SfxS342:	include "sfx/sonic3/42.asm"
+		even
+SfxS343:	include "sfx/sonic3/43.asm"
+		even
+SfxS344:	include "sfx/sonic3/44.asm"
+		even
+SfxS345:	include "sfx/sonic3/45.asm"
+		even
+SfxS346:	include "sfx/sonic3/46.asm"
+		even
+SfxS347:	include "sfx/sonic3/47.asm"
+		even
+SfxS348:	include "sfx/sonic3/48.asm"
+		even
+SfxS349:	include "sfx/sonic3/49.asm"
+		even
+SfxS34A:	include "sfx/sonic3/4A.asm"
+		even
+SfxS34B:	include "sfx/sonic3/4B.asm"
+		even
+SfxS356:	include "sfx/sonic3/56.asm"	; shares patch with 4C
+		even
+SfxS34C:	include "sfx/sonic3/4C.asm"
+		even
+SfxS34D:	include "sfx/sonic3/4D.asm"
+		even
+SfxS34E:	include "sfx/sonic3/4E.asm"
+		even
+SfxS34F:	include "sfx/sonic3/4F.asm"
+		even
+SfxS350:	include "sfx/sonic3/50.asm"
+		even
+SfxS351:	include "sfx/sonic3/51.asm"
+		even
+SfxS352:	include "sfx/sonic3/52.asm"
+		even
+SfxS353:	include "sfx/sonic3/53.asm"
+		even
+SfxS354:	include "sfx/sonic3/54.asm"
+		even
+SfxS355:	include "sfx/sonic3/55.asm"
+		even
+SfxS358:	include "sfx/sonic3/58.asm"
+		even
+SfxS359:	include "sfx/sonic3/59.asm"
+		even
+SfxS35A:	include "sfx/sonic3/5A.asm"
+		even
+SfxS35B:	include "sfx/sonic3/5B.asm"
+		even
+SfxS35C:	include "sfx/sonic3/5C.asm"
+		even
+SfxS35D:	include "sfx/sonic3/5D.asm"
+		even
+SfxS35E:	include "sfx/sonic3/5E.asm"
+		even
+SfxS35F:	include "sfx/sonic3/5F.asm"
+		even
+SfxS360:	include "sfx/sonic3/60.asm"
+		even
+SfxS361:	include "sfx/sonic3/61.asm"
+		even
+SfxS362:	include "sfx/sonic3/62.asm"
+		even
+SfxS363:	include "sfx/sonic3/63.asm"
+		even
+SfxS364:	include "sfx/sonic3/64.asm"
+		even
+SfxS365:	include "sfx/sonic3/65.asm"
+		even
+SfxS366:	include "sfx/sonic3/66.asm"
+		even
+SfxS367:	include "sfx/sonic3/67.asm"
+		even
+SfxS368:	include "sfx/sonic3/68.asm"
+		even
+SfxS369:	include "sfx/sonic3/69.asm"
+		even
+SfxS36A:	include "sfx/sonic3/6A.asm"
+		even
+SfxS36B:	include "sfx/sonic3/6B.asm"
+		even
+SfxS36D:	include "sfx/sonic3/6D.asm"
+		even
+SfxS36E:	include "sfx/sonic3/6E.asm"
+		even
+SfxS36F:	include "sfx/sonic3/6F.asm"	; shares sequence with CB
+		even
+CsfxS3CB:	include "sfx/sonic3/CB.asm"
+		even
+SfxS370:	include "sfx/sonic3/70.asm"
+		even
+SfxS372:	include "sfx/sonic3/72.asm"
+		even
+SfxS373:	include "sfx/sonic3/73.asm"
+		even
+SfxS374:	include "sfx/sonic3/74.asm"
+		even
+SfxS375:	include "sfx/sonic3/75.asm"
+		even
+SfxS376:	include "sfx/sonic3/76.asm"
+		even
+SfxS377:	include "sfx/sonic3/77.asm"
+		even
+SfxS378:	include "sfx/sonic3/78.asm"
+		even
+SfxS379:	include "sfx/sonic3/79.asm"
+		even
+SfxS37A:	include "sfx/sonic3/7A.asm"
+		even
+SfxS37B:	include "sfx/sonic3/7B.asm"
+		even
+SfxS37C:	include "sfx/sonic3/7C.asm"
+		even
+SfxS37D:	include "sfx/sonic3/7D.asm"
+		even
+SfxS37E:	include "sfx/sonic3/7E.asm"
+		even
+SfxS37F:	include "sfx/sonic3/7F.asm"
+		even
+SfxS380:	include "sfx/sonic3/80.asm"
+		even
+SfxS381:	include "sfx/sonic3/81.asm"
+		even
+SfxS382:	include "sfx/sonic3/82.asm"
+		even
+SfxS383:	include "sfx/sonic3/83.asm"
+		even
+SfxS384:	include "sfx/sonic3/84.asm"
+		even
+SfxS385:	include "sfx/sonic3/85.asm"
+		even
+SfxS386:	include "sfx/sonic3/86.asm"
+		even
+SfxS387:	include "sfx/sonic3/87.asm"
+		even
+SfxS388:	include "sfx/sonic3/88.asm"
+		even
+SfxS389:	include "sfx/sonic3/89.asm"
+		even
+SfxS38A:	include "sfx/sonic3/8A.asm"
+		even
+SfxS38B:	include "sfx/sonic3/8B.asm"
+		even
+SfxS38C:	include "sfx/sonic3/8C.asm"
+		even
+SfxS38D:	include "sfx/sonic3/8D.asm"
+		even
+SfxS38E:	include "sfx/sonic3/8E.asm"
+		even
+SfxS38F:	include "sfx/sonic3/8F.asm"
+		even
+SfxS390:	include "sfx/sonic3/90.asm"
+		even
+SfxS391:	include "sfx/sonic3/91.asm"
+		even
+SfxS392:	include "sfx/sonic3/92.asm"
+		even
+SfxS393:	include "sfx/sonic3/93.asm"
+		even
+SfxS394:	include "sfx/sonic3/94.asm"
+		even
+SfxS395:	include "sfx/sonic3/95.asm"
+		even
+SfxS396:	include "sfx/sonic3/96.asm"
+		even
+SfxS397:	include "sfx/sonic3/97.asm"
+		even
+SfxS398:	include "sfx/sonic3/98.asm"
+		even
+SfxS399:	include "sfx/sonic3/99.asm"
+		even
+SfxS39A:	include "sfx/sonic3/9A.asm"
+		even
+SfxS39B:	include "sfx/sonic3/9B (Sonic 3).asm"
+		even
+SfxSK9B:	include "sfx/sonic3/9B (Sonic & Knuckles).asm"
+		even
+SfxS39C:	include "sfx/sonic3/9C.asm"
+		even
+SfxS39D:	include "sfx/sonic3/9D.asm"
+		even
+SfxS39E:	include "sfx/sonic3/9E.asm"
+		even
+SfxS39F:	include "sfx/sonic3/9F.asm"
+		even
+SfxS3A0:	include "sfx/sonic3/A0.asm"
+		even
+SfxS3A1:	include "sfx/sonic3/A1.asm"
+		even
+SfxS3A2:	include "sfx/sonic3/A2.asm"
+		even
+SfxS3A3:	include "sfx/sonic3/A3.asm"
+		even
+SfxS3A4:	include "sfx/sonic3/A4.asm"
+		even
+SfxS3A5:	include "sfx/sonic3/A5.asm"
+		even
+SfxS3A6:	include "sfx/sonic3/A6.asm"
+		even
+SfxS3AD:	include "sfx/sonic3/AD (Sonic & Knuckles).asm"	; shares patch with A7
+		even
+SfxS3A7:	include "sfx/sonic3/A7.asm"
+		even
+SfxS3A8:	include "sfx/sonic3/A8.asm"
+		even
+SfxS3A9:	include "sfx/sonic3/A9.asm"
+		even
+SfxS3AA:	include "sfx/sonic3/AA.asm"
+		even
+SfxS3AB:	include "sfx/sonic3/AB.asm"
+		even
+SfxS3AC:	include "sfx/sonic3/AC.asm"
+		even
+SfxS3AE:	include "sfx/sonic3/AE.asm"
+		even
+SfxS3AF:	include "sfx/sonic3/AF.asm"
+		even
+SfxS3B0:	include "sfx/sonic3/B0.asm"
+		even
+SfxS3B1:	include "sfx/sonic3/B1.asm"
+		even
+SfxS3B2:	include "sfx/sonic3/B2.asm"
+		even
+SfxS3B3:	include "sfx/sonic3/B3.asm"
+		even
+SfxS3B4:	include "sfx/sonic3/B4.asm"
+		even
+SfxS3B5:	include "sfx/sonic3/B5.asm"
+		even
+SfxS3B6:	include "sfx/sonic3/B6.asm"
+		even
+SfxS3B7:	include "sfx/sonic3/B7.asm"
+		even
+SfxS3B8:	include "sfx/sonic3/B8.asm"
+		even
+SfxS3BB:	include "sfx/sonic3/BB.asm"	; shares patch with BA
+		even
+SfxS3BA:	include "sfx/sonic3/BA.asm"
+		even
+
+CsfxS3C8:	include "sfx/sonic3/C8.asm"	; shares patch with BC
+		even
+CsfxS3BC:	include "sfx/sonic3/BC.asm"
+		even
+CsfxS3BD:	include "sfx/sonic3/BD.asm"
+		even
+CsfxS3BE:	include "sfx/sonic3/BE.asm"
+		even
+CsfxS3BF:	include "sfx/sonic3/BF.asm"
+		even
+CsfxS3C0:	include "sfx/sonic3/C0.asm"
+		even
+CsfxS3C1:	include "sfx/sonic3/C1.asm"
+		even
+CsfxS3C2:	include "sfx/sonic3/C2.asm"
+		even
+CsfxS3C3:	include "sfx/sonic3/C3.asm"
+		even
+CsfxS3C4:	include "sfx/sonic3/C4.asm"
+		even
+CsfxS3C5:	include "sfx/sonic3/C5.asm"
+		even
+CsfxS3C6:	include "sfx/sonic3/C6.asm"
+		even
+CsfxS3C7:	include "sfx/sonic3/C7.asm"
+		even
+CsfxS3C9:	include "sfx/sonic3/C9.asm"
+		even
+CsfxS3CA:	include "sfx/sonic3/CA.asm"
+		even
+CsfxS3CC:	include "sfx/sonic3/CC.asm"
+		even
+CsfxS3CD:	include "sfx/sonic3/CD.asm"
+		even
+CsfxS3CF:	include "sfx/sonic3/CF.asm"	; shares patch with CE
+		even
+CsfxS3CE:	include "sfx/sonic3/CE.asm"
+		even
+CsfxS3D0:	include "sfx/sonic3/D0.asm"
+		even
+CsfxS3D1:	include "sfx/sonic3/D1.asm"
+		even
+CsfxS3D2:	include "sfx/sonic3/D2.asm"
+		even
+CsfxS3D3:	include "sfx/sonic3/D3.asm"
+		even
+CsfxS3D4:	include "sfx/sonic3/D4.asm"
+		even
+CsfxS3D5:	include "sfx/sonic3/D5.asm"
+		even
+CsfxS3D6:	include "sfx/sonic3/D6.asm"
+		even
+CsfxS3D7:	include "sfx/sonic3/D7.asm"
+		even
+CsfxS3D8:	include "sfx/sonic3/D8.asm"
+		even
+CsfxS3D9:	include "sfx/sonic3/D9.asm"
+		even
+CsfxS3DA:	include "sfx/sonic3/DA.asm"
+		even
+CsfxS3DB:	include "sfx/sonic3/DB.asm"
+		even
+
 ; ---------------------------------------------------------------------------
 ; Music data
 ; ---------------------------------------------------------------------------
