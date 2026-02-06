@@ -240,7 +240,7 @@ Snd_LBZ1_Call0A:
 ; PSG2 Data
 Snd_LBZ1_PSG2:
 	dc.b	nRst, $01
-	smpsModChange       $01
+	smpsModChange       mEnv_01
 	smpsJump            Snd_LBZ1_PSG1
 
 ; DAC Data

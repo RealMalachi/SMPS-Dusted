@@ -291,7 +291,7 @@ Snd_CNZ1_Call01:
 Snd_CNZ1_PSG1:
 	smpsNoteFill        $06
 	smpsPSGvoice        sTone_05
-	smpsModChange       $02
+	smpsModChange       mEnv_02
 	dc.b	nRst, $0C, nG4, $18, nG4, nG4, nG4, $0C
 	smpsLoop            $00, $03, Snd_CNZ1_PSG1
 	dc.b	nRst, $60
@@ -325,7 +325,7 @@ Snd_CNZ1_Loop17:
 ; PSG2 Data
 Snd_CNZ1_PSG2:
 	smpsPSGvoice        sTone_12
-	smpsModChange       $02
+	smpsModChange       mEnv_02
 	smpsNoteFill        $06
 	dc.b	nC4, $0C, nE4, nG3, nE4, nC4, nE4, nG3, nE4
 	smpsLoop            $00, $03, Snd_CNZ1_PSG2

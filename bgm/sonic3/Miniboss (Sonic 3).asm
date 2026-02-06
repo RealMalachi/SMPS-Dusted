@@ -255,19 +255,19 @@ Snd_S3_Miniboss_Loop00:
 	smpsJump            Snd_S3_Miniboss_FM3
 
 Snd_S3_Miniboss_Call00:
-	smpsModChange       $07
+	smpsModChange       mEnv_07
 	dc.b	nEb4, $0C
-	smpsModChange       $08
+	smpsModChange       mEnv_08
 	dc.b	nD4, nEb4, nF4, nEb4, nF4
-	smpsModChange       $07
+	smpsModChange       mEnv_07
 	dc.b	nFs4
-	smpsModChange       $08
+	smpsModChange       mEnv_08
 	dc.b	nF4, nFs4, $07, nRst, $05
-	smpsModChange       $07
+	smpsModChange       mEnv_07
 	dc.b	nAb4, $0C
-	smpsModChange       $08
+	smpsModChange       mEnv_08
 	dc.b	nFs4, nAb4
-	smpsModChange       $07
+	smpsModChange       mEnv_07
 	dc.b	nA4
 	smpsModSet          $01, $01, $01, $08
 	dc.b	nAb4, nA4, nBb4, $0C, smpsNoAttack, $60
@@ -279,19 +279,19 @@ Snd_S3_Miniboss_Call01:
 	smpsReturn
 
 Snd_S3_Miniboss_Call02:
-	smpsModChange       $06
+	smpsModChange       mEnv_06
 	dc.b	nBb4, $0C
 	smpsModOff
 	dc.b	nAb4, $07, nBb4, $05
-	smpsModChange       $06
+	smpsModChange       mEnv_06
 	dc.b	nAb4, $0C
 	smpsModOff
 	dc.b	nFs4, $07, nAb4, $05
-	smpsModChange       $06
+	smpsModChange       mEnv_06
 	dc.b	nFs4, $0C
 	smpsModOff
 	dc.b	nF4, $07, nFs4, $05
-	smpsModChange       $06
+	smpsModChange       mEnv_06
 	dc.b	nF4, $0C
 	smpsModOff
 	dc.b	nEb4, $05, nRst, $07
@@ -374,7 +374,7 @@ Snd_S3_Miniboss_PSG1:
 	smpsPSGAlterVol     $F6
 	smpsModSet          $05, $01, $13, $0E
 	dc.b	nAb3, $0C
-	smpsModChange       $04
+	smpsModChange       mEnv_04
 	dc.b	nRst, $07, nFs3, $05, nRst, $0C, nEb3, $13
 	smpsModOff
 	dc.b	nEb3, $05, nFs3, $07, nAb3, $05, nRst, $24, nRst, $1F, nBb3, $05
@@ -386,7 +386,7 @@ Snd_S3_Miniboss_PSG1:
 	dc.b	nBb3, nFs3, nA3, nAb3, nFs3, nEb3, nRst, $18
 	smpsModSet          $01, $01, $F1, $71
 	dc.b	nAb2
-	smpsModChange       $04
+	smpsModChange       mEnv_04
 	smpsAlterPitch      $F4
 	dc.b	nRst, $0C, nEb4, $05, nRst, $07, nEb4, $05, nRst, $07, nEb4, $05
 	dc.b	nRst, $07, nEb4, $05, nRst, $07, nEb4, $05, nRst, $07, nEb4, nFs4
