@@ -1024,13 +1024,14 @@ SMPS_UVB_FM:
 ; ---------------------------------------------------------------------------
 ; Music	index
 ; index start: "START" keyword, first song id
-; song index: jingle flag, PAL speed adjustment disable, water muffle disable,song data pointer, song data id
+; song index: jingle flag, PAL speed adjustment disable, water muffle disable, song data pointer, song data id
 ; index end: "END" keyword, last song id
 ; ---------------------------------------------------------------------------
 SMPS_MusicIndex:
 	musdef START,bgm__First
 	musdef 0,0,0,BgmTest,bgm_Test
 	musdef 0,0,0,BgmSoccer,bgm_Soccer
+	musdef 0,0,0,BgmSCDTimeTravel,bgm_SCDTimeTravel
 
 	musdef 0,0,0,BgmS1Title,bgm_S1Title
 	musdef 0,0,0,BgmS1GHZ,bgm_S1GHZ
@@ -1205,6 +1206,8 @@ SMPS_SoundIndex:
 	sfxdef $00,0,0,0,SfxFlickyGrab,sfx_FlickyGrab
 	sfxdef $00,0,0,0,SfxSpindash,sfx_Spindash
 	sfxdef $00,0,0,0,SfxSpikeMove,sfx_SpikeMove
+	sfxdef $00,0,0,0,SfxSkidPSG,sfx_SkidPSG
+	sfxdef $00,0,0,0,SfxSkidFM,sfx_SkidFM
 
 	sfxdef $00,0,0,0,SfxS1A0,sfx_S1Jump
 	sfxdef $70,0,0,0,SfxS1A1,sfx_S1Lamppost
@@ -1356,6 +1359,86 @@ SMPS_SoundIndex:
 	sfxdef $00,0,0,0,SfxS2BDF,sfx_S2BDF
 	sfxdef $00,0,0,0,SfxS2BE0,sfx_S2BE0
 
+	sfxdef $7A,0,0,0,SfxCdSKID,	sfx_CdSKID
+	sfxdef $7A,0,0,0,SfxCd91,	sfx_Cd91
+	sfxdef $7A,0,0,0,SfxCdJUMP,	sfx_CdJUMP
+	sfxdef $7D,0,0,0,SfxCdHURT,	sfx_CdHURT
+	sfxdef $7D,0,0,0,SfxCdRINGLOSS,	sfx_CdRINGLOSS
+	sfxdef $70,0,0,0,SfxCdRING,	sfx_CdRING
+	sfxdef $70,0,0,0,SfxCdDESTROY,	sfx_CdDESTROY
+	sfxdef $7A,0,0,0,SfxCdSHIELD,	sfx_CdSHIELD
+	sfxdef $70,0,0,0,SfxCdSPRING,	sfx_CdSPRING
+	sfxdef $6D,0,0,0,SfxCd99,	sfx_Cd99
+	sfxdef $7D,0,0,0,SfxCdKACHING,	sfx_CdKACHING
+	sfxdef $7A,0,0,0,SfxCd9B,	sfx_Cd9B
+	sfxdef $7A,0,0,0,SfxCd9C,	sfx_Cd9C
+	sfxdef $70,0,0,0,SfxCdSIGNPOST,	sfx_CdSIGNPOST
+	sfxdef $7A,0,0,0,SfxCdEXPLODE,	sfx_CdEXPLODE
+	sfxdef $6D,0,0,0,SfxCd9F,	sfx_Cd9F
+	sfxdef $70,0,0,0,SfxCdA0,	sfx_CdA0
+	sfxdef $6D,0,0,0,SfxCdA1,	sfx_CdA1
+	sfxdef $70,0,0,0,SfxCdA2,	sfx_CdA2
+	sfxdef $70,0,0,0,SfxCdA3,	sfx_CdA3
+	sfxdef $6D,0,0,0,SfxCdA4,	sfx_CdA4
+	sfxdef $6D,0,0,0,SfxCdA5,	sfx_CdA5
+	sfxdef $6D,0,0,0,SfxCdA6,	sfx_CdA6
+	sfxdef $70,0,0,0,SfxCdA7,	sfx_CdA7
+	sfxdef $70,0,0,0,SfxCdRINGL,	sfx_CdRINGL
+	sfxdef $7D,0,0,0,SfxCdA9,	sfx_CdA9
+	sfxdef $70,0,0,0,SfxCdAA,	sfx_CdAA
+	sfxdef $7D,0,0,0,SfxCdCHARGESTOP,sfx_CdCHARGESTOP
+	sfxdef $70,0,0,0,SfxCdAC,	sfx_CdAC
+	sfxdef $7D,0,0,0,SfxCdAD,	sfx_CdAD
+	sfxdef $7A,0,0,0,SfxCdCHECKPOINT,sfx_CdCHECKPOINT
+	sfxdef $7A,0,0,0,SfxCdBIGRING,	sfx_CdBIGRING
+	sfxdef $70,0,0,0,SfxCdB0,	sfx_CdB0
+	sfxdef $70,0,0,0,SfxCdB1,	sfx_CdB1
+	sfxdef $70,0,0,0,SfxCdB2,	sfx_CdB2
+	sfxdef $6D,0,0,0,SfxCdB3,	sfx_CdB3
+	sfxdef $70,0,0,0,SfxCdB4,	sfx_CdB4
+	sfxdef $70,0,0,0,SfxCdB5,	sfx_CdB5
+	sfxdef $7A,0,0,0,SfxCdB6,	sfx_CdB6
+	sfxdef $70,0,0,0,SfxCdB7,	sfx_CdB7
+	sfxdef $7D,0,0,0,SfxCdB8,	sfx_CdB8
+	sfxdef $7D,0,0,0,SfxCdB9,	sfx_CdB9
+	sfxdef $6A,0,0,0,SfxCdBA,	sfx_CdBA
+	sfxdef $6D,0,0,0,SfxCdBB,	sfx_CdBB
+	sfxdef $7D,0,0,0,SfxCdBC,	sfx_CdBC
+	sfxdef $6D,0,0,0,SfxCdTALLY,	sfx_CdTALLY
+	sfxdef $6D,0,0,0,SfxCdBE,	sfx_CdBE
+	sfxdef $6D,0,0,0,SfxCdBF,	sfx_CdBF
+	sfxdef $70,0,0,0,SfxCdC0,	sfx_CdC0
+	sfxdef $70,0,0,0,SfxCdC1,	sfx_CdC1
+	sfxdef $70,0,0,0,SfxCdC2,	sfx_CdC2
+	sfxdef $7A,0,0,0,SfxCdC3,	sfx_CdC3
+	sfxdef $70,0,0,0,SfxCdC4,	sfx_CdC4
+	sfxdef $70,0,0,0,SfxCdC5,	sfx_CdC5
+	sfxdef $70,0,0,0,SfxCdC6,	sfx_CdC6
+	sfxdef $70,0,0,0,SfxCdC7,	sfx_CdC7
+	sfxdef $7D,0,0,0,SfxCdSSWARP,	sfx_CdSSWARP
+	sfxdef $70,0,0,0,SfxCdC9,	sfx_CdC9
+	sfxdef $70,0,0,0,SfxCdCA,	sfx_CdCA
+	sfxdef $6D,0,0,0,SfxCdCB,	sfx_CdCB
+	sfxdef $6D,0,0,0,SfxCdCC,	sfx_CdCC
+	sfxdef $70,0,0,0,SfxCdCD,	sfx_CdCD
+	sfxdef $7A,0,0,0,SfxCdCE,	sfx_CdCE
+	sfxdef $70,0,0,0,SfxCdCF,	sfx_CdCF
+	sfxdef $6D,0,0,0,SfxCdD0,	sfx_CdD0
+	sfxdef $6D,0,0,0,SfxCdD1,	sfx_CdD1
+	sfxdef $7A,0,0,0,SfxCdD2,	sfx_CdD2
+	sfxdef $70,0,0,0,SfxCdD3,	sfx_CdD3
+	sfxdef $70,0,0,0,SfxCdD4,	sfx_CdD4
+	sfxdef $6D,0,0,0,SfxCdD5,	sfx_CdD5
+	sfxdef $6A,0,0,0,SfxCdD6,	sfx_CdD6
+	sfxdef $6D,0,0,0,SfxCdD7,	sfx_CdD7
+	sfxdef $70,0,0,0,SfxCdD9,	sfx_CdD9
+	sfxdef $70,0,0,0,SfxCdDA,	sfx_CdDA
+	sfxdef $70,0,0,0,SfxCdDB,	sfx_CdDB
+	sfxdef $70,0,0,0,SfxCdDC,	sfx_CdDC
+	sfxdef $70,0,0,0,SfxCdDD,	sfx_CdDD
+	sfxdef $70,0,0,0,SfxCdDE,	sfx_CdDE
+	sfxdef $00,0,0,0,SfxCdDF,	sfx_CdDF
+
 	sfxdef END,sfx__Last
 SMPS_SoundIndex_Exit:
 	even
@@ -1476,6 +1559,10 @@ SfxFlickyGrab:	include "sfx/Flicky Grab Jingle.asm"
 SfxSpindash:	include "sfx/Spin Dash Rev.asm"
 		even
 SfxSpikeMove:	include "sfx/Spike Move.asm"
+		even
+SfxSkidPSG:	include "sfx/Skid PSG.asm"
+		even
+SfxSkidFM:	include "sfx/Skid FM.asm"
 		even
 
 SfxS1A0:	include "sfx/sonic1/SndA0 - Jump.asm"
@@ -1775,12 +1862,172 @@ SfxS2BDF:	include "sfx/sonic2-wai/DF - Super Transform.asm"
 SfxS2BE0:	include "sfx/sonic2-wai/E0 - Spin Dash Rev.asm"
 		even
 
+SfxCdSKID:	include "sfx/soniccd/90 - Skid.asm"
+		even
+SfxCd91:	include "sfx/soniccd/91.asm"
+		even
+SfxCdJUMP:	include "sfx/soniccd/92 - Jump.asm"
+		even
+SfxCdHURT:	include "sfx/soniccd/93 - Hurt.asm"
+		even
+SfxCdRINGLOSS:	include "sfx/soniccd/94 - Ring Loss.asm"
+		even
+SfxCdRING:	include "sfx/soniccd/95 - Ring Right.asm"
+		even
+SfxCdDESTROY:	include "sfx/soniccd/96 - Destroy.asm"
+		even
+SfxCdSHIELD:	include "sfx/soniccd/97 - Shield.asm"
+		even
+SfxCdSPRING:	include "sfx/soniccd/98 - Spring.asm"
+		even
+SfxCd99:	include "sfx/soniccd/99.asm"
+		even
+SfxCdKACHING:	include "sfx/soniccd/9A - Kaching.asm"
+		even
+SfxCd9B:	include "sfx/soniccd/9B.asm"
+		even
+SfxCd9C:	include "sfx/soniccd/9C.asm"
+		even
+SfxCdSIGNPOST:	include "sfx/soniccd/9D - Signpost.asm"
+		even
+SfxCdEXPLODE:	include "sfx/soniccd/9E - Explode.asm"
+		even
+SfxCd9F:	include "sfx/soniccd/9F.asm"
+		even
+SfxCdA0:	include "sfx/soniccd/A0.asm"
+		even
+SfxCdA1:	include "sfx/soniccd/A1.asm"
+		even
+SfxCdA2:	include "sfx/soniccd/A2.asm"
+		even
+SfxCdA3:	include "sfx/soniccd/A3.asm"
+		even
+SfxCdA4:	include "sfx/soniccd/A4.asm"
+		even
+SfxCdA5:	include "sfx/soniccd/A5.asm"
+		even
+SfxCdA6:	include "sfx/soniccd/A6.asm"
+		even
+SfxCdA7:	include "sfx/soniccd/A7.asm"
+		even
+SfxCdRINGL:	include "sfx/soniccd/A8 - Ring Left.asm"
+		even
+SfxCdA9:	include "sfx/soniccd/A9 - Null.asm"
+		even
+SfxCdCHARGESTOP:include "sfx/soniccd/AB - Charge Stop.asm"	; shares patch with AA
+		even
+SfxCdAA:	include "sfx/soniccd/AA.asm"
+		even
+SfxCdAC:	include "sfx/soniccd/AC.asm"
+		even
+SfxCdAD:	include "sfx/soniccd/AD.asm"
+		even
+SfxCdCHECKPOINT:include "sfx/soniccd/AE - Checkpoint.asm"
+		even
+SfxCdBIGRING:	include "sfx/soniccd/AF - Big Ring.asm"
+		even
+SfxCdB0:	include "sfx/soniccd/B0.asm"
+		even
+SfxCdB1:	include "sfx/soniccd/B1.asm"
+		even
+SfxCdB2:	include "sfx/soniccd/B2.asm"
+		even
+SfxCdB3:	include "sfx/soniccd/B3.asm"
+		even
+SfxCdB4:	include "sfx/soniccd/B4.asm"
+		even
+SfxCdB5:	include "sfx/soniccd/B5.asm"
+		even
+SfxCdB6:	include "sfx/soniccd/B6.asm"
+		even
+SfxCdB7:	include "sfx/soniccd/B7.asm"
+		even
+SfxCdB8:	include "sfx/soniccd/B8.asm"
+		even
+SfxCdB9:	include "sfx/soniccd/B9.asm"
+		even
+SfxCdBA:	include "sfx/soniccd/BA.asm"
+		even
+SfxCdBB:	include "sfx/soniccd/BB.asm"
+		even
+SfxCdBC:	include "sfx/soniccd/BC.asm"
+		even
+SfxCdTALLY:	include "sfx/soniccd/BD - Tally.asm"
+		even
+SfxCdBE:	include "sfx/soniccd/BE.asm"
+		even
+SfxCdBF:	include "sfx/soniccd/BF.asm"
+		even
+SfxCdC0:	include "sfx/soniccd/C0.asm"
+		even
+SfxCdC1:	include "sfx/soniccd/C1.asm"
+		even
+SfxCdC2:	include "sfx/soniccd/C2.asm"
+		even
+SfxCdC3:	include "sfx/soniccd/C3.asm"
+		even
+SfxCdC4:	include "sfx/soniccd/C4.asm"
+		even
+SfxCdC5:	include "sfx/soniccd/C5.asm"
+		even
+SfxCdC6:	include "sfx/soniccd/C6.asm"
+		even
+SfxCdC7:	include "sfx/soniccd/C7.asm"
+		even
+SfxCdSSWARP:	include "sfx/soniccd/C8 - SS Warp.asm"
+		even
+SfxCdC9:	include "sfx/soniccd/C9.asm"
+		even
+SfxCdCA:	include "sfx/soniccd/CA.asm"
+		even
+SfxCdCB:	include "sfx/soniccd/CB.asm"
+		even
+SfxCdCC:	include "sfx/soniccd/CC.asm"
+		even
+SfxCdCD:	include "sfx/soniccd/CD.asm"
+		even
+SfxCdCE:	include "sfx/soniccd/CE.asm"
+		even
+SfxCdCF:	include "sfx/soniccd/CF.asm"
+		even
+SfxCdD0:	include "sfx/soniccd/D0.asm"
+		even
+SfxCdD1:	include "sfx/soniccd/D1.asm"
+		even
+SfxCdD2:	include "sfx/soniccd/D2.asm"
+		even
+SfxCdD3:	include "sfx/soniccd/D3.asm"
+		even
+SfxCdD4:	include "sfx/soniccd/D4.asm"
+		even
+SfxCdD5:	include "sfx/soniccd/D5.asm"
+		even
+SfxCdD6:	include "sfx/soniccd/D6.asm"
+		even
+SfxCdD7:	include "sfx/soniccd/D7.asm"
+		even
+SfxCdD9:	include "sfx/soniccd/D9.asm"
+		even
+SfxCdDA:	include "sfx/soniccd/DA.asm"
+		even
+SfxCdDB:	include "sfx/soniccd/DB.asm"
+		even
+SfxCdDC:	include "sfx/soniccd/DC.asm"
+		even
+SfxCdDD:	include "sfx/soniccd/DD.asm"
+		even
+SfxCdDE:	include "sfx/soniccd/DE.asm"
+		even
+SfxCdDF:	include "sfx/soniccd/DF.asm"
+		even
 ; ---------------------------------------------------------------------------
 ; Music data
 ; ---------------------------------------------------------------------------
 BgmTest:	include "bgm/_tester.asm"
 		even
 BgmSoccer:	include "bgm/MDSoccer-Title.asm"
+		even
+BgmSCDTimeTravel:	include "bgm/CD Time Travel.asm"
 		even
 
 BgmS1Title:	include "bgm/sonic1/S1-Title.asm"

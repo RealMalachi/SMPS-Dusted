@@ -74,7 +74,7 @@ nMaxPSG2	equ	nB6
 cFM3		equ	$02
 cFM4		equ	$04
 cFM5		equ	$05
-cFM6		equ	$06	; overrides PCM
+;cFM6		equ	$06
 cPSG1		equ	$80
 cPSG2		equ	$A0
 cPSG3		equ	$C0
@@ -665,8 +665,8 @@ smpsMaxRelRate macro
 	smpsFMICommand $8C,$0F
 	endm
 ; Fade in previous song from a jingle (1up)
-; in smps-dusted, val defines the fadein counter, if not defined then it uses the default
-; in smps-68000, val doesn't exist, simple
+; in smps-dusted, val defines the fadein counter, if not defined then it uses the default value
+; in smps-68000, val doesn't exist and it always uses the default value, simple
 ; in smps-z80... nobody has even the slightest clue what they were on, but it was evidently some good shit
 ; - val $FF is the fade-in
 ; - val $29 (the hardcoded 1up ID -1) acts as the 1up signifier flag, prevent sfx playback and such
@@ -770,8 +770,22 @@ smpsPSGpulse macro
 	endif
 	smpsPSGform 0
 	endm
+; DEVON NOOO-
+smpsSlideSpeed macro val
+	smpsDetune val
+	endm
 ; ---------------------------------------------------------------------------
 ; unsupported with no interest to support
+smpsRingSwap macro
+	if MOMPASS==1
+	warning "smpsRingSwap is unsupported"
+	endif
+	endm
+smpsConditionalJumpCD macro
+	if MOMPASS==1
+	warning "smpsConditionalJumpCD is unsupported"
+	endif
+	endm
 smpsClearPush macro
 	if MOMPASS==1
 	warning "smpsClearPush is unsupported"
