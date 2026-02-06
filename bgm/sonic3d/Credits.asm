@@ -592,7 +592,7 @@ Snd_Credits_Call08:
 
 Snd_Credits_Call05:
 	smpsPSGvoice        sTone_0F
-	dc.b	$0C, $0C
+	dc.b	(nMaxPSG2-$23)&$FF, $0C, $0C
 	smpsPSGvoice        sTone_12
 	dc.b	$0C
 	smpsPSGvoice        sTone_0F

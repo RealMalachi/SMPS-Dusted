@@ -34,14 +34,19 @@ smps-dusted mutes psg3 when switching to psgnoise, then mutes psgnoise when swit
 note nB7 (0xE0) and nBs7 (0xE1) cannot be played without detuning, due to commands starting at 0xE0, thus overriding them... aside for on Clone Driver, where commands start at 0xFE.
 
 note-rest-time-time acts oddly on smps-z80
-on smps-68k, the note plays for the last saved time, rest occurs for the new time, next time also rests. this is the de-facto standard.
-on smps-z80, the note plays for the last saved time, rest occurs for the new time, next time plays the previous note
-smps-dusted follows smps-68k logic
+- on smps-68k, the note plays for the last saved time, rest occurs for the new time, next time also rests. this is the de-facto standard.
+- on smps-z80, the note plays for the last saved time, rest occurs for the new time, next time plays the previous note
+- smps-dusted follows smps-68k logic
 
 rest on PCM is inconsistent
 - on smps-68k it doesn't stop the dac, but it's common to see drivers add that feature
 - on smps-z80 it doesn't stop the dac
 - on smps-dusted it stops the dac
+
+default channel frequencies are weird
+- smps-68000 and smps-z80 defaults frequencies to 0 (mute for FM, max for PSG)
+- smps-dusted defaults frequencies to muted
+stock sonic 3d blasts credits theme erroneously relies on the max default for PSG3
 
 ## smps-dusted features
 smps-dusted supports additional features that no others possess
