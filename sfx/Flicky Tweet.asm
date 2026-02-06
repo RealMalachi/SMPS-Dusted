@@ -4,7 +4,7 @@ Flicky_Header:
 	smpsHeaderTempoSFX	$01
 	smpsHeaderChanSFX	$01
 
-	smpsHeaderSFXChannel	cFM5, Flicky_FM5, $00, $0D
+	smpsHeaderSFXChannel	cFM4, Flicky_FM5, $00, $0D
 
 ; FM5 Data
 Flicky_FM5:
