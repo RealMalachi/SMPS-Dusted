@@ -44,7 +44,7 @@
 ; Clone Driver - Functions modules
 ; ---------------------------------------------------------------------------
 
-		include "Sound/Engine/Functions.asm"
+		include "Sound/Functions.asm"
 
 ; ---------------------------------------------------------------------------
 ; Fading palettes modules
@@ -406,16 +406,10 @@
 		include "Data/Uncompressed Data.asm"
 
 ; ---------------------------------------------------------------------------
-; Vladikcomper's Mega PCM 2.0 - DAC Sound Driver
+; SMPS-Dusted sound driver module
 ; ---------------------------------------------------------------------------
 
-		include "Sound/Engine/MegaPCM.asm"
-
-; ---------------------------------------------------------------------------
-; Clone sound driver modules
-; ---------------------------------------------------------------------------
-
-		include "Sound/Engine/Sonic 2 Clone Driver v2.asm"
+		include "Sound/Driver.asm"
 
 	if MSUMode
 

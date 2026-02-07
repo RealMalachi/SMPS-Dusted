@@ -148,7 +148,7 @@ Obj_LevelResults:
 
 		; check timer
 		cmpi.w	#5*60-11,objoff_2E(a0)
-		bne.s	.return2							; play after eh, a second or so
+		bne.s	.return							; play after eh, a second or so
 		moveq	#30,d0
 		move.b	d0,(Player_1+air_left).w					; reset air p1
 		move.b	d0,(Player_2+air_left).w					; reset air p2

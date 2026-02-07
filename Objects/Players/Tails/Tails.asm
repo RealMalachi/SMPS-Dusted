@@ -1369,7 +1369,7 @@ loc_1469C:
 
 loc_146BA:
 		bclr	#status.player.underwater,status(a0)
-		beq.s	locret_14638
+		beq.w	locret_14638
 		addq.b	#1,(Water_entered_counter).w
 		movea.w	a0,a1
 		bsr.w	Player_ResetAirTimer

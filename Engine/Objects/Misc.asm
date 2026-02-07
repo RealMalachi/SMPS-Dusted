@@ -238,8 +238,8 @@ Obj_Song_Fade_Transition:
 ; ---------------------------------------------------------------------------
 
 .wait
-		tst.b	(Clone_Driver_RAM+SMPS_RAM.variables.v_fadeout_counter).w
-		bne.s	.return
+	;	tst.b	(Clone_Driver_RAM+SMPS_RAM.variables.v_fadeout_counter).w
+	;	bne.s	.return
 		move.b	subtype(a0),d0
 		move.b	d0,(Current_music+1).w
 		bsr.w	Play_Music							; play music
@@ -256,8 +256,8 @@ Obj_Song_Fade_ToLevelMusic:
 ; ---------------------------------------------------------------------------
 
 .wait
-		tst.b	(Clone_Driver_RAM+SMPS_RAM.variables.v_fadeout_counter).w
-		bne.s	.return
+	;	tst.b	(Clone_Driver_RAM+SMPS_RAM.variables.v_fadeout_counter).w
+	;	bne.s	.return
 		bsr.s	Restore_LevelMusic
 		bra.w	Delete_Current_Object
 
