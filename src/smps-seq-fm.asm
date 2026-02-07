@@ -9,6 +9,7 @@ FMUpdateTrack:
 		btst	#_resting,TrackPlaybackControl(a5)
 		bne.s	.locret
 		bsr.w	DoVolEnv				; bsr is necessary for stack reasons, see `VolEnvCommands`
+		bsr.w	DoPanEnv				; bsr is necessary for stack reasons
 		bsr.w	FMPrepareNote
 		bra.w	FMNoteOn
 ; ---------------------------------------------------------------------------
@@ -16,6 +17,7 @@ FMUpdateTrack:
 		bne.s	.locret
 		bsr.w	NoteTimeoutUpdate			; bsr is necessary for stack reasons
 		bsr.w	UpdateVolume				; bsr is necessary for stack reasons, see `VolEnvCommands`
+		bsr.w	UpdatePanning				; bsr is necessary for stack reasons
 		bsr.w	DoModulation
 		bra.w	FMUpdateFreq
 ; ---------------------------------------------------------------------------

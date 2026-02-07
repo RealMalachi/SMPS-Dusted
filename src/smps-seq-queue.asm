@@ -431,21 +431,10 @@ Sound_PlayBGM:
 		clr.b	TrackVolEnvCtrl(a5)
 		move.b	queue_volenvptr+1(a1),TrackVolEnvPtr+1(a5)
 		move.w	queue_volenvptr+2(a1),TrackVolEnvPtr+2(a5)
-
-		moveq	#$3F,d0
-		and.b	TrackVoiceControl(a5),d0
-		bsr.w	DACStopSample				; TODO: all this doesn't check for SFX PCM
-
 		move.b	#$C0,TrackAMSFMSPan(a5)			; Set AMS/FMS/Panning
 		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
-;		move.b	TrackAMSFMSPan(a5),d1
-;		btst	#5,v_driverflags(a6)
-;		beq.s	.dacstereo
-;		or.b	#$C0,d1
-		moveq_	$C0,d1
-.dacstereo:	bsr.w	DACSetPan 
-
+		bsr.w	DACStopSample
 		add.w	#TrackDacSz,a5
 		dbf	d7,.dacloadloop
 	if __smpsPCM<>"MegaPCM2"
@@ -519,14 +508,6 @@ Sound_PlayBGM:
 		move.w	queue_fminstptr+2(a1),TrackFmVoicePtr+2(a5)
 		move.b	#$C0,TrackAMSFMSPan(a5)			; Set AMS/FMS/Panning
 		bsr.w	FMSilence
-		moveq_	$B4,d0					; Register for AMS/FMS/Panning
-		moveq_	$C0,d1					; Set pan
-;		move.b	TrackAMSFMSPan(a5),d1			; Value to send
-;		btst	#5,v_driverflags(a6)
-;		beq.s	.fmstereo
-;		or.b	#$C0,d1
-.fmstereo:	bsr.w	WriteFMIorIIMain
-
 		add.w	#TrackFmSz,a5
 		dbf	d7,.fmloadloop
 .fmdone:
@@ -768,41 +749,22 @@ Sound_PlaySFX_Setup:
 .dofm:
 		moveq	#(TrackFmSz/2)-1,d1
 		bsr.s	.do
-
+		move.b	#$C0,TrackAMSFMSPan(a5)
 		move.b	queue_fminstptr+1(a1),TrackFmVoicePtr+1(a5)
 		move.w	queue_fminstptr+2(a1),TrackFmVoicePtr+2(a5)
-		move.b	#$C0,TrackAMSFMSPan(a5)
-;		bsr.w	FMSilence
-		moveq_	$B4,d0					; Register for AMS/FMS/Panning
-		moveq_	$C0,d1					; Set panning
-;		move.b	TrackAMSFMSPan(a5),d1			; Value to send
-;		btst	#5,v_driverflags(a6)
-;		beq.s	.fmstereo
-;		or.b	#$C0,d1
-.fmstereo:	bra.w	WriteFMIorIIMain
-
+;		bra.w	FMSilence
+		rts
 .dodac:
 		moveq	#(TrackDacSz/2)-1,d1
 		bsr.s	.do
-
-		moveq	#$3F,d0
-		and.b	TrackVoiceControl(a5),d0
-		bsr.w	DACStopSample
-
 		move.b	#$C0,TrackAMSFMSPan(a5)
 		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
-;		move.b	TrackAMSFMSPan(a5),d1
-;		btst	#5,v_driverflags(a6)
-;		beq.s	.dacstereo
-;		or.b	#$C0,d1
-		moveq_	$C0,d1					; Set panning
-.dacstereo:	bra.w	DACSetPan
-
+		bra.w	DACStopSample
 .dopsg:
 		moveq	#(TrackPsgSz/2)-1,d1
 		bsr.s	.do
-
+;		bra.w	PSGSilence
 		cmp.b	#$C0,d2
 		blo.s	.psg34
 		move.b	#$DF,(psginput).l

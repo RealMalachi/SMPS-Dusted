@@ -447,6 +447,25 @@ GetVolume:
 .nocap:
 		rts
 ; ===========================================================================
+UpdatePanning:
+		btst	#5,v_driverflags(a6)
+		bne.s	.mono
+		move.b	TrackAMSFMSPan(a5),d1
+		move.b	TrackVoiceControl(a5),d2
+		add.b	d2,d2
+		bmi.s	.pcm
+.fm:		moveq_	$B4,d0				; Command to set AMS/FMS/panning
+		bra.w	WriteFMIorIIMain
+.pcm:		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
+		bra.w	DACSetPan
+.mono:		rts
+; ---------------------------------------------------------------------------
+DoPanEnv:
+;		btst	#5,v_driverflags(a6)
+;		bne.s	.mono
+.mono:		rts
+; ===========================================================================
 ; handle control flags 
 CoordFlag:
 		subi.w	#$E0,d5
