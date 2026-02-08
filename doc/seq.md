@@ -3,11 +3,11 @@
 
 
 sequences contain resting times, notes, and control flags.
-$00     | reserved (invalid time in stock smps)
-$01-$7F | note/rest time
-$80     | note rest
-$81-$DF | notes
-$E0-$FF | control flags
+| $00     | reserved (invalid time in stock smps) |
+| $01-$7F | note/rest time |
+| $80     | rest |
+| $81-$DF | note |
+| $E0-$FF | control flags |
 
 sequence data is organised as follows: flag,note,time
 ```
