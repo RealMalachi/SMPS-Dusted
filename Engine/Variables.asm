@@ -152,7 +152,9 @@ Plane_buffer:						ds.w $240			; used by level drawing routines
 Plane_buffer_end
 
 ; sound variables
-Snd_driver_RAM:						ds.b $400			; start of RAM for the sound driver data
+Snd_driver_RAM:						ds.b smpsramsize		; start of RAM for the sound driver data
+Snd_driver_misc_bitfield:				ds.b 1				; bit 7 is ring pan
+							ds.b 1				; even
 Snd_driver_RAM_end					= *
 
 ; misc variables

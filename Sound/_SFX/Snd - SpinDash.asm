@@ -8,6 +8,7 @@ Sound60_SpindashRev_Header:
 
 ; FM5 Data
 Sound60_SpindashRev_FM5:
+	smpsSpindashRev
 	smpsSetvoice        $00
 	smpsModSet          $00, $01, $20, $F6
 	dc.b	nG5, $16, smpsNoAttack

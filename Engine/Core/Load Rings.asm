@@ -317,7 +317,7 @@ AddRings:
 		bls.s	.add
 
 .sfx
-		sfx	sfx_RingRight,1							; play ring sound
+		jmp	(QueueRingSound).w
 ; ---------------------------------------------------------------------------
 
 .add

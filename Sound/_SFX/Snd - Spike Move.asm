@@ -8,12 +8,15 @@ SndB6_Spikes_Move_Header:
 
 ; PSG3 Data
 SndB6_Spikes_Move_PSG3:
+; 016 016 006 3F6(FFF6) 3E6(FFE6) 3D6(FFD6) 3D6(FFD6)
 	smpsModSet          $01, $01, $F0, $08
 	smpsPSGform         $E7
 	dc.b	nE5, $07
-
+; 80
+	smpsModOff
+	smpsDetune          $01
 SndB6_Spikes_Move_Loop00:
-	dc.b	nG6, $01
+	dc.b	nA2, $01
 	smpsPSGAlterVol     $01
 	smpsLoop            $00, $0C, SndB6_Spikes_Move_Loop00
 	smpsStop

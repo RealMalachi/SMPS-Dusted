@@ -18,7 +18,7 @@ SMPS_Start:
 	cmddef smpsramsize,	v_endofram
 	cmddef cmd__First,	$F000
 ;	cmddef cmd_FadeoutBGM,	$F000
-	cmddef mus_FadeOut,	$F100
+	cmddef mus_FadeOut,	$F100|160
 ;	cmddef cmd_Fadein,	$F200
 	cmddef mus_Stop,	$F300
 ;	cmddef cmd_StopBGM,	$F301
