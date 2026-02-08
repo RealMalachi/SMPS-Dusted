@@ -118,6 +118,7 @@ StopBGM:
 		beq.s	.dacgetptr
 		move.l	a6,a3
 		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
 		bmi.s	.dacgotptr
 .dacgetptr:
@@ -127,10 +128,10 @@ StopBGM:
 		beq.s	.dacnext
 		move.l	a6,a3
 		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
 		bpl.s	.dacnext
 .dacgotptr:
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		or.b	#1<<_resting,TrackPlaybackControl(a3)
 .dacnext:
 		dbf	d6,.dacloop
@@ -151,6 +152,7 @@ StopBGM:
 		beq.s	.fmgetptr
 		move.l	a6,a3
 		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
 		bpl.s	.fmgotptr
 .fmgetptr:
@@ -160,10 +162,10 @@ StopBGM:
 		beq.s	.fmnext
 		move.l	a6,a3
 		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
 		bpl.s	.fmnext
 .fmgotptr:
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		or.b	#1<<_resting,TrackPlaybackControl(a3)
 		exg.l	a3,a5
 		bsr.w	SetVoice
@@ -188,6 +190,7 @@ StopBGM:
 		beq.s	.psggetptr
 		move.l	a6,a3
 		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
 		bmi.s	.psggotptr
 .psggetptr:
@@ -197,10 +200,10 @@ StopBGM:
 		beq.s	.psgnext
 		move.l	a6,a3
 		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
 		bpl.s	.psgnext
 .psggotptr:
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		or.b	#1<<_resting,TrackPlaybackControl(a3)
 		move.b	TrackVoiceControl(a3),d0
 		cmpi.b	#$E0,d0
@@ -232,6 +235,7 @@ StopSFX:
 		beq.s	.fmgetptr
 		move.l	a6,a3
 		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
 	 	bmi.s	.fmgotptr
 .fmgetptr:
@@ -241,10 +245,10 @@ StopSFX:
 	 	beq.s	.fmnext
 		move.l	a6,a3
 		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
 	 	bpl.s	.fmnext
 .fmgotptr:
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		or.b	#1<<_resting,TrackPlaybackControl(a3)
 		exg.l	a3,a5
 		bsr.w	SetVoice
@@ -269,6 +273,7 @@ StopSFX:
 		beq.s	.psggetptr
 		move.l	a6,a3
 		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
 		bmi.s	.psggotptr
 .psggetptr:
@@ -278,10 +283,10 @@ StopSFX:
 		beq.s	.psgnext
 		move.l	a6,a3
 		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
 		bpl.s	.psgnext
 .psggotptr:
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		or.b	#1<<_resting,TrackPlaybackControl(a3)
 		move.b	TrackVoiceControl(a3),d0
 		cmpi.b	#$E0,d0
@@ -311,6 +316,7 @@ StopBSFX:
 		beq.s	.fmgetptr
 		move.l	a6,a3
 		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
 	 	bmi.s	.fmgotptr
 .fmgetptr:
@@ -319,10 +325,10 @@ StopBSFX:
 	 	beq.s	.fmnext
 		move.l	a6,a3
 		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
 	 	bpl.s	.fmnext
 .fmgotptr:
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		or.b	#1<<_resting,TrackPlaybackControl(a3)
 		exg.l	a3,a5
 		bsr.w	SetVoice
@@ -346,6 +352,7 @@ StopBSFX:
 		beq.s	.psggetptr
 		move.l	a6,a3
 		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
 		bmi.s	.psggotptr
 .psggetptr:
@@ -354,10 +361,10 @@ StopBSFX:
 		beq.s	.psgnext
 		move.l	a6,a3
 		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
 		bpl.s	.psgnext
 .psggotptr:
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		or.b	#1<<_resting,TrackPlaybackControl(a3)
 		move.b	TrackVoiceControl(a3),d0
 		cmpi.b	#$E0,d0
