@@ -646,15 +646,15 @@ cfAddVolume:
 		add.b	d0,TrackVolume(a5)
 		rts
 cfAddFMVolume:
+		move.b	(a4)+,d0
 		cmp.b	#$40,TrackVoiceControl(a5)
 		bhs.s	.notfm
-		move.b	(a4)+,d0
 		add.b	d0,TrackVolume(a5)
 .notfm:		rts
 cfAddPSGVolume:
+		move.b	(a4)+,d0
 		tst.b	TrackVoiceControl(a5)
 		bpl.s	.notpsg
-		move.b	(a4)+,d0
 		add.b	d0,TrackVolume(a5)
 .notpsg:	rts
 ; ---------------------------------------------------------------------------
@@ -662,14 +662,16 @@ cfSetVolume:
 		move.b	(a4)+,TrackVolume(a5)
 		rts
 cfSetFMVolume:
+		move.b	(a4)+,d0
 		cmp.b	#$40,TrackVoiceControl(a5)
 		bhs.s	.notfm
-		move.b	(a4)+,TrackVolume(a5)
+		move.b	d0,TrackVolume(a5)
 .notfm:		rts
 cfSetPSGVolume:
+		move.b	(a4)+,d0
 		tst.b	TrackVoiceControl(a5)
 		bpl.s	.notpsg
-		move.b	(a4)+,TrackVolume(a5)
+		move.b	d0,TrackVolume(a5)
 .notpsg:	rts
 ; ===========================================================================
 cfHoldNote:
