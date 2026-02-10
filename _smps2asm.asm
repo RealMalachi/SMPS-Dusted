@@ -856,7 +856,7 @@ envtableid := envtableid+1
 
 smpsEnvVol macro data,data2
 	if "data"==""
-	elseif "data"=="RESET"
+	elseif "data"=="REPEAT"
 	dc.b	$80
 	elseif "data"=="HOLD"
 	dc.b	$81
@@ -881,7 +881,7 @@ smpsEnvVol macro data,data2
 	endm
 smpsEnvVolPsg macro data,data2
 	if "data"==""
-	elseif "data"=="RESET"
+	elseif "data"=="REPEAT"
 	dc.b	$80
 	elseif "data"=="HOLD"
 	dc.b	$81
@@ -907,7 +907,7 @@ smpsEnvVolPsg macro data,data2
 
 smpsEnvMod macro data,data2
 	if "data"==""
-	elseif "data"=="RESET"
+	elseif "data"=="REPEAT"
 	dc.b	$80,$10
 	elseif "data"=="HOLD"
 	dc.b	$80,$11

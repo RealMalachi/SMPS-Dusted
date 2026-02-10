@@ -156,11 +156,11 @@ SMPS_VolEnvIndex_s03:	smpsEnvVolPsg $02,$01,$00,$00,$01,$02,$02,$02,$02,$02,$02,
 SMPS_VolEnvIndex_s04:	smpsEnvVolPsg $00,$00,$02,$03,$04,$04,$05,$05,$05,$06,$06,HOLD
 SMPS_VolEnvIndex_s05:	smpsEnvVolPsg $03,$00,$01,$01,$01,$02,$03,$04,$04,$05,HOLD
 SMPS_VolEnvIndex_s06:	smpsEnvVolPsg $00,$00,$01,$01,$02,$03,$04,$05,$05,$06,$08,$07,$07,$06,HOLD
-SMPS_VolEnvIndex_s07:	smpsEnvVolPsg $01,$0C,$03,$0F,$02,$07,$03,$0F,RESET
+SMPS_VolEnvIndex_s07:	smpsEnvVolPsg $01,$0C,$03,$0F,$02,$07,$03,$0F,REPEAT
 SMPS_VolEnvIndex_s08:	smpsEnvVolPsg $00,$00,$00,$02,$03,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0E,$0F,HOLD
 SMPS_VolEnvIndex_s09:	smpsEnvVolPsg $03,$02,$01,$01,$00,$00,$01,$02,$03,$04,HOLD
 SMPS_VolEnvIndex_s0A:	smpsEnvVolPsg $01,$00,$00,$00,$00,$01,$01,$01,$02,$02,$02,$03,$03,$03,$03,$04,$04,$04,$05,$05,HOLD
-SMPS_VolEnvIndex_s0B:	smpsEnvVol    $10,$20,$30,$40,$30,$20,$10,$00,$7F,RESET	; ...,-$10,RESET
+SMPS_VolEnvIndex_s0B:	smpsEnvVol    $10,$20,$30,$40,$30,$20,$10,$00,$7F,REPEAT	; ...,-$10,REPEAT
 SMPS_VolEnvIndex_s0C:	smpsEnvVolPsg $00,$00,$01,$01,$03,$03,$04,$05,REST
 SMPS_VolEnvIndex_s0D:	smpsEnvVolPsg $00,HOLD
 SMPS_VolEnvIndex_s0E:	smpsEnvVolPsg $02,REST
@@ -176,7 +176,7 @@ SMPS_VolEnvIndex_s16:	smpsEnvVolPsg $03,$02,$01,$01,$00,$00,$01,$02,$03,$04,HOLD
 SMPS_VolEnvIndex_s17:	smpsEnvVolPsg $01,$00,$00,$00,$00,$01,$01,$01,$02,$02,$02,$03,$03,$03,$03,$04
 			smpsEnvVolPsg $04,$04,$05,$05,HOLD
 SMPS_VolEnvIndex_s18:	smpsEnvVol    $10,$20,$30,$40,$30,$20,$10,$00,$10,$20,$30,$40,$30,$20,$10,$00
-			smpsEnvVol    $10,$20,$30,$40,$30,$20,$10,$00,RESET
+			smpsEnvVol    $10,$20,$30,$40,$30,$20,$10,$00,REPEAT
 SMPS_VolEnvIndex_s19:	smpsEnvVolPsg $00,$00,$01,$01,$03,$03,$04,$05,REST
 SMPS_VolEnvIndex_s1A:	smpsEnvVol    $00,$02,$04,$06,$08,$16,REST
 SMPS_VolEnvIndex_s1B:	smpsEnvVolPsg $00,$00,$01,$01,$03,$03,$04,$05,REST

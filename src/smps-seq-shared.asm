@@ -217,7 +217,7 @@ GetFrequency:
 		bra.s	.EnvS12N				; $0D
 		bra.s	.EnvS12N				; $0E
 		bra.s	.EnvS12N				; $0F
-		bra.s	.Reset					; $10
+		bra.s	.Repeat					; $10
 		bra.s	.Hold					; $11
 		bra.s	.Index					; $12
 		bra.s	.Rest					; $13
@@ -246,7 +246,7 @@ GetFrequency:
 		else
 		bra.s	.gotmodenv2
 		endif
-.Reset:
+.Repeat:
 		moveq	#0,d0
 		bra.w	.loop
 .Hold:
@@ -294,11 +294,11 @@ VolEnvCommands:
 		cmp.w	#3*2,d0
 		bhi.s	VolEnvCommands_SizeAssert
 		jmp	.lut(pc,d0.w)
-.lut:		bra.s	.Reset					; $80
+.lut:		bra.s	.Repeat					; $80
 		bra.s	.Hold					; $81
 		bra.s	.Index					; $82
 		bra.s	.Rest					; $83
-.Reset:
+.Repeat:
 		clr.b	TrackVolEnvIndex(a5)
 		bra.w	DoVolEnv.loop
 .Hold:

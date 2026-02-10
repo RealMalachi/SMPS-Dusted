@@ -87,5 +87,5 @@ TestSfx_ModEnv:
 	smpsEnvTable TestSfx_ModEnv_01
 	smpsEnvTable TestSfx_ModEnv_02
 	smpsEnvTable END
-TestSfx_ModEnv_01:	smpsEnvMod 0,1,2,3,4,5,6,7,6,5,4,3,2,1,RESET
+TestSfx_ModEnv_01:	smpsEnvMod 0,1,2,3,4,5,6,7,6,5,4,3,2,1,REPEAT
 TestSfx_ModEnv_02:	smpsEnvMod 0,1,2,3,4,5,6,7,8,9,10,11,12,13,REST
