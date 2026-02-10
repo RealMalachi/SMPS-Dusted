@@ -35,10 +35,56 @@ sequence data is organised as follows: flag,note/rest,time
         dc.b        nBb4,nBb4,$08                   ; play new note detuned for previous time, then play another new note for new time
         dc.b        nBs7,nRst                       ; play new note for previous time, then rest for previous time
 ```
+## automatic sound updaters
+
+### timeout
+A timer that's independant from the sequence which rests it, the timer doesn't reset on hold notes, not much else to say
+
+### volenv
+| data | smps-68k | smps-z80 | smps-dusted |
+|:-|:-:|:-:|:-:|
+| volenv range | $00-$7F, $81-$FF | $00-$7F, $84-$FF | $00-$7F |
+| PSG internal volume | $00-$0F | $00-$0F | $00-$7F |
+| volume cap | nope | nope | $00-$7F |
+| HOLD | yep($80) | yep($81) | yep |
+| REPEAT/REST | nope | yep($80) | yep |
+| INDEX | nope | yep($82) | yep |
+| RESET | nope | yep($83) | yep |
+
+SMPS-Dusted currently lacks support for negative volume envelopes. If they were to be added, it should cap to the maximum volume on overflow.
+
+PSG volume being internally consistent with FM means that they can be more easily shared. Songs that had to separate FM and PSG volume envelopes no longer have to, but songs that relied on FM and PSG being given the same thing and acting differently will have to fix their sequences; this usually only happens for broken or poorly planned out sequences.
+
+### modenv
+| data | smps-68k | smps-z80 | smps-dusted |
+|:-|:-:|:-:|:-:|
+| s8 modenv | yep | yep | yep |
+| s12 modenv | nope | nope | yep |
+| s16 modenv | nope | nope | yep |
+| REPEAT/REST | nop | yep | yep |
+| HOLD | yep | yep | yep |
+| INDEX | yep | yep | yep |
+| RESET | yep | yep | yep |
+| MUL | yep($86); mod x mul | yep($86); mod x ((mul+1)&FFh) | nope |
+
+SMPS-Dusted lacks support for s8 modenv multipliers, but adds support for s12 and s16 to make up for it. Realistically speaking you'll only need s12.
+
+### modalgo
+| smps-68k | smps-z80| smps-dusted|
+|:-:|:-:|:-:|
+| yep;todo | yep;todo | yep;can select between either of the aforementioned |
+Sonic 2s modalgo is slightly different in that it runs when the sequence updates, like smps-z80 but unlike smps-68k. It's otherwise identical to smps-68k
+
+### pananim
+| smps-68k | smps-z80 | smps-dusted |
+|:-:|:-:|:-:|
+| yep;todo | nope | nope |
 
 ## stack
 Each channel has 12 individual bytes of stack, which is primarily used by smpsLoop and smpsCall.
+
 smpsLoop uses one byte of stack for a loop index. You can reference any byte in the stack or even go out of bounds, but you'll usually use the first few bytes of stack.
+
 smpsCall uses either 4(68K), 2(Z80,S2) or 3(dusted) bytes of stack, for a pointer to after the call command for when the call is done. The driver handles allocating these automatically, starting from the end of the stack.
 - For smps-68K, this allows either using 4 loops and 2 calls, or no loops and 3 calls. You can squeeze three loops in index 0,4,8 for call layers 3,2,1 respectively, but it's not recommended
 - For smps-Z80, this allows 4 loops and 4 calls, 2 loops and 5 calls, or 6 calls
