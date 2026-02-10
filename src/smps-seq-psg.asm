@@ -6,6 +6,7 @@ PSGUpdateTrack:
 		btst	#_resting,TrackPlaybackControl(a5)
 		bne.s	.locret
 		bsr.w	DoVolEnv				; bsr is necessary for stack reasons, see `VolEnvCommands`
+		bsr.w	DoModulation
 		bra.w	PSGPrepareNote
 ; ---------------------------------------------------------------------------
 .notegoing:	btst	#_resting,TrackPlaybackControl(a5)

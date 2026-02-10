@@ -10,6 +10,7 @@ FMUpdateTrack:
 		bne.s	.locret
 		bsr.w	DoVolEnv				; bsr is necessary for stack reasons, see `VolEnvCommands`
 		bsr.w	DoPanEnv				; bsr is necessary for stack reasons
+		bsr.w	DoModulation
 		bsr.w	FMPrepareNote
 		bra.w	FMNoteOn
 ; ---------------------------------------------------------------------------

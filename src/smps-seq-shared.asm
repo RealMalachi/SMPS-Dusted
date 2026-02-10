@@ -55,6 +55,11 @@ FMFinishTrackUpdate:
 	endif
 		tst.b	TrackModulationCtrl(a5)
 		bpl.s	.nomod
+		btst	#6,TrackModulationCtrl(a5)			; if using Z80 mod algo and resting, don't set anything
+		beq.s	.yesmod
+		btst	#_resting,TrackPlaybackControl(a5)
+		bne.s	.z80mod
+.yesmod:
 		move.l	TrackModulationPtr(a5),a0			; Modulation data pointer
 		move.b	(a0)+,TrackModulationWait(a5)			; Reset wait
 		move.b	(a0)+,TrackModulationSpeed(a5)			; Reset speed
@@ -65,6 +70,10 @@ FMFinishTrackUpdate:
 		clr.w	TrackModulationVal(a5)				; Reset frequency change
 .nomod:
 .exit:		rts
+.z80mod:
+;		clr.b	TrackModulationSpeed(a5)			; Clear ModEnvIndex (shared with ModAlgoSpeed)
+;		clr.b	TrackModulationVal+1(a5)			; Clear ModEnvMul (shared with LSB of ModAlgoVal)
+		rts
 ; ===========================================================================
 NoteTimeoutUpdate:
 		subq.b	#1,TrackNoteTimeout(a5)				; Update note fill timeout
@@ -890,9 +899,10 @@ cfxSetPSG3:
 ; ===========================================================================
 cfModulation68K:
 		move.b	#1<<7,TrackModulationCtrl(a5)
-		move.b	TrackModulationPtr(a5),d0
-		move.l	a4,TrackModulationPtr(a5)
-		move.b	d0,TrackModulationPtr(a5)
+		move.l	a4,d0
+		move.w	d0,TrackModulationPtr+2(a5)
+		swap	d0
+		move.b	d0,TrackModulationPtr+1(a5)
 		move.b	(a4)+,TrackModulationWait(a5)
 		move.b	(a4)+,TrackModulationSpeed(a5)
 		move.b	(a4)+,TrackModulationDelta(a5)
@@ -905,9 +915,10 @@ cfModulation68K:
 cfModulationZ80:
 ; As noted in Clone Driver, envelope clear is important for S3 miniboss theme
 		move.b	#1<<7|1<<6,TrackModulationCtrl(a5)
-		move.b	TrackModulationPtr(a5),d0
-		move.l	a4,TrackModulationPtr(a5)
-		move.b	d0,TrackModulationPtr(a5)
+		move.l	a4,d0
+		move.w	d0,TrackModulationPtr+2(a5)
+		swap	d0
+		move.b	d0,TrackModulationPtr+1(a5)
 		addq.w	#4,a4
 		rts
 ; ---------------------------------------------------------------------------
