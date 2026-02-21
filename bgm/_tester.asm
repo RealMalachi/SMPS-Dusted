@@ -65,19 +65,19 @@ Mus_TestBgm_DAC_Loop3:
 	smpsStop
 
 Mus_TestBgm_Voices:
-	smpsVcAlgorithm     $00
-	smpsVcFeedback      $04
-	smpsVcUnusedBits    $00
-	smpsVcDetune        $03, $03, $03, $03
-	smpsVcCoarseFreq    $01, $00, $05, $06
-	smpsVcRateScale     $02, $02, $03, $03
-	smpsVcAttackRate    $1F, $1F, $1F, $1F
-	smpsVcAmpMod        $00, $00, $00, $00
-	smpsVcDecayRate1    $06, $09, $06, $07
-	smpsVcDecayRate2    $08, $06, $06, $07
-	smpsVcDecayLevel    $0F, $01, $01, $02
-	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $13, $37, $19
+	smpsVcAlgorithm		$00
+	smpsVcFeedback		$04
+	smpsVcDetune		$03, $03, $03, $03
+	smpsVcCoarseFreq	$01, $00, $05, $06
+	smpsVcRateScale		$02, $02, $03, $03
+	smpsVcAttackRate	$1F, $1F, $1F, $1F
+	smpsVcAmpMod		$00, $00, $00, $00
+	smpsVcDecayRate1	$06, $09, $06, $07
+	smpsVcDecayRate2	$08, $06, $06, $07
+	smpsVcDecayLevel	$0F, $01, $01, $02
+	smpsVcReleaseRate	$0F, $0F, $0F, $0F
+	smpsVcTotalLevelMuffle	$80, $13, $37, $19
+	smpsVcTotalLevel	$80, $13, $37, $19
 
 Mus_TestBgm_VolEnv:
 	smpsEnvTable START

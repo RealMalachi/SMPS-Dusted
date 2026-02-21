@@ -947,6 +947,11 @@ smpsVcAlgorithm macro val
 	set vcSSG2,0
 	set vcSSG3,0
 	set vcSSG4,0
+	set vcTLM1,$FF00
+	set vcTLM2,$FF00
+	set vcTLM3,$FF00
+	set vcTLM4,$FF00
+	set vcPanAmsPms,$C0
 	endm
 
 smpsVcUnusedBits macro val,d1r1,d1r2,d1r3,d1r4
@@ -1047,6 +1052,24 @@ smpsVcSsgEg macro op1,op2,op3,op4
 	set vcSSG3,op3
 	set vcSSG4,op4
 	endm
+smpsVcTotalLevelMuffle macro op1,op2,op3,op4
+	if (SourceDriver=="DUSTED")
+		set vcTLM1,op1
+		set vcTLM2,op2
+		set vcTLM3,op3
+		set vcTLM4,op4
+	elseif (SourceDriver<3)
+		set vcTLM1,op1&$7F|(1<<7)
+		set vcTLM2,op2&$7F|((vcAlgorithm>=5)<<7)
+		set vcTLM3,op3&$7F|((vcAlgorithm>=4)<<7)
+		set vcTLM4,op4&$7F|((vcAlgorithm==7)<<7)
+	else
+		set vcTLM1,op1
+		set vcTLM2,op2
+		set vcTLM3,op3
+		set vcTLM4,op4
+	endif
+	endm
 
 ; Voices - Total Level
 ; On SMPS Z80 and Dusted, bit 7 of TL is used to tell the driver to not
@@ -1078,6 +1101,51 @@ smpsVcTotalLevel macro op1,op2,op3,op4
 		set vcTL3,op3
 		set vcTL4,op4
 	endif
+	if vcTLM1==$FF00
+; table based on observing Sonic 2 Recreation, semi-thanks to Valleybell
+	switch vcAlgorithm&7
+	case 0
+		smpsVcMuffleWrapper vcTLM1,vcTL1,$0B
+		smpsVcMuffleWrapper vcTLM2,vcTL2,$0B
+		smpsVcMuffleWrapper vcTLM3,vcTL3,$0B
+		smpsVcMuffleWrapper vcTLM4,vcTL4,$0B
+	case 1
+		smpsVcMuffleWrapper vcTLM1,vcTL1,$04
+		smpsVcMuffleWrapper vcTLM2,vcTL2,$08
+		smpsVcMuffleWrapper vcTLM3,vcTL3,$08
+		smpsVcMuffleWrapper vcTLM4,vcTL4,$08
+	case 2
+		smpsVcMuffleWrapper vcTLM1,vcTL1,$0A
+		smpsVcMuffleWrapper vcTLM2,vcTL2,$0A
+		smpsVcMuffleWrapper vcTLM3,vcTL3,$0A
+		smpsVcMuffleWrapper vcTLM4,vcTL4,$0C
+	case 3
+		smpsVcMuffleWrapper vcTLM1,vcTL1,$06
+		smpsVcMuffleWrapper vcTLM2,vcTL2,$06
+		smpsVcMuffleWrapper vcTLM3,vcTL3,$0A
+		smpsVcMuffleWrapper vcTLM4,vcTL4,$0A
+	case 4
+		smpsVcMuffleWrapper vcTLM1,vcTL1,$06
+		smpsVcMuffleWrapper vcTLM2,vcTL2,$06
+		smpsVcMuffleWrapper vcTLM3,vcTL3,$0A
+		smpsVcMuffleWrapper vcTLM4,vcTL4,$0A
+	case 5
+		smpsVcMuffleWrapper vcTLM1,vcTL1,$06
+		smpsVcMuffleWrapper vcTLM2,vcTL2,$06
+		smpsVcMuffleWrapper vcTLM3,vcTL3,$0A
+		smpsVcMuffleWrapper vcTLM4,vcTL4,$0A
+	case 6
+		smpsVcMuffleWrapper vcTLM1,vcTL1,$0A
+		smpsVcMuffleWrapper vcTLM2,vcTL2,$0A
+		smpsVcMuffleWrapper vcTLM3,vcTL3,$08
+		smpsVcMuffleWrapper vcTLM4,vcTL4,$0E
+	case 7
+		smpsVcMuffleWrapper vcTLM1,vcTL1,$04
+		smpsVcMuffleWrapper vcTLM2,vcTL2,$08
+		smpsVcMuffleWrapper vcTLM3,vcTL3,$08
+		smpsVcMuffleWrapper vcTLM4,vcTL4,$08
+	endcase
+	endif
 		dc.b	(vcFeedback<<3)+vcAlgorithm
 		dc.b	(vcDT4<<4)+vcCF4       ,(vcDT3<<4)+vcCF3       ,(vcDT2<<4)+vcCF2       ,(vcDT1<<4)+vcCF1
 		dc.b	(vcRS4<<6)+vcAR4       ,(vcRS3<<6)+vcAR3       ,(vcRS2<<6)+vcAR2       ,(vcRS1<<6)+vcAR1
@@ -1086,4 +1154,16 @@ smpsVcTotalLevel macro op1,op2,op3,op4
 		dc.b	(vcDL4<<4)+vcRR4       ,(vcDL3<<4)+vcRR3       ,(vcDL2<<4)+vcRR2       ,(vcDL1<<4)+vcRR1
 		dc.b	(vcSSG4<<4)|vcSSG2     ,(vcSSG3<<4)|vcSSG1
 		dc.b	vcTL4                  ,vcTL2                  ,vcTL3                  ,vcTL1
+		dc.b	vcTLM4                 ,vcTLM2                 ,vcTLM3                 ,vcTLM1
+		dc.b	0	; reserved
+	endm
+
+; caps muffle volume to a maximum of $7F
+; I really didn't feel like copying this 32 times
+smpsVcMuffleWrapper macro tlmbase,tlbase,muffleadd
+	if ((tlbase&$7F)+muffleadd)>$7F
+	set tlmbase,tlbase&$80|$7F
+	else
+	set tlmbase,tlbase&$80|((tlbase&$7F)+muffleadd)
+	endif
 	endm

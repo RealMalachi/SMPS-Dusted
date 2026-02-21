@@ -320,16 +320,10 @@ SetVoicePan:
 		;bra.s	SetVoice
 SetVoice:
 		move.l	TrackFmVoicePtr(a5),a1		; voice pointer
-		moveq	#0,d0
-		move.b	TrackFmVoiceIndex(a5),d0	; Current voice
-		adda.w	d0,a1		; x1
-		add.w	d0,d0		; d0x2
-		adda.w	d0,a1		; x3
-		add.w	d0,d0		; d0x4
-		add.w	d0,d0		; d0x8
-		adda.w	d0,a1		; x11
-		adda.w	d0,a1		; x19
-		adda.w	d0,a1		; x27
+		moveq	#0,d1
+		move.b	TrackFmVoiceIndex(a5),d1	; Current voice
+		lsl.w	#5,d1		; x32
+		adda.w	d1,a1		; x32
 
 		lea	FMInstrumentOperatorTable(pc),a2
 		moveq	#(FMInstrumentOperatorTable_End-FMInstrumentOperatorTable)-1,d3
@@ -350,14 +344,8 @@ SendVoiceSSG:
 		move.l	TrackFmVoicePtr(a5),a1
 		moveq	#0,d1
 		move.b	TrackFmVoiceIndex(a5),d1
-		adda.w	d1,a1		; x1
-		add.w	d1,d1		; d1x2
-		adda.w	d1,a1		; x3
-		add.w	d1,d1		; d1x4
-		add.w	d1,d1		; d1x8
-		adda.w	d1,a1		; x11
-		adda.w	d1,a1		; x19
-		adda.w	d1,a1		; x27
+		lsl.w	#5,d1		; x32
+		adda.w	d1,a1		; x32
 		adda.w	#21,a1		; Want SSG
 .gotptr:
 		move.b	(a1)+,-(sp)
@@ -391,82 +379,39 @@ SendVoiceTL:
 		move.l	TrackFmVoicePtr(a5),a1
 		moveq	#0,d1
 		move.b	TrackFmVoiceIndex(a5),d1
-		adda.w	d1,a1		; x1
-		add.w	d1,d1		; d1x2
-		adda.w	d1,a1		; x3
-		add.w	d1,d1		; d1x4
-		add.w	d1,d1		; d1x8
-		adda.w	d1,a1		; x11
-		adda.w	d1,a1		; x19
-		adda.w	d1,a1		; x27
-		move.b	(a1),d1		; get algo
-		adda.w	#23,a1		; Want TL
+		lsl.w	#5,d1		; x32
+		adda.w	d1,a1		; x32
+		adda.w	#23,a1		; Wants TL
 
+		tst.b	v_driverflags2(a6)			; is underwater muffle enabled?
+		bpl.s	.nomuffle
+		btst	#_nouservol,TrackPlaybackControl(a5)	; is song going "nuh uh"?
+		bne.s	.nomuffle
+		addq.w	#4,a1		; Wants TL muffle
+.nomuffle:
 		move.w	d0,d3
 		swap	d3
 		move.w	#4-1,d3
-
-		moveq	#.nomuzzle-.muzzle,d2
-		tst.b	v_driverflags2(a6)			; is underwater muffle enabled?
-		bpl.s	.nouservol
-		btst	#_nouservol,TrackPlaybackControl(a5)	; song go "nuh uh"
-		bne.s	.nouservol
-		moveq	#7,d2
-		and.w	d1,d2
-		add.w	d2,d2
-		add.w	d2,d2
-.nouservol:
-		lea	.muzzle(pc,d2.w),a2
-
 		moveq	#$40,d0
+
 .loop:		move.b	(a1)+,d1
-		bpl.s	.muzz
+		bpl.s	.send_tl
 		move.l	d3,d2
 		swap	d2
 		add.b	d2,d1
-		bcs.s	.cap_tl
-		and.b	#$7F,d1
-.muzz:		add.b	(a2)+,d1
-		bpl.s	.send_tl
-.cap_tl:	moveq	#$7F,d1
-.send_tl:
-		bsr.w	WriteFMIorII	; trashes a0/d2
+		bcc.s	.send_tl
+		moveq	#$7F,d1
+.send_tl:	bsr.w	WriteFMIorII	; trashes a0/d2
 		addq.w	#4,d0
 		dbf	d3,.loop
 		rts
-
-.muzzle:	dc.l	$0B0B0B0B	; 0 ; table based on observing Sonic 2 Recreation, semi-thanks Valleybell
-		dc.l	$08080804	; 1
-		dc.l	$0C0A0A0A	; 2
-		dc.l	$0A060A06	; 3
-		dc.l	$0A060A06	; 4
-		dc.l	$0A060A06	; 5
-		dc.l	$0E0A080A	; 6
-		dc.l	$08080804	; 7
-.nomuzzle:	dc.l	$00000000	; std
-	even
 ; ---------------------------------------------------------------------------
 FMInstrumentOperatorTable:
-		dc.b  $B0		; feedback/algorithm
-		dc.b  $30		; Detune/multiple operator 1
-		dc.b  $38		; Detune/multiple operator 3
-		dc.b  $34		; Detune/multiple operator 2
-		dc.b  $3C		; Detune/multiple operator 4
-		dc.b  $50		; Rate scalling/attack rate operator 1
-		dc.b  $58		; Rate scalling/attack rate operator 3
-		dc.b  $54		; Rate scalling/attack rate operator 2
-		dc.b  $5C		; Rate scalling/attack rate operator 4
-		dc.b  $60		; Amplitude modulation/first decay rate operator 1
-		dc.b  $68		; Amplitude modulation/first decay rate operator 3
-		dc.b  $64		; Amplitude modulation/first decay rate operator 2
-		dc.b  $6C		; Amplitude modulation/first decay rate operator 4
-		dc.b  $70		; Secondary decay rate operator 1
-		dc.b  $78		; Secondary decay rate operator 3
-		dc.b  $74		; Secondary decay rate operator 2
-		dc.b  $7C		; Secondary decay rate operator 4
-		dc.b  $80		; Secondary amplitude/release rate operator 1
-		dc.b  $88		; Secondary amplitude/release rate operator 3
-		dc.b  $84		; Secondary amplitude/release rate operator 2
-		dc.b  $8C		; Secondary amplitude/release rate operator 4
+		dc.b  fmreg.algofeed;,fmreg.panamspms
+		dc.b  fmreg.muldt+$0,fmreg.muldt+$8,fmreg.muldt+$4,fmreg.muldt+$C
+		dc.b  fmreg.arrs+$0,fmreg.arrs+$8,fmreg.arrs+$4,fmreg.arrs+$C
+		dc.b  fmreg.dramen+$0,fmreg.dramen+$8,fmreg.dramen+$4,fmreg.dramen+$C
+		dc.b  fmreg.sr+$0,fmreg.sr+$8,fmreg.sr+$4,fmreg.sr+$C
+		dc.b  fmreg.rrsl+$0,fmreg.rrsl+$8,fmreg.rrsl+$4,fmreg.rrsl+$C
 FMInstrumentOperatorTable_End:
 	even
