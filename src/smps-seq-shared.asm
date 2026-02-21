@@ -463,7 +463,7 @@ UpdatePanning:
 		move.b	TrackVoiceControl(a5),d2
 		add.b	d2,d2
 		bmi.s	.pcm
-.fm:		moveq_	$B4,d0				; Command to set AMS/FMS/panning
+.fm:		moveq_	fmreg.panamspms,d0			; Command to set AMS/FMS/panning
 		bra.w	WriteFMIorIIMain
 .pcm:		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
@@ -560,7 +560,7 @@ cfUnk:
 cfxSetLFO:
 		cmp.b	#$40,TrackVoiceControl(a5)
 		bhs.s	.notfm
-		moveq_	$22,d0
+		moveq_	fmreg.lfofreq,d0
 		move.b	(a4)+,d1
 		bsr.w	WriteFMI
 		moveq_	%11000000,d1			; Change AMS/FMS, retain panning
@@ -616,7 +616,7 @@ cfxSetPanAMSFMS:
 		bne.s	.mono
 		add.b	d2,d2
 		bmi.s	.pcm
-		moveq_	$B4,d0				; Command to set AMS/FMS/panning
+		moveq_	fmreg.panamspms,d0		; Command to set AMS/FMS/panning
 		bra.w	WriteFMIorIIMain
 ; ---------------------------------------------------------------------------
 .pcm:		moveq	#$3F,d0

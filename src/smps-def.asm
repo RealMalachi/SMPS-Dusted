@@ -41,6 +41,38 @@ Z80_Clock		= Master_Clock/15	; 3579478
 FM_Sample_Rate		= M68000_Clock/(6*6*4)	; 53267
 PSG_Sample_Rate		= Z80_Clock/16		; 223721
 ; ---------------------------------------------------------------------------
+; https://www.plutiedev.com/ym2612-registers
+; TODO: utilize
+fmreg:
+.lfofreq	equ $22		; global
+.tmrAfreqmsb	equ $24		; global
+.tmrAfreqlsb	equ $25		; global
+.tmrBfreq	equ $26		; global
+.ch3mdtmr	equ $27		; global
+.key		equ $28		; global
+.dacout		equ $2A		; global
+.dacen		equ $2B		; global
+.test		equ $2C		; global 
+.muldt		equ $30		; per-operator
+.tl		equ $40		; per-operator
+.arrs		equ $50		; per-operator
+.dramen		equ $60		; per-operator
+.sr		equ $70		; per-operator
+.rrsl		equ $80		; per-operator
+.ssgeg		equ $90		; per-operator
+.freqlsb	equ $A0		; per-channel
+.freqmsb	equ $A4		; per-channel
+.algofeed	equ $B0		; per-channel
+.panamspms	equ $B4		; per-channel
+.freqch3lsb1	equ $A8		; per-operator
+.freqch3lsb2	equ $A9		; per-operator
+.freqch3lsb3	equ $AA		; per-operator
+.freqch3lsb4	equ $A2		; per-operator
+.freqch3msb1	equ $AD		; per-operator
+.freqch3msb2	equ $AE		; per-operator
+.freqch3msb3	equ $AF		; per-operator
+.freqch3msb4	equ $A6		; per-operator
+; ---------------------------------------------------------------------------
 vdpdata		equ $C00000
 vdpctrl		equ $C00004
 	if __smpsTarget=="mdgen"
@@ -195,7 +227,7 @@ _sfxoverride	= 1
 _special	= 2	; FM3 multi/PSG3 Noise 
 _holdnotes	= 3
 _noattack	= 4
-_nouservol	= 6
+_nouservol	= 6	; TODO: rename to _nomuffle
 _playing	= 7	; bpl/bmi
 
 TrackVoiceControl:		ds.b 1			; All	; expected to be 1

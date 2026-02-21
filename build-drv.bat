@@ -3,7 +3,7 @@ if not exist _out mkdir _out
 REM // https://github.com/Clownacy/p2bin
 echo ============================================
 echo Building SMPS driver release blob
-tools\asw.exe -xx -n -q -A -L -U -E -g map -i . -olist _out\drv.lst -E _out\drv.log build-drv.asm -D __smpsDebug=0
+tools\asw.exe -xx -n -q -A -L -U -g map -i . -olist _out\drv.lst -E _out\drv.log build-drv.asm -D __smpsDebug=0
 if not exist build-drv.p goto _BUILDTYPE_ERROR_RELEASE
 tools\p2bin.exe "build-drv.p" "smps-drv.bin" ""
 move build-drv.p _out/build-drv.p
@@ -14,7 +14,7 @@ if not exist _out\drv.log echo Release blob build successful
 
 echo ============================================
 echo Building SMPS driver debug blob
-tools\asw.exe -xx -n -q -A -L -U -E -g map -i . -olist _out\drv-debug.lst -E _out\drv-debug.log build-drv.asm -D __smpsDebug=1
+tools\asw.exe -xx -n -q -A -L -U -g map -i . -olist _out\drv-debug.lst -E _out\drv-debug.log build-drv.asm -D __smpsDebug=1
 if not exist build-drv.p goto _BUILDTYPE_ERROR_DEBUG
 tools\p2bin.exe "build-drv.p" "smps-drv-debug.bin" ""
 move build-drv.p _out/build-drv-debug.p

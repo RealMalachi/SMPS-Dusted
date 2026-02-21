@@ -17,6 +17,16 @@ SMPS2ASMVer	equ 1
 SMPSCPUVer	equ "68K"	; 68K, Z80
 FixMusicAndSFXDataBugs	equ 1
 ; ---------------------------------------------------------------------------
+; valid SourceDriver values
+; 1 = Sonic 1
+; 2 = Sonic 2
+; 3 = Sonic 3
+; 4 = Sonic 3K
+; 5 = Sonic 3D
+; 6 = Sonic CD
+; 8 = Sonic Crackers??
+; "DUSTED" = SMPS-Dusted ; TODO: change to a hex number representing ASCII
+; ---------------------------------------------------------------------------
 ; Standard Octave Pitch Equates
 	enumconf	$C
 	enum		smpsPitch10lo=$88,smpsPitch09lo,smpsPitch08lo,smpsPitch07lo,smpsPitch06lo
@@ -457,11 +467,21 @@ smpsAlterVol macro vol
 	endif
 	dc.b	cVolAdd,vol
 	endm
-smpsFMAlterVol macro vol
-	if (vol=0) && (MOMPASS=1)
-	warning "eh?"
-	endif
+smpsFMAlterVol macro vol,vol2
+	if ("vol2"<>"")
+		if (MOMPASS=1)
+		warning "Are you sure this wasn't a mistake?"
+		endif
+		if (vol2=0) && (MOMPASS=1)
+		warning "eh?"
+		endif
+	dc.b	cVolAddFM,vol2
+	else
+		if (vol=0) && (MOMPASS=1)
+		warning "eh?"
+		endif
 	dc.b	cVolAddFM,vol
+	endif
 	endm
 smpsPSGAlterVol macro vol
 	if (vol=0) && (MOMPASS=1)
@@ -700,6 +720,24 @@ smpsRevStop macro
 smpsModVoice macro voice,type
 	fatal "smpsModVoice is unsupported"
 	endm
+smpsPanAni macro
+	fatal "smpsPanAni is unsupported"
+	endm
+smpsConditionalJumpCD macro
+	if MOMPASS==1
+	warning "smpsConditionalJumpCD is unsupported"
+	endif
+	endm
+smpsClearPush macro
+	if MOMPASS==1
+	warning "smpsClearPush is unsupported"
+	endif
+	endm
+;	dc.b cExtCmd,cxPushFlag
+smpsFM3SpecialMode macro ind1,ind2,ind3,ind4
+	fatal "smpsFM3SpecialMode is unsupported"
+	endm
+;	dc.b	cExtCmd,0,ind1,ind2,ind3,ind4
 ; ---------------------------------------------------------------------------
 ; using these is not advised
 
@@ -781,17 +819,6 @@ smpsRingSwap macro
 	warning "smpsRingSwap is unsupported"
 	endif
 	endm
-smpsConditionalJumpCD macro
-	if MOMPASS==1
-	warning "smpsConditionalJumpCD is unsupported"
-	endif
-	endm
-smpsClearPush macro
-	if MOMPASS==1
-	warning "smpsClearPush is unsupported"
-	endif
-	endm
-;	dc.b cExtCmd,cxPushFlag
 smpsCopyData macro data,len
 	fatal "smpsCopyData is unsupported"
 	endm
@@ -818,10 +845,6 @@ smpsAlternateSMPS macro flag
 ;	dc.b	cExtCmd,cxSetFreqMode2
 ;	endif
 ;	endm
-smpsFM3SpecialMode macro ind1,ind2,ind3,ind4
-	fatal "smpsFM3SpecialMode is unsupported"
-	endm
-;	dc.b	cExtCmd,0,ind1,ind2,ind3,ind4
 smpsPitchSlide macro enable
 	fatal "smpsPitchSlide is unsupported"
 	endm
@@ -934,6 +957,23 @@ smpsEnvMod macro data,data2
 	endm
 ; ---------------------------------------------------------------------------
 ; Macros for FM instruments
+
+; Define an ID for the instrument, useful for UVBs but not required
+; Can give one instrument multiple IDs within the same macro, if you want that
+smpsVcIdentifier macro startoflist,id1,id2
+	if ((*)-startoflist)#32<>0
+	fatal "FM instrument isn't within an expected modulo of 32"
+	else
+	set id1,((*)-startoflist)/32
+		if ARGCOUNT>2
+		set vcTemp,startoflist
+		shift
+		shift
+		smpsVcIdentifier vcTemp,ALLARGS
+		endif
+	endif
+	endm
+
 ; Voices - Feedback
 smpsVcFeedback macro val
 	set vcFeedback,val

@@ -210,6 +210,7 @@ SourceSMPS2ASM := 1
 SourceDriver := 3
 SMPS_UVB_FM:
 ;	Voice 00h - Synth Bass 2
+	smpsVcIdentifier    SMPS_UVB_FM,pSynthBass2,pS3kSynthBass2
 	smpsVcAlgorithm     $04
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -224,6 +225,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0A, $05, $0A, $05
 	smpsVcTotalLevel    $80, $07, $80, $1A
 ;	Voice 01h - Trumpet 1
+	smpsVcIdentifier    SMPS_UVB_FM,pTrumpet1
 	smpsVcAlgorithm     $05
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -238,6 +240,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0A, $0A, $0A, $05
 	smpsVcTotalLevel    $80, $80, $80, $15
 ;	Voice 02h - Slap Bass 2
+	smpsVcIdentifier    SMPS_UVB_FM,pSlapBass2
 	smpsVcAlgorithm     $03
 	smpsVcFeedback      $00
 	smpsVcUnusedBits    $00
@@ -252,6 +255,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0A, $05, $05, $05
 	smpsVcTotalLevel    $80, $15, $16, $13
 ;	Voice 03h - Synth Bass 1
+	smpsVcIdentifier    SMPS_UVB_FM,pSynthBass1
 	smpsVcAlgorithm     $04
 	smpsVcFeedback      $06
 	smpsVcUnusedBits    $00
@@ -266,6 +270,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0A, $05, $0A, $05
 	smpsVcTotalLevel    $83, $18, $83, $10
 ;	Voice 04h - Bell Synth 1
+	smpsVcIdentifier    SMPS_UVB_FM,pBellSynth1
 	smpsVcAlgorithm     $06
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -280,6 +285,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0A, $0A, $0A, $05
 	smpsVcTotalLevel    $80, $80, $80, $1B
 ;	Voice 05h - Bell Synth 2
+	smpsVcIdentifier    SMPS_UVB_FM,pBellSynth2
 	smpsVcAlgorithm     $04
 	smpsVcFeedback      $06
 	smpsVcUnusedBits    $00
@@ -294,6 +300,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $87, $29, $80, $23
 ;	Voice 06h - Synth Brass 1
+	smpsVcIdentifier    SMPS_UVB_FM,pSynthBrass1
 	smpsVcAlgorithm     $02
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -308,6 +315,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $80, $27, $28, $18
 ;	Voice 07h - Synth like Bassoon
+	smpsVcIdentifier    SMPS_UVB_FM,pSynthBassoon
 	smpsVcAlgorithm     $04
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -322,6 +330,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $80, $0C, $80, $1E
 ;	Voice 08h - Bell Horn type thing
+	smpsVcIdentifier    SMPS_UVB_FM,pBellHorn
 	smpsVcAlgorithm     $04
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -336,6 +345,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $07, $02, $08, $03
 	smpsVcTotalLevel    $87, $1D, $80, $15
 ;	Voice 09h - Synth Bass 3
+	smpsVcIdentifier    SMPS_UVB_FM,pSynthBass3
 	smpsVcAlgorithm     $05
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -350,6 +360,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $9B, $80, $80, $1B
 ;	Voice 0Ah - Synth Trumpet
+	smpsVcIdentifier    SMPS_UVB_FM,pSynthTrumper
 	smpsVcAlgorithm     $02
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -364,6 +375,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $08, $02, $02, $02
 	smpsVcTotalLevel    $80, $18, $22, $18
 ;	Voice 0Bh - Wood Block
+	smpsVcIdentifier    SMPS_UVB_FM,pWoodBlock
 	smpsVcAlgorithm     $04
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -378,6 +390,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $80, $1A, $80, $33
 ;	Voice 0Ch - Tubular Bell
+	smpsVcIdentifier    SMPS_UVB_FM,pTubularBell
 	smpsVcAlgorithm     $04
 	smpsVcFeedback      $06
 	smpsVcUnusedBits    $00
@@ -392,6 +405,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $97, $29, $90, $23
 ;	Voice 0Dh - Strike Bass
+	smpsVcIdentifier    SMPS_UVB_FM,pStrikeBass
 	smpsVcAlgorithm     $00
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -406,6 +420,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $80, $1A, $19, $1A
 ;	Voice 0Eh - Elec Piano
+	smpsVcIdentifier    SMPS_UVB_FM,pElecPiano
 	smpsVcAlgorithm     $02
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -420,6 +435,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $80, $1F, $27, $29
 ;	Voice 0Fh - Bright Piano
+	smpsVcIdentifier    SMPS_UVB_FM,pBrightPiano
 	smpsVcAlgorithm     $04
 	smpsVcFeedback      $00
 	smpsVcUnusedBits    $00
@@ -434,6 +450,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $80, $23, $80, $23
 ;	Voice 10h - Church Bell
+	smpsVcIdentifier    SMPS_UVB_FM,pChurchBell
 	smpsVcAlgorithm     $04
 	smpsVcFeedback      $02
 	smpsVcUnusedBits    $00
@@ -448,6 +465,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $80, $14, $80, $1E
 ;	Voice 11h - Synth Brass 2
+	smpsVcIdentifier    SMPS_UVB_FM,pSynthBrass2
 	smpsVcAlgorithm     $05
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -462,6 +480,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $80, $82, $80, $1C
 ;	Voice 12h - Bell Piano
+	smpsVcIdentifier    SMPS_UVB_FM,pBellPiano
 	smpsVcAlgorithm     $04
 	smpsVcFeedback      $03
 	smpsVcUnusedBits    $00
@@ -476,6 +495,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $80, $19, $80, $1E
 ;	Voice 13h - Wet Wood Bass
+	smpsVcIdentifier    SMPS_UVB_FM,pWetWoodBass
 	smpsVcAlgorithm     $01
 	smpsVcFeedback      $06
 	smpsVcUnusedBits    $00
@@ -490,6 +510,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $80, $1E, $1E, $1E
 ;	Voice 14h - Silent Bass
+	smpsVcIdentifier    SMPS_UVB_FM,pSilentBass
 	smpsVcAlgorithm     $02
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -504,6 +525,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $80, $28, $12, $21
 ;	Voice 15h - Picked Bass
+	smpsVcIdentifier    SMPS_UVB_FM,pPickedBass
 	smpsVcAlgorithm     $00
 	smpsVcFeedback      $05
 	smpsVcUnusedBits    $00
@@ -518,6 +540,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $80, $1E, $14, $0E
 ;	Voice 16h - Xylophone
+	smpsVcIdentifier    SMPS_UVB_FM,pXylophone
 	smpsVcAlgorithm     $06
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -532,6 +555,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $06, $06, $0F, $0F
 	smpsVcTotalLevel    $80, $A3, $80, $28
 ;	Voice 17h - Sine Flute
+	smpsVcIdentifier    SMPS_UVB_FM,pSineFlute
 	smpsVcAlgorithm     $01
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -546,6 +570,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $80, $28, $32, $1B
 ;	Voice 18h - Pipe Organ
+	smpsVcIdentifier    SMPS_UVB_FM,p
 	smpsVcAlgorithm     $07
 	smpsVcFeedback      $00
 	smpsVcUnusedBits    $00
@@ -559,7 +584,8 @@ SMPS_UVB_FM:
 	smpsVcDecayLevel    $02, $02, $03, $03
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $80, $80, $8A, $8A
-;	Voice 19h - Synth Brass 2
+;	Voice 19h - Synth Brass 3
+	smpsVcIdentifier    SMPS_UVB_FM,pSynthBrass3
 	smpsVcAlgorithm     $02
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -574,6 +600,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $80, $26, $28, $17
 ;	Voice 1Ah - Harpsichord
+	smpsVcIdentifier    SMPS_UVB_FM,pHarpsichord
 	smpsVcAlgorithm     $03
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -588,6 +615,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $80, $0F, $1E, $32
 ;	Voice 1Bh - Metallic Bass
+	smpsVcIdentifier    SMPS_UVB_FM,pMetallicBass1
 	smpsVcAlgorithm     $05
 	smpsVcFeedback      $00
 	smpsVcUnusedBits    $00
@@ -602,6 +630,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $8C, $84, $90, $16
 ;	Voice 1Ch - Alternate Metallic Bass
+	smpsVcIdentifier    SMPS_UVB_FM,pMetallicBass2
 	smpsVcAlgorithm     $04
 	smpsVcFeedback      $05
 	smpsVcUnusedBits    $00
@@ -616,6 +645,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $80, $17, $80, $16
 ;	Voice 1Dh - Backdropped Metallic Bass
+	smpsVcIdentifier    SMPS_UVB_FM,pBackdropMetallicBass
 	smpsVcAlgorithm     $02
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -630,6 +660,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $8F, $27, $28, $18
 ;	Voice 1Eh - Sine like Bell
+	smpsVcIdentifier    SMPS_UVB_FM,pSineBell
 	smpsVcAlgorithm     $06
 	smpsVcFeedback      $06
 	smpsVcUnusedBits    $00
@@ -644,6 +675,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $80, $81, $8B, $1E
 ;	Voice 1Fh - Synth like Metallic with Small Bell
+	smpsVcIdentifier    SMPS_UVB_FM,pMetallicSynthWithBell
 	smpsVcAlgorithm     $04
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -658,6 +690,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $07, $02, $08, $03
 	smpsVcTotalLevel    $8A, $1D, $85, $15
 ;	Voice 20h - Nice Synth like lead
+	smpsVcIdentifier    SMPS_UVB_FM,pNiceSynthLead
 	smpsVcAlgorithm     $06
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -672,6 +705,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0A, $0A, $0A, $05
 	smpsVcTotalLevel    $8F, $8F, $8F, $1B
 ;	Voice 21h - Rock Organ
+	smpsVcIdentifier    SMPS_UVB_FM,pRockOrgan
 	smpsVcAlgorithm     $07
 	smpsVcFeedback      $00
 	smpsVcUnusedBits    $00
@@ -686,6 +720,7 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $8A, $8A, $8A, $8A
 ;	Voice 22h - Strike like Slap Bass
+	smpsVcIdentifier    SMPS_UVB_FM,pStrikeSlapBass
 	smpsVcAlgorithm		$00
 	smpsVcFeedback		$04
 	smpsVcUnusedBits	$00

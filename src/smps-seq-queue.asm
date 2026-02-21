@@ -164,7 +164,7 @@ Cmd_SetBitFlag_Mono:
 		and.b	TrackPlaybackControl(a5),d0
 		cmp.b	#1<<_playing|0<<_sfxoverride,d0
 		bne.s	.fmnext
-		moveq_	$B4,d0
+		moveq_	fmreg.panamspms,d0
 		move.b	TrackAMSFMSPan(a5),d1
 		btst	#5,v_driverflags(a6)
 		beq.s	.fmstereo
@@ -444,7 +444,7 @@ Sound_PlayBGM:
 	endif
 .dacdone:
 	if __smpsPCM<>"MegaPCM2"
-		moveq_	$2B,d0
+		moveq_	fmreg.dacen,d0
 		bsr.w	WriteFMI
 	endif
 ; mute remaining dac channels

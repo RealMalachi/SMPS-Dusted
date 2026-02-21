@@ -14,6 +14,7 @@ APILUT:
 		bra.w	SetDriverDataPointer			; 36 ; a0 = driver data
 		bra.w	DACGuard				; 40 ;
 		bra.w	DACUnguard				; 44 ;
+;		bra.w	PlayCDDA				; 48 ; d0.b = track ID
 ; ---------------------------------------------------------------------------
 		rept (64-(*))/4
 		bra.w	.error
