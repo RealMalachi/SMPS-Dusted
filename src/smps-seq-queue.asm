@@ -54,8 +54,8 @@ Cmd_FadeOutMusic:
 ; ---------------------------------------------------------------------------
 Cmd_FadeIn:
 		move.b	d7,v_fadein_counter(a6)
-		lea	v_music_dac_tracks(a6),a5
-		moveq	#((v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz)-1,d7
+		lea	v_music_pcm_tracks(a6),a5
+		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d7
 		moveq	#TrackDacSz,d6
 		bsr.s	.fade
 		lea	v_music_fm_tracks(a6),a5
@@ -146,8 +146,8 @@ Cmd_SetBitFlag_Speed:
 		rts
 
 Cmd_SetBitFlag_Mono:
-		lea	v_music_dac_tracks(a6),a5
-		moveq	#((v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz)-1,d7
+		lea	v_music_pcm_tracks(a6),a5
+		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d7
 		bsr.s	.dacloop
 		lea	v_music_fm_tracks(a6),a5
 		moveq	#((v_music_fm_tracks_end-v_music_fm_tracks)/TrackFmSz)-1,d7
@@ -229,8 +229,8 @@ Cmd_SetBitFlag_Muffle:
 		moveq	#TrackPsgSz,d6
 		bsr.s	.fade
 	endif
-		lea	v_music_dac_tracks(a6),a5
-		moveq	#((v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz)-1,d7
+		lea	v_music_pcm_tracks(a6),a5
+		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d7
 		moveq	#TrackDacSz,d6
 		bsr.s	.fade
 		lea	v_music_fm_tracks(a6),a5
@@ -254,12 +254,21 @@ Sound_PlayPCM:
 		moveq	#0,d0
 		bra.w	DACQueueSampleSFX
 ; ===========================================================================
-DACInitBytes:	dc.b $40, $41
-; notice the 0, 1, 2 then 4, 5, 6
-; this is the gap between parts I and II for YM2612 port writes
-FMInitBytes:	dc.b 0, 1, 2, 4, 5, 6
-; Specifically, these configure writes to the PSG port for each channel
-PSGInitBytes:	dc.b $80, $A0, $C0, $E0
+DACInitBytes:
+	dc.b $40,1<<_drummode	; PCM1
+	dc.b $41,1<<_drummode	; PCM2
+FMInitBytes:
+	dc.b $00,0	; FM1
+	dc.b $01,0	; FM2
+	dc.b $02,0	; FM3
+	dc.b $04,0	; FM4
+	dc.b $05,0	; FM5
+	dc.b $06,0	; FM6
+PSGInitBytes:
+	dc.b $80,0	; PSG1
+	dc.b $A0,0	; PSG2
+	dc.b $C0,0	; PSG3
+	dc.b $E0,0	; PSG4
 	even
 ; ===========================================================================
 ; TODO: enums?
@@ -299,8 +308,8 @@ Sound_PlayBGM:
 		bne.s	.bgm_loadJingle
 
 		moveq_	$FF!(1<<_sfxoverride),d1
-		set .val,v_music_dac_tracks+TrackPlaybackControl
-		rept (v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz
+		set .val,v_music_pcm_tracks+TrackPlaybackControl
+		rept (v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz
 		and.b	d1,.val(a6)
 		set .val,.val+TrackDacSz
 		endr
@@ -388,7 +397,7 @@ Sound_PlayBGM:
 		or.b	#1<<_playing,d6				; set playing regardless
 		lea	3(a3),a4
 ; init allocated dac channels
-		lea	v_music_dac_tracks(a6),a5
+		lea	v_music_pcm_tracks(a6),a5
 		lea	DACInitBytes(pc),a2
 	if __smpsPCM<>"MegaPCM2"
 		moveq_	0<<7,d1					; disable DAC
@@ -397,15 +406,17 @@ Sound_PlayBGM:
 		move.b	(a3),d7
 		beq.w	.dacdone
 		if __smpsDebug
-		cmp.w	#(v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz,d7
+		cmp.w	#(v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz,d7
 		bls.s	.as1
 		SMPS_assert "Exceeding maximum BGM DAC channels"
 .as1:
 		endif
 		subq.w	#1,d7
 .dacloadloop:	and.b	#1<<_sfxoverride,TrackPlaybackControl(a5)
-		or.b	d6,TrackPlaybackControl(a5)
 		move.b	(a2)+,TrackVoiceControl(a5)		; Voice control bits
+		move.b	d6,d0
+		or.b	(a2)+,d0
+		or.b	d0,TrackPlaybackControl(a5)
 
 		moveq	#0,d0
 		lea	TrackVoiceControl+1(a5),a0
@@ -448,7 +459,7 @@ Sound_PlayBGM:
 		bsr.w	WriteFMI
 	endif
 ; mute remaining dac channels
-		moveq	#(v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz-1,d7
+		moveq	#(v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz-1,d7
 		sub.b	(a3)+,d7
 		bcs.s	.dacallon
 .dacmute:	and.b	#1<<_sfxoverride,TrackPlaybackControl(a5)
@@ -473,8 +484,10 @@ Sound_PlayBGM:
 		endif
 		subq.w	#1,d7
 .fmloadloop:	and.b	#1<<_sfxoverride,TrackPlaybackControl(a5)
-		or.b	d6,TrackPlaybackControl(a5)
 		move.b	(a2)+,TrackVoiceControl(a5)
+		move.b	d6,d0
+		or.b	(a2)+,d0
+		or.b	d0,TrackPlaybackControl(a5)
 
 		moveq	#0,d0
 		lea	TrackVoiceControl+1(a5),a0
@@ -535,8 +548,10 @@ Sound_PlayBGM:
 		endif
 		subq.w	#1,d7
 .psgloadloop:	and.b	#1<<_sfxoverride,TrackPlaybackControl(a5)
-		or.b	d6,TrackPlaybackControl(a5)
 		move.b	(a2)+,TrackVoiceControl(a5)
+		move.b	d6,d0
+		or.b	(a2)+,d0
+		or.b	d0,TrackPlaybackControl(a5)
 
 		moveq	#0,d0
 		lea	TrackVoiceControl+1(a5),a0

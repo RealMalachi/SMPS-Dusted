@@ -116,14 +116,14 @@ FMUpdateFreq:
 		beq.s	FMUpdateFreq_exit			; if not, branch
 
 FMPrepareNote:
-		btst	#_sfxoverride,TrackPlaybackControl(a5)
-		bne.s	FMUpdateFreq_exit
 		moveq	#0,d2
 		bsr.w	GetFrequency
 		bpl.s	.valid
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
 		rts
 .valid:
+		btst	#_sfxoverride,TrackPlaybackControl(a5)
+		bne.s	FMUpdateFreq_exit
 		move.w	d6,-(sp)				; d1.b = d6>>8
 		move.b	(sp)+,d1
 		moveq_	$A4,d0					; Register for upper 6 bits of frequency

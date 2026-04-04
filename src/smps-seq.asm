@@ -53,19 +53,19 @@ HandlePause:
 		dbf	d3,.noteoffloop
 		bsr.w	PSGSilenceAll
 		bra.w	DACPauseSample
-.unp_dacloop:
+.unp_pcmloop:
 		moveq_	1<<_playing|1<<_sfxoverride,d0
 		and.b	TrackPlaybackControl(a5),d0
 		cmp.b	#1<<_playing|0<<_sfxoverride,d0
-		bne.s	.unp_dacnext
+		bne.s	.unp_pcmnext
 		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
 		move.b	TrackAMSFMSPan(a5),d1		; Get value from track RAM
 		btst	#5,v_driverflags(a6)
-		beq.s	.unp_dacstereo
+		beq.s	.unp_pcmstereo
 		or.b	#$C0,d1				; force mono
-.unp_dacstereo:	bsr.w	DACSetPan
-.unp_dacnext:	lea	TrackDacSz(a5),a5
+.unp_pcmstereo:	bsr.w	DACSetPan
+.unp_pcmnext:	lea	TrackDacSz(a5),a5
 		dbf	d7,.unp_fmloop
 		rts
 .unp_fmloop:
@@ -86,9 +86,9 @@ HandlePause:
 .unpausemusic:
 		and.b	#%11110011,v_driverflags(a6)	; set to playing
 
-		lea	v_music_dac_tracks(a6),a5
-		moveq	#((v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz)-1,d7
-		bsr.s	.unp_dacloop
+		lea	v_music_pcm_tracks(a6),a5
+		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d7
+		bsr.s	.unp_pcmloop
 		lea	v_music_fm_tracks(a6),a5
 		moveq	#((v_music_fm_tracks_end-v_music_fm_tracks)/TrackFmSz)-1,d7
 		bsr.s	.unp_fmloop
@@ -127,11 +127,12 @@ HandleSoundQueue:
 
 HandleSequencer:
 		bsr.w	TempoWait
-		lea	v_music_dac_tracks(a6),a5
-		moveq	#((v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz)-1,d7
+
+		lea	v_music_pcm_tracks(a6),a5
+		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d7
 .bgmdacloop:	tst.b	TrackPlaybackControl(a5)
 		bpl.s	.bgmdacnext
-		bsr.w	DACUpdateTrack
+		bsr.w	PCMUpdateTrack
 .bgmdacnext:	add.w	#TrackDacSz,a5
 		dbf	d7,.bgmdacloop
 
@@ -241,8 +242,8 @@ TempoWait:
 .withfractions:
 		add.w	d0,v_main_tempo_timeout(a6)
 		bcc.s	.exit
-	set .val,v_music_dac_tracks+TrackDurationTimeout
-	rept (v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz
+	set .val,v_music_pcm_tracks+TrackDurationTimeout
+	rept (v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz
 		addq.b	#1,.val(a6)
 	set .val,.val+TrackDacSz
 	endr
@@ -261,8 +262,8 @@ TempoWait:
 		add.w	d0,v_main_tempo_timeout(a6)
 		bcc.s	.exit
 		clr.w	v_main_tempo_timeout(a6)
-	set .val,v_music_dac_tracks+TrackDurationTimeout
-	rept (v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz
+	set .val,v_music_pcm_tracks+TrackDurationTimeout
+	rept (v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz
 		addq.b	#1,.val(a6)
 	set .val,.val+TrackDacSz
 	endr
@@ -329,7 +330,7 @@ RAM_BGMChannel:
 		dc.w v_music_psg2_track,0
 		dc.w v_music_psg3_track,0
 		dc.w v_music_psg3_track
-		dc.w v_music_dac1_track		; 30
+		dc.w v_music_pcm1_track		; 30
 RAM_SFXChannel:
 		dc.w 0,0,v_sfx_fm3_track,0
 		dc.w v_sfx_fm4_track,v_sfx_fm5_track,0,0

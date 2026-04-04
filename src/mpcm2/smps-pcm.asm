@@ -482,12 +482,12 @@ DACUpdateSFX:
 ;		bra.s	DACRestoreFromSFX
 ; ---------------------------------------------------------------------------
 DACRestoreFromSFX:
-	if ((v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz)=1
-		lea	v_music_dac_tracks(a6),a5
+	if ((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)=1
+		lea	v_music_pcm_tracks(a6),a5
 		tst.b	TrackPlaybackControl(a5)
 	else
-		lea	v_music_dac_tracks-TrackDacSz(a6),a5
-		moveq	#((v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz)-1,d7
+		lea	v_music_pcm_tracks-TrackDacSz(a6),a5
+		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d7
 .bgmdacloop:	add.w	#TrackDacSz,a5
 		tst.b	TrackPlaybackControl(a5)
 		dbmi	d7,.bgmdacloop

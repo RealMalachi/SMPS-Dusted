@@ -1,5 +1,5 @@
 TestSfx_Header:
-	smpsHeaderStartSong	"DUSTED",1
+	smpsHeaderStartSong	$F0E50000,1
 	smpsHeaderVoice		TestSfx_Voices
 	smpsHeaderVolEnv	TestSfx_VolEnv
 	smpsHeaderModEnv	TestSfx_ModEnv

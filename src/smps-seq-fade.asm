@@ -5,8 +5,8 @@ DoFadeOut:
 		and.b	v_fadeout_counter(a6),d0
 		bne.s	.skipthisframe
 
-		lea	v_music_dac_tracks(a6),a5
-		moveq	#((v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz)-1,d7
+		lea	v_music_pcm_tracks(a6),a5
+		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d7
 .dacloop:	tst.b	TrackPlaybackControl(a5)	; Is track playing?
 		bpl.s	.nextdac			; Branch if not
 		addq.b	#1,TrackVolume(a5)
@@ -52,8 +52,8 @@ DoFadeIn:
 ;		beq.s	.fadedone			; Branch if yes
 		subq.b	#1,v_fadein_counter(a6)		; Update fade counter
 
-		lea	v_music_dac_tracks(a6),a5
-		moveq	#((v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz)-1,d7
+		lea	v_music_pcm_tracks(a6),a5
+		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d7
 		moveq	#TrackDacSz,d6
 		bsr.s	.fade
 
@@ -102,8 +102,8 @@ StopAllSound:
 		bra.w	PSGSilenceAll
 ; ===========================================================================
 StopBGM:
-		lea	v_music_dac_tracks(a6),a5
-		moveq	#((v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz)-1,d6
+		lea	v_music_pcm_tracks(a6),a5
+		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d6
 .dacloop:	tst.b	TrackPlaybackControl(a5)
 		bpl.s	.dacnext
 		and.b	#$FF!(1<<_playing),TrackPlaybackControl(a5)

@@ -1,20 +1,22 @@
-; defined during assembler call
-;__smpsDebug	equ 0
-__smpsDataVer	equ 0
-
+;__smpsDebug		equ 0		; defined during assembler call
+__smpsDataVer		equ 1
+__smpsTarget		equ "mdgen"	; read below
+__smpsPCM		equ "MegaPCM2"
+__smpsJingle		equ 1
+__smpsBFX		equ 1
+__smpsModEnv		equ 1
+__smpsPanEnv		equ 0
+__smpsDrum		equ 0
+__smpsSeqStack		equ 10
+__smpsCommBytes		equ 8
+; __smpsTarget values:
 ; "fuckFM" is MD without FM
 ; "sys14" is 2xYM2203 (unimplemented)
 ; "pico" is Pico (unimplemented)
 ; "copera" is Copera (unimplemented)
 ; "mdgen" is YM2612/SN76-blah blah
-__smpsTarget	equ "mdgen"
-__smpsPCM	equ "MegaPCM2"
-__smpsJingle	equ 1
-__smpsBFX	equ 1
-__smpsModEnv	equ 1
-__smpsPanEnv	equ 0
-; picoADPCM
-; coperaADPCM
+; ---------------------------------------------------------------------------
+; TODO: picoADPCM, coperaADPCM
 	if (__smpsPCM=="null") || (__smpsTarget=="fuckFM")
 	include "src/null/smps-pcm-def.asm"
 ;	elseif __smpsPCM=="DirtyPCM"
@@ -33,9 +35,7 @@ __smpsPanEnv	equ 0
 	fatal "Unknown PCM type"
 	endif
 ; ---------------------------------------------------------------------------
-; NTSC 53693175
-; PAL: 53203424
-Master_Clock		= 53693175
+Master_Clock		= 53693175		; NTSC=53693175,PAL=53203424
 M68000_Clock		= Master_Clock/7	; 7670453
 Z80_Clock		= Master_Clock/15	; 3579478
 FM_Sample_Rate		= M68000_Clock/(6*6*4)	; 53267
@@ -218,15 +218,19 @@ drvdata:
 .uvbvol:	ds.w 1
 .uvbmod:	ds.w 1
 .uvbdac:	ds.l 1
+.fmdrum:	ds.w 1
+.psgdrum:	ds.w 1
+.pcmdrum:	ds.w 1
 	dephase
 ; ---------------------------------------------------------------------------
 	phase 0
 TrackPlaybackControl:		ds.b 1			; All	; word writes include TrackVoiceControl
 _resting	= 0
 _sfxoverride	= 1
-_special	= 2	; FM3 multi/PSG3 Noise 
+_special	= 2	; FM3 multi/PSG3 Noise
 _holdnotes	= 3
 _noattack	= 4
+_drummode	= 5
 _nouservol	= 6	; TODO: rename to _nomuffle
 _playing	= 7	; bpl/bmi
 
@@ -242,9 +246,8 @@ TrackStackPointer:		ds.b 1			; All
 TrackDurationTimeout:		ds.b 1			; All
 TrackSavedDuration:		ds.b 1			; All
 
-TrackSavedDAC:			;ds.w 1			; DAC
-TrackFreq:			ds.w 1			; FM/PSG
-TrackTranspose:			ds.b 1			; FM/PSG	; pitch ; word writes include TrackVolume
+TrackFreq:			ds.w 1			; FM/PSG	; sign bit indicates rest ; TODO: change to 0 for MCD PCM support
+TrackTranspose:			ds.b 1			; All		; pitch ; word writes include TrackVolume
 TrackVolume:			ds.b 1			; All
 TrackDetune:			ds.b 1			; FM/PSG
 TrackAMSFMSPan:			ds.b 1			; FM/DAC
@@ -257,14 +260,26 @@ TrackDataPointer:		ds.l 1			; All
 TrackNoteTimeout:		ds.b 1			; All
 TrackNoteTimeoutMaster:		ds.b 1			; All
 
+	if __smpsDrum
+TrackDrum:			ds.b 1
+	endif
 ; loop indexes start upward, subroutine calls extend downward
-TrackGoSubStackEnd:		;ds.b 0			; All
-TrackLoopCounters:		ds.b 12 		; All
-TrackGoSubStack:		;ds.b 0
-TrackDacSz:			;ds.b 0
+TrackGoSubStackEnd:		ds.b 0			; All
+TrackLoopCounters:		ds.b __smpsSeqStack 	; All
+TrackGoSubStack:		ds.b 0
+TrackUniSz:			ds.b 0
+	dephase
 
+	phase TrackUniSz
+TrackSavedDAC:			ds.b 1			; DAC
+			ds.b (*)&1
+TrackDacSz:			ds.b 0
+	dephase
+
+	phase TrackUniSz
 ; bit 7 enables calculated mod, bit 6 is reserved for modulation type flag
 ; other bits are the mod envelope index
+			ds.b (*)&1
 TrackModulationCtrl:		;ds.b 1			; FM/PSG
 TrackModulationPtr:		ds.l 1			; FM/PSG
 TrackModulationWait:		ds.b 1			; FM/PSG
@@ -277,12 +292,13 @@ TrackModEnvIndex:		;ds.b 1			; FM/PSG
 TrackModEnvPtr:			ds.l 1			; FM/PSG
 ;TrackModEnvMultiply:		ds.b 1			; FM/PSG
 	endif
-TrackPsgSz:			;ds.b 0
+TrackPsgSz:			ds.b 0
 
 TrackFmVoiceIndex:		;ds.b 1			; FM
 TrackFmVoicePtr:		ds.l 1			; FM
-TrackFmSz:			;ds.b 0
+TrackFmSz:			ds.b 0
 	dephase
+
 
 	phase 0
 v_startofram:			ds.b 0
@@ -302,7 +318,8 @@ v_driverflags2:			ds.b 1	; W... ....
 ; TODO: proper bitfield labels
 ; W = water muffle, 0 = no muffle, 1 = muffle
 
-v_communication_byte:		ds.b 1	; generally used for syncing gameplay with music
+v_communication:		ds.b __smpsCommBytes	; generally used for syncing gameplay with music
+v_communication_end:
 
 v_soundqueue_start:		ds.b 0
 v_soundqueue0:			ds.w 1
@@ -332,9 +349,9 @@ v_main_tempo_timeout:		ds.w 1
 v_main_tempo:			ds.w 1
 
 v_music_track_ram:		ds.b 0
-v_music_dac_tracks:		ds.b 0
-v_music_dac1_track:		ds.b TrackDacSz
-v_music_dac_tracks_end:		ds.b 0
+v_music_pcm_tracks:		ds.b 0
+v_music_pcm1_track:		ds.b TrackDacSz
+v_music_pcm_tracks_end:		ds.b 0
 
 v_music_fm_tracks:		ds.b 0
 v_music_fm1_track:		ds.b TrackFmSz

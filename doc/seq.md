@@ -4,9 +4,9 @@
 
 sequences contain resting times, notes, and control flags.
 | $00     | reserved (invalid time in stock smps) |
-| $01-$7F | note/rest time |
+| $01-$7F | time |
 | $80     | rest |
-| $81-$DF | note |
+| $81-$DF | note/drum |
 | $E0-$FF | control flags |
 
 sequence data is organised as follows: flag,note,time

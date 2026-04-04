@@ -14,6 +14,9 @@ SMPS_Start:
 	dc.w SMPS_VolEnvIndex-.s
 	dc.w SMPS_ModEnvIndex-.s
 	dc.l SMPS_SampleTable-.s
+	dc.w SMPS_FmDrumTable-.s
+	dc.w SMPS_PsgDrumTable-.s
+	dc.w SMPS_PcmDrumTable-.s
 ; ---------------------------------------------------------------------------
 	cmddef smpsramsize,	v_endofram
 	cmddef cmd__First,	$F000
@@ -58,7 +61,6 @@ SMPS_ModEnvIndex_m05:	smpsEnvMod $00,$00,$01,$03,$01,$00,-$01,-$03,-$01,$00,INDE
 SMPS_ModEnvIndex_m06:	smpsEnvMod $00,$00,$00,$00,  0, 10, 20, 30,  20,  10,   0, -10, -20, -30, -20, -10,INDEX,4
 SMPS_ModEnvIndex_m07:	smpsEnvMod $00,$00,$00,$00, 22, 44, 66, 44,  22,   0, -22, -44, -66, -44, -22,INDEX,3
 SMPS_ModEnvIndex_m08:	smpsEnvMod $01,$02,$03,$04,$03,$02,$01,$00,-$01,-$02,-$03,-$04,-$03,-$02,-$01,$00,INDEX,1
-
 ; ---------------------------------------------------------------------------
 ; Universal Volume Envelopes
 ; ---------------------------------------------------------------------------
@@ -119,7 +121,6 @@ SMPS_VolEnvIndex:
 	smpsEnvTable SMPS_VolEnvIndex_s26,sTone_26
 	smpsEnvTable SMPS_VolEnvIndex_s27,sTone_27
 	smpsEnvTable END
-
 SMPS_VolEnvIndex_f01:	smpsEnvVolPsg $00,$00,$00,$01,$01,$01,$02,$02,$02,$03,$03,$03,$04,$04,$04,$05,$05,$05,$06,$06,$06,$07,HOLD
 SMPS_VolEnvIndex_f02:	smpsEnvVolPsg $00,$02,$04,$06,$08,$10,HOLD
 SMPS_VolEnvIndex_f03:	smpsEnvVolPsg $00,$00,$01,$01,$02,$02,$03,$03,$04,$04,$05,$05,$06,$06,$07,$07,HOLD
@@ -202,7 +203,6 @@ SMPS_VolEnvIndex_s26:	smpsEnvVolPsg $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,
 ;			smpsEnvVolPsg $09,$09		; S3A has these two extra ticks
 			smpsEnvVolPsg $09,$09,REST
 SMPS_VolEnvIndex_s27:	smpsEnvVolPsg $00,$02,$02,$02,$03,$03,$03,$04,$04,$04,$05,$05,REST
-
 ; ---------------------------------------------------------------------------
 ; FM Universal Voice Bank
 ; ---------------------------------------------------------------------------
@@ -735,13 +735,37 @@ SMPS_UVB_FM:
 	smpsVcReleaseRate	$08, $00, $00, $00
 	smpsVcTotalLevel	$80, $13, $37, $19
 ; ---------------------------------------------------------------------------
-	even
+; PCM Drums
+; ---------------------------------------------------------------------------
+SMPS_PcmDrumTable:
+; ---------------------------------------------------------------------------
+; FM Drums
+; ---------------------------------------------------------------------------
+SMPS_FmDrumTable:
+; ---------------------------------------------------------------------------
+; PSG Drums
+; ---------------------------------------------------------------------------
+; vibr,enve,noisetype
+SMPS_PsgDrumTable:
+	smpsEnvTable START
+	smpsEnvTable SMPS_PsgDrumTable_01
+	smpsEnvTable SMPS_PsgDrumTable_02
+	smpsEnvTable SMPS_PsgDrumTable_03
+	smpsEnvTable SMPS_PsgDrumTable_04
+	smpsEnvTable SMPS_PsgDrumTable_05
+	smpsEnvTable END
+SMPS_PsgDrumTable_01:	dc.b  1<<3,fTone_02,$E5
+SMPS_PsgDrumTable_02:	dc.b  1<<3,fTone_03,$E4
+SMPS_PsgDrumTable_03:	dc.b  1<<3,fTone_02,$E4
+SMPS_PsgDrumTable_04:	dc.b  2<<3,fTone_01,$E4
+SMPS_PsgDrumTable_05:	dc.b  2<<3,fTone_02,$E4
 ; ---------------------------------------------------------------------------
 ; Music	index
 ; index start: "START" keyword, first song id
 ; song index: jingle flag, PAL speed adjustment disable, water muffle disable, song data pointer, song data id
 ; index end: "END" keyword, last song id
 ; ---------------------------------------------------------------------------
+	even
 SMPS_MusicIndex:
 	musdef START,bgm__First
 	musdef 0,0,0,BgmTest,bgm_Test
@@ -907,13 +931,13 @@ SMPS_MusicIndex:
 
 	musdef END,bgm__Last
 SMPS_MusicIndex_Exit:
-	even
 ; ---------------------------------------------------------------------------
 ; Sound	effect index
 ; index start: "START" keyword, first sound id, last song id
 ; song index: sound priority (0 to ignore, 1 is lowest, $FF is highest), csfx flag, bsfx flag, water muffle disable, sound data pointer, sound data id
 ; index end: "END" keyword, last sound id
 ; ---------------------------------------------------------------------------
+	even
 SMPS_SoundIndex:
 	sfxdef START,sfx__First,bgm__Last
 	sfxdef $00,0,0,0,SfxTest,sfx_Test
@@ -1327,10 +1351,10 @@ SMPS_SoundIndex:
 
 	sfxdef END,sfx__Last
 SMPS_SoundIndex_Exit:
-	even
 ; ---------------------------------------------------------------------------
 ; PCM Samples
 ; ---------------------------------------------------------------------------
+	even
 SMPS_SampleTable:
 ; ============= type	expected driver		sequence id start	queue id start			queue id start label
 	pcmdef	START,	MegaPCM2,		$81,			sfx__Last,			pcm__First

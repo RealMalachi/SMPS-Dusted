@@ -6,8 +6,8 @@ APILUT:
 		bra.w	RunDriver				; 04 ; 
 		bra.w	QueueSound				; 08 ; d0.w = sound id
 		bra.w	UpdateFIFO				; 12 ;
-		bra.w	ReadComm				; 16 ; d0.b = 
-		bra.w	WriteComm				; 20 ; d0.b = 
+		bra.w	ReadComm				; 16 ; d0.b = comm, d1.b = index
+		bra.w	WriteComm				; 20 ; d0.b = comm, d1.b = index
 		bra.w	PauseDriver				; 24 ;
 		bra.w	ResumeDriver				; 28 ;
 		bra.w	SetupPianoRoll				; 32 ; a0 = piano ram
@@ -15,14 +15,13 @@ APILUT:
 		bra.w	DACGuard				; 40 ;
 		bra.w	DACUnguard				; 44 ;
 ;		bra.w	PlayCDDA				; 48 ; d0.b = track ID
-; ---------------------------------------------------------------------------
 		rept (64-(*))/4
 		bra.w	.error
 		endr
+; ---------------------------------------------------------------------------
 .sign:		dc.b "SMPS-DUSTED 68K V0.1 BY MALACHI",0
 		dc.b [32-((*)-.sign)]" "
-.error:
-		SMPS_assert "Undefined API command"
+.error:		SMPS_assert "Undefined API command"
 ; ---------------------------------------------------------------------------
 QueueSound:
 	set .loc,v_soundqueue_start
@@ -50,11 +49,19 @@ ResumeDriver:
 		rts
 ; ---------------------------------------------------------------------------
 ReadComm:
-		move.b	d0,v_communication_byte(a1)
+		cmp.b	#__smpsCommBytes,d1
+		bhs.s	.index
+		and.w	#$FF,d1
+		move.b	d0,v_communication(a1,d1.w)
 		rts
+.index:		SMPS_assert "ReadComm: Index is too large"
 WriteComm:
-		move.b	v_communication_byte(a1),d0
+		cmp.b	#__smpsCommBytes,d1
+		bhs.s	.index
+		and.w	#$FF,d1
+		move.b	v_communication(a1,d1.w),d0
 		rts
+.index:		SMPS_assert "ReadComm: Index is too large"
 ; ---------------------------------------------------------------------------
 SetDriverDataPointer:
 		move.l	a0,d0

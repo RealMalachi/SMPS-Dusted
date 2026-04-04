@@ -1,18 +1,19 @@
 ; ---------------------------------------------------------------------------
-DACUpdateTrack:
+PCMUpdateTrack:
 		subq.b	#1,TrackDurationTimeout(a5)		; Has DAC sample timeout expired?
 		bne.s	.sampleongoing				; Return if not
-		bsr.s	DACDoNext
+		bsr.s	PCMDoNext
 		btst	#_resting,TrackPlaybackControl(a5)
 		bne.s	.locret
 		bsr.w	DoVolEnv				; bsr is necessary for stack reasons, see `VolEnvCommands`
 		bsr.w	DoPanEnv				; bsr is necessary for stack reasons
-;DACPlaySample:
+;PCMPlaySample:
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	.locret
 		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
-		move.w	TrackSavedDAC(a5),d1
+		moveq	#0,d1
+		move.b	TrackSavedDAC(a5),d1
 		bpl.w	DACQueueSample
 		btst	#_noattack,TrackPlaybackControl(a5)
 		bne.s	.locret
@@ -24,7 +25,7 @@ DACUpdateTrack:
 		bsr.w	UpdatePanning				; bsr is necessary for stack reasons
 .locret:	rts
 ; ===========================================================================
-DACDoNext:
+PCMDoNext:
 		and.b	#$FF!(1<<_resting|1<<_noattack),TrackPlaybackControl(a5)
 		btst	#_holdnotes,TrackPlaybackControl(a5)
 		beq.s	.notheld
@@ -39,37 +40,37 @@ DACDoNext:
 		pea	.noteloop(pc)
 		bra.w	CoordFlag				; manipulates stack
 ; ---------------------------------------------------------------------------
-.gotnote:
-		move.w	d5,d1
-		sub.w	#$81,d1
-		bcc.s	.gotnoteitisntarest
-		moveq	#$3F,d0
-		and.b	TrackVoiceControl(a5),d0
-		bsr.w	DACStopSample
-		or.b	#1<<_resting,TrackPlaybackControl(a5)
-		moveq	#-1,d1
-.gotnoteitisntarest:
-		move.w	d1,TrackFreq(a5)
-
+.gotnote:	bsr.w	PCMSetDAC
 		move.b	(a4)+,d5
 		bpl.s	.gotnotetime
 		subq.w	#1,a4
-		bra.w	DACFinishTrackUpdate
+		bra.w	PCMFinishTrackUpdate
 .gotnotetime:	tst.w	TrackFreq(a5)
 		bpl.s	.norest
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
-.norest:	pea	DACFinishTrackUpdate(pc)
+.norest:	pea	PCMFinishTrackUpdate(pc)
 		bra.w	SetDuration
 ; ---------------------------------------------------------------------------
 .gotonlytime:	tst.w	TrackFreq(a5)
 		bpl.s	.norest
 	if __smpsDebug
 ; note-rest-time-time varies on different versions of SMPS, as noted in Clone Drivers asserts
-		SMPS_assert "DAC note-rest-time-time"
+		SMPS_assert "PCM note-rest-time-time"
 	else
 ; note-rest-time-time
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
-		pea	DACFinishTrackUpdate(pc)
+		pea	PCMFinishTrackUpdate(pc)
 		bra.w	SetDuration
 	endif
 ; ===========================================================================
+PCMSetDAC:
+		sub.b	#$81,d5
+		bcs.s	.rest
+		move.b	d5,TrackSavedDAC(a5)
+		move.w	#$100,TrackFreq(a5)
+		rts
+.rest:		or.b	#1<<_resting,TrackPlaybackControl(a5)
+		move.w	#-1,TrackFreq(a5)
+		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
+		bra.w	DACStopSample

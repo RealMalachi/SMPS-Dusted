@@ -2,6 +2,11 @@
 ; INPUT
 ; a0 = driver data
 ; a1 = driver ram
+; d0.l = desired add-ons bitfield
+; ........ ........ ........ .....MCD
+; M = 32X PWM
+; C = Mega-CD Ricoh PCM
+; D = CDDA (Mega-CD or MD+)
 ; TRASHES: d0-a6
 ; ---------------------------------------------------------------------------
 InitDriver:
@@ -9,17 +14,17 @@ InitDriver:
 .endaddr	= v_endofram
 .clrLen		= .endaddr-.startaddr
 		lea	.startaddr(a1),a2
-		moveq	#0,d0
+		moveq	#0,d1
 	if (.clrLen)/4<>0
 		move.w	#(.clrLen)/4-1,d1
-.clrLoop:	move.l	d0,(a2)+
+.clrLoop:	move.l	d1,(a2)+
 		dbf	d1,.clrLoop
 	endif
 	if (.clrLen)&2
-		move.w	d0,(a2)+
+		move.w	d1,(a2)+
 	endif
 	if (.clrLen)&1
-		move.b	d0,(a2)+
+		move.b	d1,(a2)+
 	endif
 		move.w	#$7AD4,v_random(a1)
 		bsr.w	SetDriverDataPointer
@@ -29,13 +34,13 @@ InitDriver:
 .okayitsfine:
 
 		bsr.s	Detect_Firecore
-		seq	d0
-		and.w	#%01010000,d0		; set firecore detect on and SSG-EG off
-		moveq	#1,d1			; 0 = NTSC, 1 = PAL
-		and.w	(vdpctrl).l,d1
-		ror.b	#1,d1			; move to bit 7
-		or.b	d1,d0
-		move.b	d0,v_driverflags(a1)
+		seq	d1
+		and.w	#%01010000,d1		; set firecore detect on and SSG-EG off
+		moveq	#1,d2			; 0 = NTSC, 1 = PAL
+		and.w	(vdpctrl).l,d2
+		ror.b	#1,d2			; move to bit 7
+		or.b	d2,d1
+		move.b	d1,v_driverflags(a1)
 
 		move.l	a1,a6
 		bsr.w	DACInitDriver
@@ -101,7 +106,7 @@ Detect_Firecore:
 	move.w	#3,.k68Clock-.PSGFreq(a0)			; 3 for 68K clock divider (9MHz)
 	move.w	#$0607,.Z80Clock-.PSGFreq(a0)			; I don't fully understand this, but it clocks the Z80 ~3.5MHz
 	move.w	#$0004,(.DevMode).w				; normal mode
-	moveq	#0,d0				; set ccr zero bit...
+	moveq	#0,d1				; set ccr zero bit...
 .ABCDFail:					; ...or leave with ccr zero bit cleared
 	rts
 ; -------------------------------------------------------------------------

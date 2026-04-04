@@ -25,7 +25,7 @@ SetDuration:
 		move.b	d5,TrackDurationTimeout(a5)			; Save duration timeout
 		rts
 ; ===========================================================================
-DACFinishTrackUpdate:
+PCMFinishTrackUpdate:
 		move.l	a4,d0
 		move.w	d0,TrackDataPointer+2(a5)
 		swap	d0
@@ -531,7 +531,7 @@ cfExtCmd:
 		dc.w  cfxPanningAMSFMS-.lut			; cxPanAMSFMS
 		dc.w  cfxSetLFO-.lut				; cxSetLFO
 		dc.w  cfxSetLFOSens-.lut			; cxSetLFOSens
-		dc.w  cfxSetCommunication-.lut			; cxCommunicate
+		dc.w  cfxCommunicate-.lut			; cxCommunicate
 		dc.w  cfxFadeInToPrevious-.lut			; cxSongFadeIn
 		dc.w  cfxUnk-.lut				; cxSpecialFM3
 		dc.w  cfxRevUp-.lut				; cxRevUp
@@ -547,14 +547,28 @@ cfExtCmd:
 		dc.w  cfxModChg-.lut				; cxModChg
 		dc.w  cfxModChg2-.lut				; cxModChg2
 		dc.w  cfxRandPitch-.lut				; cxRandPitch
-		dc.w  cfxPlaySampleID-.lut			; cxSample
+		dc.w  cfxSample-.lut				; cxSample
 		dc.w  cfxSetTempoMod-.lut			; cxTempoMod
 		dc.w  cfxSetTempoDividerAll-.lut		; cxTempoDivAll
+		dc.w  cfxDrumModeOn-.lut			; cxDrumModeOn
+		dc.w  cfxDrumModeOff-.lut			; cxDrumModeOff
+		dc.w  cfxCommJump-.lut				; cxCommJump
 .lute:
 ; ===========================================================================
 cfxUnk:
-cfUnk:		
-		SMPS_assert "Invalid sequence control flag, TODO print cf"
+cfUnk:		SMPS_assert "Invalid sequence control flag, TODO print cf"
+; ===========================================================================
+	if __smpsDrum
+cfxDrumModeOn:
+		or.b	#1<<_drummode,TrackPlaybackControl(a5)
+		rts
+cfxDrumModeOff:
+		and.b	#(1<<_drummode)!$FF,TrackPlaybackControl(a5)
+		rts
+	else
+cfxDrumModeOn:	SMPS_assert "cfxDrumModeOn: __smpsDrum was disabled"
+cfxDrumModeOff:	SMPS_assert "cfxDrumModeOff: __smpsDrum was disabled"
+	endif
 ; ===========================================================================
 ; set the global modulation and channels sensitivity
 cfxSetLFO:
@@ -753,8 +767,8 @@ cfxSetTempoDividerAll:
 .valid:
 		endif
 		move.b	(a4)+,d0
-	set .val,v_music_dac_tracks+TrackTempoDivider
-	rept (v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz
+	set .val,v_music_pcm_tracks+TrackTempoDivider
+	rept (v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz
 		move.b	d0,.val(a6)
 	set .val,.val+TrackDacSz
 	endr
@@ -792,14 +806,18 @@ cfxSetTempoMod:
 		move.w	d0,v_main_tempo_timeout(a6)		; And reset timeout (!)
 		rts
 ; ===========================================================================
-cfxPlaySampleID:
-		move.b	(a4)+,-(sp)
-		move.w	(sp)+,d1
+cfxSample:
 		move.b	(a4)+,d1
-		move.w	d1,TrackSavedDAC(a5)
+		cmp.b	#$40,TrackVoiceControl(a5)
+		blo.s	.nope
+		tst.b	TrackVoiceControl(a5)
+		bmi.s	.nope
+		move.b	d1,TrackSavedDAC(a5)
 		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
-		bra.w	DACQueueSample
+		btst	#_sfxoverride,TrackPlaybackControl(a5)
+		beq.w	DACQueueSample
+.nope:		rts
 ; ===========================================================================
 cfSetFMVoice:
 		move.b	(a4)+,d0
@@ -994,6 +1012,7 @@ cfxConditionalJump:
 .jump:		clr.b	(a3)
 		bra.s	cfJumpTo
 ; ---------------------------------------------------------------------------
+; Jump until and decrement contsfx until it's zero
 cfxLoopCSFX:
 		tst.b	v_contsfx_loop(a6)
 		bne.s	.nope
@@ -1003,6 +1022,20 @@ cfxLoopCSFX:
 .nope:
 		subq.b	#1,v_contsfx_loop(a6)
 		bra.s	cfJumpTo
+; ---------------------------------------------------------------------------
+; If the chosen communication byte is zero, continue looping
+cfxCommJump:
+		moveq	#0,d0
+		move.b	(a4)+,d0
+		if __smpsDebug=1
+		cmp.b	#__smpsCommBytes,d0
+		bhs.s	.index
+		endif
+		tst.b	TrackLoopCounters(a5,d0.w)
+		beq.s	cfJumpTo
+		addq.w	#2,a4
+		rts
+.index:		SMPS_assert "cfxCommJump: Index is too large"
 ; ---------------------------------------------------------------------------
 cfJumpToGosub:
 		moveq	#0,d0
@@ -1022,7 +1055,7 @@ cfJumpToGosub:
 		move.b	(sp)+,-(a0)
 		swap	d1
 		move.b	d1,-(a0)
-		bra.s	cfJumpTo
+		bra.w	cfJumpTo
 
 		if __smpsDebug=1
 .exceeding:	SMPS_assert "cfJumpToGosub: Stack overflow, TODO: print stack offset"
@@ -1071,9 +1104,16 @@ cfxWriteFMII:
 		move.b	(a4)+,d1
 		bra.w	WriteFMII
 ; ===========================================================================
-cfxSetCommunication:
-		move.b	(a4)+,v_communication_byte(a6)
+cfxCommunicate:
+		moveq	#0,d1
+		move.b	(a4)+,d1
+		if __smpsDebug=1
+		cmp.b	#__smpsCommBytes,d1
+		bhs.s	.index
+		endif
+		move.b	(a4)+,v_communication(a6,d1.w)
 		rts
+.index:		SMPS_assert "cfxCommunicate: Index is too large"
 ; ===========================================================================
 cfxStopFM:
 		cmp.b	#$40,TrackVoiceControl(a5)
@@ -1203,27 +1243,33 @@ cfxRevReset:
 		rts
 ; ===========================================================================
 cfxFadeInToPrevious:
-	if __smpsJingle=1
+	if __smpsJingle=0
+		SMPS_assert "smpsFade: __smpsJingle is disabled"
+	else
+		bclr	#0,v_driverflags(a6)			; clear jingle flag
+		bne.s	.valid
+		SMPS_assert "smpsFade: That was not a jingle track."
+.valid:
+		move.b	(a4)+,v_fadein_counter(a6)		; Trigger fade-in
+; restore track
 		lea	v_1up_save_ram(a6),a0
 		lea	v_1up_ram_copy(a6),a1
 		moveq	#0,d0
-		moveq	#((v_1up_ram_copy_end-v_1up_ram_copy)/4)-1,d2
+		moveq	#((v_1up_ram_copy_end-v_1up_ram_copy)/4)-1,d1
 .restore:
 		move.l	(a1),(a0)+
 		move.l	d0,(a1)+
-		dbf	d2,.restore
+		dbf	d1,.restore
 	if (v_1up_ram_copy_end-v_1up_ram_copy)&2
 		move.w	(a1),(a0)+
 		move.w	d0,(a1)+
 	endif
-		move.b	#$50,v_fadein_counter(a6)		; Trigger fade-in
-		bclr	#0,v_driverflags(a6)
 
 		move.l	a5,a3
 		move.l	d7,-(sp)
 
-		moveq	#((v_music_dac_tracks_end-v_music_dac_tracks)/TrackDacSz)-1,d7
-		lea	v_music_dac_tracks(a6),a5
+		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d7
+		lea	v_music_pcm_tracks(a6),a5
 .dacloop:	tst.b	TrackPlaybackControl(a5)
 		bpl.s	.nextdac
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
@@ -1260,11 +1306,9 @@ cfxFadeInToPrevious:
 
 		move.l	(sp)+,d7
 		move.l	a3,a5
-		lea	12(sp),sp				; stop processing all BGM channels
-		move.l	(sp),d2
+; stop processing all BGM channels for this frame
+		lea	12(sp),sp
 		bra.w	HandleSequencerEnd
-	else
-		SMPS_assert "smpsFade: __smpsJingle is disabled"
 	endif
 ; ===========================================================================
 cfxPlayID:

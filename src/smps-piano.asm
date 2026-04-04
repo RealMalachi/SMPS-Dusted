@@ -85,8 +85,8 @@ SetupPianoRoll:
 		dc.w v_music_psg2_track
 		dc.w v_music_psg3_track
 		dc.w 0;v_music_psg4_track
-		dc.w v_music_dac1_track
-		dc.w 0;v_music_dac2_track
+		dc.w v_music_pcm1_track
+		dc.w 0;v_music_pcm2_track
 .snde:
 		even
 ; ---------------------------------------------------------------------------
@@ -127,7 +127,8 @@ SetupPianoRoll:
 		rts
 ; ---------------------------------------------------------------------------
 .pcm:
-		move.w	TrackSavedDAC(a5),d6
+		moveq	#0,d6
+		move.b	TrackSavedDAC(a5),d6
 		moveq	#-1,d0
 		move.b	TrackAMSFMSPan(a5),d1	; ........ RL......
 		ext.w	d1			; RRRRRRRR RL......

@@ -57,6 +57,10 @@ PSGDoNext:
 	endif
 ; ===========================================================================
 PSGSetFreq:
+	if __smpsDrum
+		btst	#_drummode,TrackPlaybackControl(a5)
+		bne.s	.drummode
+	endif
 		subi.b	#$81,d5					; Convert to 0-based index
 		bcs.s	.rest					; If $80, put track at rest
 		add.b	TrackTranspose(a5),d5
@@ -70,6 +74,13 @@ PSGSetFreq:
 .rest:		or.b	#1<<_resting,TrackPlaybackControl(a5)
 		move.w	#-1,TrackFreq(a5)
 		bra.w	PSGNoteOff
+	if __smpsDrum
+.drummode:
+		subi.b	#$80,d5
+		move.b	d5,TrackDrum(a5)
+		beq.s	.rest
+		rts
+	endif
 .assert:	SMPS_assert "PSGSetFreq: invalid frequency, TODO: print freq id"
 ; ===========================================================================
 ; PSG Note Values: c-0 to a-6
@@ -87,17 +98,46 @@ PSGFrequenciesEnd:
 PSGUpdateFreq:
 		moveq_	%10111111,d0
 		and.b	TrackModulationCtrl(a5),d0		; is modulation (calculated or envelopes) enabled?
-		beq.s	PSGUpdateFreq_exit			; if not, branch
+		beq.s	PSGPrepareNote.exit			; if not, branch
 
 PSGPrepareNote:
-		btst	#_sfxoverride,TrackPlaybackControl(a5)
-		bne.s	PSGUpdateFreq_exit
+	if __smpsDrum
+		btst	#_drummode,TrackPlaybackControl(a5)
+		bne.s	.drummode
+	endif
 		moveq	#0,d2
 		bsr.w	GetFrequency
 		bpl.s	.valid
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
+.exit:		rts
+	if __smpsDrum
+.drummode:
+		moveq	#0,d1
+		move.b	TrackDrum(a5),d1
+		beq.s	.exit
+
+		move.l	v_dataptr(a6),a0
+		moveq	#0,d0
+		move.w	drvdata.psgdrum(a0),d0
+		add.l	d0,a0
+		add.w	d1,d1
+		move.b	-2(a0,d1.w),-(sp)
+		move.w	(sp)+,d0
+		move.b	1-2(a0,d1.w),d0
+		adda.w	d0,a0
+
+		move.b	(a0)+,TrackVolume(a5)
+		move.b	(a0)+,TrackVolEnvIndex(a5)
+		move.b	(a0)+,d0
+		move.b	d0,TrackVoiceControl(a5)
+		btst	#_sfxoverride,TrackPlaybackControl(a5)
+		bne.s	.exit
+		move.b	d0,(psginput).l
 		rts
+	endif
 .valid:
+		btst	#_sfxoverride,TrackPlaybackControl(a5)
+		bne.s	.exit
 ; TODO: check for other noise modes
 		moveq_	$E0,d0
 		and.b	TrackVoiceControl(a5),d0		; Get channel bits
@@ -112,7 +152,6 @@ PSGPrepareNote:
 		andi.b	#$3F,d6					; Send to latched channel
 		move.b	d0,(psginput).l
 		move.b	d6,(psginput).l
-PSGUpdateFreq_exit:
 		rts
 ; ===========================================================================
 PSGSilence:

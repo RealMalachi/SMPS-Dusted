@@ -1,5 +1,5 @@
 Mus_TestBgm_Header:
-	smpsHeaderStartSong	"DUSTED",1
+	smpsHeaderStartSong	$F0E50000,1
 	smpsHeaderVoice		Mus_TestBgm_Voices
 	smpsHeaderVolEnv	Mus_TestBgm_VolEnv
 ;	smpsHeaderModEnv	Mus_TestBgm_ModEnv

@@ -24,7 +24,7 @@ SMPSCPUVer	equ "68K"	; 68K, Z80
 ; 5 = Sonic 3D
 ; 6 = Sonic CD
 ; 8 = Sonic Crackers??
-; "DUSTED" = SMPS-Dusted ; TODO: change to a hex number representing ASCII
+; $F0E5xxxx = SMPS-Dusted
 ; ---------------------------------------------------------------------------
 ; Standard Octave Pitch Equates
 	enumconf	$C
@@ -139,7 +139,7 @@ cxPanAuto		ds.b 1		; cfxUnk
 cxPanAMSFMS		ds.b 1		; cfxPanningAMSFMS
 cxSetLFO		ds.b 1		; cfxSetLFO
 cxSetLFOSens		ds.b 1		; cfxSetLFOSens
-cxCommunicate		ds.b 1		; cfSetCommunication
+cxCommunicate		ds.b 1		; cfxCommunicate
 cxSongFadeIn		ds.b 1		; cfxFadeInToPrevious
 cxSpecialFM3		ds.b 1		; cfxUnk
 cxRevUp			ds.b 1		; cfxRevUp
@@ -155,9 +155,12 @@ cxLoopCSFX		ds.b 1		; cfxLoopCSFX
 cxModChg		ds.b 1		; cfxModChg
 cxModChg2		ds.b 1		; cfxModChg2
 cxRandPitch		ds.b 1		; cfxRandPitch
-cxSample		ds.b 1		; cfxPlaySampleID
+cxSample		ds.b 1		; cfxSample
 cxTempoMod		ds.b 1		; cfxSetTempoMod
 cxTempoDivAll		ds.b 1		; cfxSetTempoDividerAll
+cxDrumModeOn		ds.b 1		; cfxDrumModeOn
+cxDrumModeOff		ds.b 1		; cfxDrumModeOff
+cxCommJump		ds.b 1		; cfxCommJump
 ;cxSetFreqMode1		ds.b 1		; cfxSetFreqMode1
 ;cxSetFreqMode2		ds.b 1		; cfxSetFreqMode2
 	dephase
@@ -182,7 +185,7 @@ cxTempoDivAll		ds.b 1		; cfxSetTempoDividerAll
 ;
 ; Sonic 2 is just a non-overflow timer and can be easily inverted
 convertMainTempoMod macro mod
-	if SourceDriver=="DUSTED"
+	if (SourceDriver>>16)==$F0E5
 	dc.w	mod
 	elseif SourceDriver==1
 		if mod==1
@@ -270,7 +273,7 @@ smpsHeaderChan macro fm,psg,dac
 fmCount  set fm
 psgCount set psg
 dacCount set dac
-	elseif SourceDriver=="DUSTED"
+	elseif (SourceDriver>>16)==$F0E5
 	fatal "Please specify all sound channels (including DACs)"
 	else
 fmCount  set fm-(fm>0)
@@ -319,7 +322,7 @@ smpsHeaderFM macro loc,pitch,vol
 ; In standard SMPS 68k Type 1, frequency/modulation envelopes are skipped and can contain garbage.
 smpsHeaderPSG macro loc,pitch,vol,mod,voice
 	CheckedChannelPointer loc
-	if SourceDriver=="DUSTED"
+	if (SourceDriver>>16)==$F0E5
 	dc.b	pitch,vol,mod,voice
 	elseif SourceDriver>=3
 	dc.b	pitch,((vol&$F)<<3)|((vol)&$80),mod,voice
@@ -360,7 +363,7 @@ smpsHeaderSFXChannel macro chanid,loc,pitch,vol
 ;		if (loc-((*)+1))>$FF
 ;		warning "SFX channel offset too large for u8: 0x\{loc-((*)+1)}"
 ;		endif
-	elseif (chanid<$80) || (SourceDriver=="DUSTED")
+	elseif (chanid<$80) || ((SourceDriver>>16)==$F0E5)
 	dc.b	chanid,pitch,vol,loc-((*)+1+3)
 	elseif SourceDriver>=3
 	dc.b	chanid,pitch,((vol&$F)<<3)|((vol)&$80),loc-((*)+1+3)
@@ -417,9 +420,14 @@ smpsDetune macro val
 	dc.b	cDetune,val
 	endm
 
-; Set communication byte
-smpsCommunicate macro val
-	dc.b	cExtCmd,cxCommunicate,val
+; Set communication byte, using index 0 if it isn't defined
+smpsComm macro val,index
+	dc.b	cExtCmd,cxCommunicate,index+0,val
+	endm
+; Jump if the condition is zero
+smpsCommJump macro loc,index
+	dc.b	cExtCmd,cxCommJump,index+0
+	CheckedChannelJump loc
 	endm
 
 ; Set channel tempo divider
@@ -439,21 +447,21 @@ smpsSetTempoMod macro mod
 ; Set Volume to xx
 ; DUSTED bases this in attenuation like AlterVol, S3K bases it on volume-ish
 smpsSetVol macro vol
-	if (SourceDriver=="DUSTED")
+	if (SourceDriver>>16)==$F0E5
 	dc.b	cVolSet,vol
 	else
 	dc.b	cVolSet,(vol&$7F)!$7F
 	endif
 	endm
 smpsFMSetVol macro vol
-	if (SourceDriver=="DUSTED")
+	if (SourceDriver>>16)==$F0E5
 	dc.b	cVolSet,vol
 	else
 	dc.b	cVolSet,(vol&$7F)!$7F
 	endif
 	endm
 smpsPSGSetVol macro vol
-	if (SourceDriver=="DUSTED")
+	if (SourceDriver>>16)==$F0E5
 	dc.b	cVolSetPSG,vol
 	else
 	dc.b	cVolSetPSG,((vol&$F)!&$F)<<3
@@ -486,7 +494,7 @@ smpsPSGAlterVol macro vol
 	if (vol=0) && (MOMPASS=1)
 	warning "eh?"
 	endif
-	if (SourceDriver=="DUSTED")
+	if (SourceDriver>>16)==$F0E5
 	dc.b	cVolAddPSG,vol
 	else
 	dc.b	cVolAddPSG,((vol&$F)<<3)|((vol)&$80)
@@ -505,7 +513,7 @@ smpsReleaseNotes macro
 ; Set note fill to xx
 ; type 0 is 68K, type 1 is Z80, if type isn't specified then base it on the source driver
 smpsNoteFill macro val,type
-	if ("type"=="") && (SourceDriver=="DUSTED")
+	if ("type"=="") && ((SourceDriver>>16)==$F0E5)
 	fatal "Please specify the note file version"
 	elseif ("type"=="") && (SourceDriver<3)
 	dc.b	cNoteFill,val
@@ -537,7 +545,7 @@ smpsRandPitch macro valto,valfrom
 ; the algorithm type can be specified, DUSTED sources expect
 ; you to define the type but it'll be auto-detected for others
 smpsModSet macro wait,speed,change,step,type
-	if ("type"=="") && (SourceDriver=="DUSTED")
+	if ("type"=="") && ((SourceDriver>>16)==$F0E5)
 	fatal "Please specify the modulation algorithm version"
 	elseif ("type"=="") && (SourceDriver<3)
 	dc.b	cModSet68K,wait,speed,change,step
@@ -570,7 +578,7 @@ smpsModChange2 macro fmmod,psgmod
 
 ; Play sample ID (for samples outside of 81-DF range)
 smpsPlayDACSample macro smpID
-	dc.b	cExtCmd,cxSample,(smpID)>>8,(smpID)&$FF
+	dc.b	cExtCmd,cxSample,smpID
 	endm
 ; Set FM voice
 smpsFMvoice macro voice,soundID
@@ -675,6 +683,14 @@ smpsStopSpecial macro
 smpsStopFM macro
 	dc.b	cExtCmd,cxStopFM
 	endm
+
+; enable and disable a channels respective drum modes
+smpsEnableDrumMode macro
+	dc.b	cExtCmd,cxDrumModeOn
+	endm
+smpsDisableDrumMode macro
+	dc.b	cExtCmd,cxDrumModeOff
+	endm
 ; ---------------------------------------------------------------------------
 ; Sonic game specific features, don't expect these to be commonplace elsewhere
 
@@ -722,17 +738,6 @@ smpsModVoice macro voice,type
 smpsPanAni macro
 	fatal "smpsPanAni is unsupported"
 	endm
-smpsConditionalJumpCD macro
-	if MOMPASS==1
-	warning "smpsConditionalJumpCD is unsupported"
-	endif
-	endm
-smpsClearPush macro
-	if MOMPASS==1
-	warning "smpsClearPush is unsupported"
-	endif
-	endm
-;	dc.b cExtCmd,cxPushFlag
 smpsFM3SpecialMode macro ind1,ind2,ind3,ind4
 	fatal "smpsFM3SpecialMode is unsupported"
 	endm
@@ -768,8 +773,8 @@ smpsNoAttacks macro
 smpsAllowAttacks macro
 	smpsReleaseNotes ALLARGS
 	endm
-smpsNop macro
-	smpsCommunicate ALLARGS
+smpsNop macro val
+	smpsComm val,0
 	endm
 smpsAlterNote macro
 	smpsDetune ALLARGS
@@ -807,16 +812,20 @@ smpsPSGpulse macro
 	endif
 	smpsPSGform 0
 	endm
+smpsConditionalJumpCD macro loc
+	smpsCommJump loc,0
+	endm
 ; DEVON NOOO-
 smpsSlideSpeed macro val
 	smpsDetune val
 	endm
 ; ---------------------------------------------------------------------------
 ; unsupported with no interest to support
+smpsClearPush macro
+	fatal "smpsClearPush is unsupported"
+	endm
 smpsRingSwap macro
-	if MOMPASS==1
-	warning "smpsRingSwap is unsupported"
-	endif
+	fatal "smpsRingSwap is unsupported"
 	endm
 smpsCopyData macro data,len
 	fatal "smpsCopyData is unsupported"
@@ -1092,7 +1101,7 @@ smpsVcSsgEg macro op1,op2,op3,op4
 	set vcSSG4,op4
 	endm
 smpsVcTotalLevelMuffle macro op1,op2,op3,op4
-	if (SourceDriver=="DUSTED")
+	if (SourceDriver>>16)==$F0E5
 		set vcTLM1,op1
 		set vcTLM2,op2
 		set vcTLM3,op3
@@ -1119,7 +1128,7 @@ smpsVcTotalLevelMuffle macro op1,op2,op3,op4
 ; Similarly, the original SMPS2ASM decides TL high bits automatically,
 ; but later versions leave it up to the user.
 smpsVcTotalLevel macro op1,op2,op3,op4
-	if (SourceDriver=="DUSTED")
+	if (SourceDriver>>16)==$F0E5
 		set vcTL1,op1
 		set vcTL2,op2
 		set vcTL3,op3
