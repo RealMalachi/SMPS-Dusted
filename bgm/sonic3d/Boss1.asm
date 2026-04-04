@@ -327,44 +327,40 @@ Snd_Boss1_Call00:
 ; DAC Data
 Snd_Boss1_DAC:
 	dc.b	dCrashCymbal, $18, dKickS3, dKickS3, dKickS3, dKickS3, dKickS3, dKickS3, dKickS3, dKickS3, dKickS3, dKickS3
-	dc.b	dKickS3, dKickS3, dKickS3, dKickS3, dKickS3, dCrashCymbal, $18, dKickS3, dKickS3, dKickS3, dKickS3, dKickS3
-	dc.b	dKickS3, dKickS3, dKickS3, dKickS3, dKickS3, dKickS3, dKickS3, $06, nRst, nRst, dKickS3, dKickS3
-	dc.b	dSnareS3, nRst, dKickS3, dKickS3, dElectricFloorTom, dElectricFloorTom, dElectricFloorTom, dElectricMidTom, dElectricMidTom, dElectricLowTom, dElectricFloorTom
+	dc.b	dKickS3, dKickS3, dKickS3, dKickS3, dKickS3, dCrashCymbal, dKickS3, dKickS3, dKickS3, dKickS3, dKickS3
+	dc.b	dKickS3, dKickS3, dKickS3, dKickS3, dKickS3, dKickS3, dKickS3, $12, dKickS3, $06, dKickS3, dSnareS3, $0C
+	dc.b	dKickS3, $06, dKickS3, dElectricFloorTom, dElectricFloorTom, dElectricFloorTom, dElectricMidTom, dElectricMidTom, dElectricLowTom, dElectricFloorTom
 
 Snd_Boss1_Jump00:
-	dc.b	dCrashCymbal, $06, nRst, nRst, nRst, dSnareS3, nRst, nRst, dKickS3, nRst, dKickS3, dKickS3
-	dc.b	nRst, dSnareS3, nRst, nRst, nRst
+	dc.b	dCrashCymbal, $18, dSnareS3, $12, dKickS3, $0C, $06, $0C
 
 Snd_Boss1_Loop00:
-	dc.b	dKickS3, $06, nRst, nRst, nRst, dSnareS3, nRst, nRst, dKickS3, nRst, dKickS3, dKickS3
-	dc.b	nRst, dSnareS3, nRst, nRst, nRst
+	dc.b	dSnareS3, $18, dKickS3, $18, dSnareS3, $12, dKickS3, $0C, $06, $0C
 	smpsLoop            $00, $06, Snd_Boss1_Loop00
-	dc.b	dCrashCymbal, $06, nRst, nRst, nRst, dSnareS3, nRst, nRst, dKickS3, nRst, dKickS3, dKickS3
+	dc.b	dSnareS3, $18, dCrashCymbal, dSnareS3, $12, dKickS3, $0C, $06, $06
 	dc.b	dElectricHighTom, dElectricMidTom, dElectricLowTom, dElectricFloorTom, dElectricFloorTom
 
 Snd_Boss1_Loop01:
-	dc.b	dKickS3, $06, nRst, nRst, nRst, dSnareS3, nRst, nRst, dKickS3, nRst, dKickS3, nRst
-	dc.b	nRst, dSnareS3, nRst, nRst, nRst
+	dc.b	dKickS3, $18, dSnareS3, $12, dKickS3, $0C, $12, dSnareS3, $18
 	smpsLoop            $00, $08, Snd_Boss1_Loop01
 
 Snd_Boss1_Loop02:
-	dc.b	dKickS3, $18, dSnareS3, dKickS3, dSnareS3
-	smpsLoop            $00, $0A, Snd_Boss1_Loop02
+	dc.b	dKickS3, $18, dSnareS3
+	smpsLoop            $00, $14, Snd_Boss1_Loop02
 	dc.b	dCrashCymbal, $18, dSnareS3, dKickS3, dKickS3, dKickS3, dKickS3, dKickS3, dKickS3, dCrashCymbal, dKickS3, dKickS3
-	dc.b	dKickS3, dKickS3, $06, dSnareS3, dKickS3, nRst, dKickS3, dSnareS3, dKickS3, nRst, dSnareS3, dSnareS3
+	dc.b	dKickS3, dKickS3, $06, dSnareS3, dKickS3, $0C, $06, dSnareS3, dKickS3, $0C, dSnareS3, $06, dSnareS3
 	dc.b	dSnareS3, dSnareS3, dElectricHighTom, dElectricMidTom, dElectricLowTom, dElectricFloorTom
 
 Snd_Boss1_Loop03:
-	dc.b	dKickS3, $06, nRst, nRst, nRst, dSnareS3, nRst, nRst, dKickS3, nRst, dKickS3, nRst
-	dc.b	nRst, dSnareS3, nRst, nRst, nRst
+	dc.b	dKickS3, $18, dSnareS3, $12, dKickS3, $0C, $12, dSnareS3, $18
 	smpsLoop            $00, $03, Snd_Boss1_Loop03
-	dc.b	dKickS3, $18, dSnareS3, dKickS3, $06, nRst, dSnareS3, nRst, dSnareS3, dSnareS3, nRst, dSnareS3
+	dc.b	dKickS3, $18, dSnareS3, dKickS3, $0C, dSnareS3, $0C, $06, $0C, $06
 
 Snd_Boss1_Loop04:
-	dc.b	dKickS3, $18, dSnareS3, dKickS3, dSnareS3
-	smpsLoop            $00, $03, Snd_Boss1_Loop04
-	dc.b	dKickS3, $06, dSnareS3, nRst, dKickS3, dSnareS3, nRst, dKickS3, dKickS3, dElectricHighTom, dElectricHighTom, dElectricMidTom
-	dc.b	dElectricMidTom, dElectricLowTom, dElectricFloorTom, dElectricFloorTom, dElectricFloorTom
+	dc.b	dKickS3, $18, dSnareS3
+	smpsLoop            $00, $06, Snd_Boss1_Loop04
+	dc.b	dKickS3, $06, dSnareS3, $0C, dKickS3, $06, dSnareS3, $0C, dKickS3, $06, $06
+	dc.b	dElectricHighTom, dElectricHighTom, dElectricMidTom, dElectricMidTom, dElectricLowTom, dElectricFloorTom, dElectricFloorTom, dElectricFloorTom
 	smpsJump            Snd_Boss1_Jump00
 
 Snd_Boss1_Voices:

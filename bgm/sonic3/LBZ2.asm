@@ -307,7 +307,7 @@ Snd_LBZ2_Call0C:
 
 ; DAC Data
 Snd_LBZ2_DAC:
-	dc.b	dModLooseKick, $12, nRst, dModLooseKick, $3C
+	dc.b	dModLooseKick, $24, dModLooseKick, $3C
 
 Snd_LBZ2_Loop00:
 	dc.b	dModLooseKick, $06, dHiHitDrum, nRst, dHiHitDrum, dLowHitDrum, nRst, dModLooseKick, dHiHitDrum, nRst, dHiHitDrum, dLowHitDrum

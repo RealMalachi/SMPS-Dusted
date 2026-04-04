@@ -5,24 +5,7 @@ Snd_S3_Knux_Header:
 	smpsHeaderTempo     $01, $43
 
 	smpsHeaderDAC       Snd_S3_Knux_DAC
-    if FixMusicAndSFXDataBugs
 	smpsHeaderFM        Snd_S3_Knux_FM1,	$02, $03
-    else
-	; The transposition of $C2 is too low, causing the octave calculation to underflow.
-	; In drivers that don't calculate the octave (such as Sonic 1's and Sonic 2's
-	; drivers, which are derived from SMPS 68k Type 1b), this invalid transpose causes
-	; this channel's notes to play with nonsensical frequencies.
-	; Calculating the correct transposition is tricky because you have to consider that
-	; it's the sum of the transposition *with the note* that underflows the octave
-	; calculation, so the correct transposition depends on which notes it is used with.
-	; '(((x/12)&7)*12)+(x%12)' can be used to obtain a post-underflow version of the
-	; transpositon. Then, if the notes used with this transposition would cause the sum
-	; to exceed $60, then subtract $60 from the transposition.
-	; $C2 run through the formula is $02, and the notes that this displacement is used
-	; with are in the low octaves, so the sum will never exceed $60. Because of this,
-	; $02 is the correct displacement.
-	smpsHeaderFM        Snd_S3_Knux_FM1,	$C2, $03
-    endif
 	smpsHeaderFM        Snd_S3_Knux_FM2,	$E0, $18
 	smpsHeaderFM        Snd_S3_Knux_FM3,	$0C, $10
 	smpsHeaderFM        Snd_S3_Knux_FM4,	$00, $14
@@ -86,9 +69,9 @@ Snd_S3_Knux_Call00:
 	dc.b	nRst, $0C
 Snd_S3_Knux_Jump02:
 	dc.b	dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $0C, $08, $04, dEchoedClapHitS3
-	dc.b	$18, nRst, $0C, dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $14, $04, dEchoedClapHitS3
-	dc.b	$18, nRst, $0C, dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $0C, $08, $04
-	dc.b	dEchoedClapHitS3, $18, nRst, $0C, dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $14, $04
+	dc.b	$24, dLowerEchoedClapHitS3, $0C, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $14, $04, dEchoedClapHitS3
+	dc.b	$24, dLowerEchoedClapHitS3, $0C, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $0C, $08, $04
+	dc.b	dEchoedClapHitS3, $24, dLowerEchoedClapHitS3, $0C, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $14, $04
 	dc.b	dEchoedClapHitS3, $18
 	smpsReturn
 Snd_S3_Knux_Call01:

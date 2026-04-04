@@ -70,7 +70,7 @@ Snd_1UP_PSG3:
 
 ; DAC Data
 Snd_1UP_DAC:
-	dc.b	dCrashCymbal, $0C, nRst, $06, dKickS3, dMuffledSnare, $03, dMuffledSnare, dMuffledSnare, dMuffledSnare, dMuffledSnare, $0C
+	dc.b	dCrashCymbal, $12, dKickS3, $06, dMuffledSnare, $03, dMuffledSnare, dMuffledSnare, dMuffledSnare, dMuffledSnare, $0C
 	dc.b	dCrashCymbal, $0C, dMuffledSnare, $06, dMuffledSnare, dMuffledSnare, $03, dMuffledSnare, dMuffledSnare, dMuffledSnare, dMuffledSnare, $0C
 	dc.b	dHiTimpaniS3, $0C, dLowTimpaniS3, dHiTimpaniS3, dLowTimpaniS3, dHiTimpaniS3, $30
 	smpsFade

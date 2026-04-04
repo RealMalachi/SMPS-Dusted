@@ -20,9 +20,10 @@ Snd_SSZ_FM1:
 	smpsAlterNote       $FE
 
 Snd_SSZ_Jump01:
-	dc.b	nG2, $07, nRst, $04, nG2, $08, nRst, $04, $24, nG3, nG2, nG2
-	dc.b	$0C, nRst, nC3, $14, nB2, $10, nG2, $08, nRst, $04, nG2, $08
-	dc.b	nRst, $04, $24, nG3, nG2, nG2, $0C, nRst, $30
+	dc.b	nG2, $07, nRst, $04, nG2, $08, nRst, $04, nG2, $24
+	dc.b	nG3, nG2, nG2, $0C, nRst, nC3, $14, nB2, $10
+	dc.b	nG2, $08, nRst, $04, nG2, $08, nRst, $04, nG2, $24
+	dc.b	nG3, nG2, nG2, $0C, nRst, $30
 
 Snd_SSZ_Loop08:
 	dc.b	nC3, $60, nC4, $24, nC3, nC4, $18, nBb2, $06, nRst, $06, nBb2
@@ -143,11 +144,11 @@ Snd_SSZ_Loop02:
 	dc.b	nA4, $24, nA4, $18, nRst, $24, nAb4, $0C, nC5, nBb4, nAb4, nEb5
 	dc.b	$18, nC5, $0C, nD5, nEb5, $18, nD5, $0C, nF5, $18
 	smpsFMAlterVol      $FF
-	dc.b	nG5, $24, nEb6, nD6, $07, nRst, $05, $18, nG5, $54, nAb5, $24
-	dc.b	nEb6, nD6, $07, nRst, $05, $18, nF6, $24, nEb6, $18, nD6, nG5
-	dc.b	$24, nEb6, nD6, $07, nRst, $05, $18, nG5, $54, nAb5, $24, nC6
-	dc.b	nEb6, $18, nG6, nF6, $0C, nEb6, $18, nF6, $24, nC6, $54, nC5
-	dc.b	$06, nE5, nF5, $24, nE5, $18, nC5, $24
+	dc.b	nG5, $24, nEb6, nD6, $07, nRst, $05, nD6, $18, nG5, $54
+	dc.b	nAb5, $24, nEb6, nD6, $07, nRst, $05, nD6, $18, nF6, $24, nEb6, $18, nD6
+	dc.b	nG5, $24, nEb6, nD6, $07, nRst, $05, nD6, $18, nG5, $54
+	dc.b	nAb5, $24, nC6, nEb6, $18, nG6, nF6, $0C, nEb6, $18, nF6, $24
+	dc.b	nC6, $54, nC5, $06, nE5, nF5, $24, nE5, $18, nC5, $24
 	smpsFMAlterVol      $FF
 	dc.b	nC6, $54, nC6, $06, nE6, nF6, $24, nE6, $18, nC6, $24
 	smpsFMAlterVol      $FF
@@ -216,22 +217,21 @@ Snd_SSZ_Jump02:
 ; DAC Data
 Snd_SSZ_DAC:
 	smpsPan             panCenter, $00
-	dc.b	nRst, $60, nRst, nRst, nRst, $17, nRst, $0C, dSnareS3, nRst, dSnareS3, nRst
-	dc.b	dKickS3, $06, dKickS3
+	dc.b	nRst, $60, nRst, nRst, nRst, $23
+	dc.b	dSnareS3, $18, $18, dKickS3, $06, $06
 
 Snd_SSZ_Loop00:
 	smpsPan             panCenter, $00
-	dc.b	dKickS3, $05, dKickS3, dKickS3, $0E, nRst, $0C, dMuffledSnare, $05, dMuffledSnare, dMuffledSnare, $0E
-	dc.b	dMuffledSnare, $0C, nRst, dKickS3, $06, dKickS3, dKickS3, $0C, dKickS3, nRst, dMuffledSnare, $05
-	dc.b	dMuffledSnare, dMuffledSnare, $0E, dMuffledSnare, $0C, nRst, dKickS3, dKickS3, $0C, dKickS3, nRst, dMuffledSnare
-	dc.b	$05, dMuffledSnare, dMuffledSnare, $0E, dMuffledSnare, $0C, nRst, dKickS3, $06, dKickS3, dKickS3, $0C
-	dc.b	dKickS3, nRst, dMuffledSnare, $05, dMuffledSnare, dMuffledSnare, $08
+	dc.b	dKickS3, $05, $05, $1A, dMuffledSnare, $05, $05, $0E, $18
+	dc.b	dKickS3, $06, $06, $0C, $18, dMuffledSnare, $05, $05, $0E, $18
+	dc.b	dKickS3, $0C, $0C, $18, dMuffledSnare, $05, $05, $0E, $18
+	dc.b	dKickS3, $06, $06, $0C, $18, dMuffledSnare, $05, $05, $08
 	smpsPan             panLeft, $00
-	dc.b	dElectricMidTom, $06, dElectricMidTom, dElectricMidTom
+	dc.b	dElectricMidTom, $06, $06, $06
 	smpsPan             panCenter, $00
 	dc.b	dElectricLowTom, dElectricLowTom
 	smpsPan             panRight, $00
-	dc.b	dElectricFloorTom, nRst
+	dc.b	dElectricFloorTom, $0C
 	smpsLoop            $00, $08, Snd_SSZ_Loop00
 	dc.b	nRst, $01
 	smpsJump            Snd_SSZ_DAC

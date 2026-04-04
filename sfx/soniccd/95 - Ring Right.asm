@@ -6,7 +6,6 @@ SonicCD_95_Header:
 	smpsHeaderSFXChannel	cFM4, SonicCD_95_FM4, $00, $05
 
 SonicCD_95_FM4:
-	smpsRingSwap
 	smpsSetvoice	$00
 	smpsPan		panRight, $00
 	dc.b	nE5, $05, nG5, $05, nC6, $1B

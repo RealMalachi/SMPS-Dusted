@@ -708,9 +708,9 @@ Snd_Credits_Call0B:
 
 ; DAC Data
 Snd_Credits_DAC:
-	dc.b	nRst, $60
-	smpsLoop            $00, $07, Snd_Credits_DAC
-	dc.b	nRst, $30, dMuffledSnare, $12, $18, $06
+	dc.b	nRst, $30
+	smpsLoop            $00, $0F, Snd_Credits_DAC
+	dc.b	dMuffledSnare, $12, $18, $06
 
 Snd_Credits_Jump00:
 	smpsCall            Snd_Credits_Call00

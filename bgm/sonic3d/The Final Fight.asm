@@ -364,7 +364,7 @@ Snd_FinalFight_Loop00:
 	smpsPan             panLeft, $00
 	dc.b	dElectricFloorTom
 	smpsPan             panCenter, $00
-	dc.b	dSnareS3, nRst, nRst
+	dc.b	dSnareS3, $12
 	smpsPan             panRight, $00
 	dc.b	dElectricMidTom, $03
 	smpsPan             panCenter, $00
@@ -385,8 +385,8 @@ Snd_FinalFight_Loop01:
 	smpsPan             panCenter, $00
 	dc.b	nRst, nRst, $30
 	smpsLoop            $01, $02, Snd_FinalFight_Loop01
-	dc.b	nRst, $60, nRst, nRst, nRst, nRst, nRst, nRst, dSnareS3, $06, dSnareS3, dSnareS3
-	dc.b	dSnareS3, nRst, nRst, nRst
+	dc.b	nRst, $60, nRst, nRst, nRst, nRst, nRst, nRst
+	dc.b	dSnareS3, $06, dSnareS3, dSnareS3, dSnareS3, $18
 	smpsPan             panRight, $00
 	dc.b	dElectricMidTom, $03
 	smpsPan             panCenter, $00
@@ -404,7 +404,7 @@ Snd_FinalFight_Call00:
 	smpsPan             panLeft, $00
 	dc.b	dElectricFloorTom
 	smpsPan             panCenter, $00
-	dc.b	dSnareS3, dFinalFightMetalCrash, dSnareS3, dFinalFightMetalCrash, nRst, nRst, nRst, nRst, nRst
+	dc.b	dSnareS3, dFinalFightMetalCrash, dSnareS3, dFinalFightMetalCrash, $24
 	smpsReturn
 
 Snd_FinalFight_Voices:

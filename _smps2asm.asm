@@ -15,7 +15,6 @@
 ; ===========================================================================
 SMPS2ASMVer	equ 1
 SMPSCPUVer	equ "68K"	; 68K, Z80
-FixMusicAndSFXDataBugs	equ 1
 ; ---------------------------------------------------------------------------
 ; valid SourceDriver values
 ; 1 = Sonic 1

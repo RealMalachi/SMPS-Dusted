@@ -217,7 +217,7 @@ Snd_S3DInvic_Jump05:
 
 ; DAC Data
 Snd_S3DInvic_DAC:
-	dc.b	dSnareS3, $06, $06, nRst, $03, dSnareS3, $03, $06, dHighTom, $02, $02, $02
+	dc.b	dSnareS3, $06, $09, dSnareS3, $03, $06, dHighTom, $02, $02, $02
 	dc.b	dMidTomS3, $03, $03, dLowTomS3, $03, $03, dFloorTomS3, $03, $03
 
 Snd_S3DInvic_Jump00:

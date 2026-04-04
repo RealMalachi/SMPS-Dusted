@@ -143,10 +143,10 @@ Snd_Knux_Loop02:
 
 ; DAC Data
 Snd_Knux_DAC:
-	dc.b	dCrashCymbal, $3C, dEchoedClapHit, $06, dEchoedClapHit, nRst, dEchoedClapHit, dEchoedClapHit, nRst
+	dc.b	dCrashCymbal, $3C, dEchoedClapHit, $06, $0C, $06, $0C
 
 Snd_Knux_Loop00:
-	dc.b	dLooserSnare, $18, dElectricFloorTom, dElectricFloorTom, $0C, dEchoedClapHit, $06, dEchoedClapHit, dElectricFloorTom, dEchoedClapHit, dEchoedClapHit, nRst
+	dc.b	dLooserSnare, $18, dElectricFloorTom, dElectricFloorTom, $0C, dEchoedClapHit, $06, dEchoedClapHit, dElectricFloorTom, dEchoedClapHit, dEchoedClapHit, $0C
 	smpsLoop            $00, $08, Snd_Knux_Loop00
 	smpsJump            Snd_Knux_DAC
 

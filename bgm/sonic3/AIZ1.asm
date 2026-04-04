@@ -363,14 +363,14 @@ Snd_AIZ1_FM3:
 	smpsAlterNote       $03
 	smpsModSet          $0F, $01, $06, $05
 	smpsPan             panCenter, $00
-	smpsFMAlterVol      $00
+;	smpsFMAlterVol      $00
 	dc.b	nRst, $03
 	smpsCall            Snd_AIZ1_Call06
 	smpsCall            Snd_AIZ1_Call07
 	dc.b	nD3, $3B, nRst, $3D
 	smpsCall            Snd_AIZ1_Call08
 	smpsCall            Snd_AIZ1_Call09
-	smpsFMAlterVol      $00
+;	smpsFMAlterVol      $00
 	smpsSetvoice        $0F
 	smpsAlterNote       $FB
 	smpsModSet          $0F, $01, $06, $06
@@ -1133,13 +1133,18 @@ Snd_AIZ1_PSG2:
 	dc.b	nC4, nRst, nA3, nRst, nF3, nRst, nD3, nRst, nB4, nRst, nA4, nRst
 	dc.b	nF4, nRst, nD4, nRst, nB3, nRst, nA3, nRst, nF3, nRst, nD3, nRst
 	dc.b	$15
-	smpsFMAlterVol      $0A, $AC
-	dc.b	$0B, nRst, $01, nD4, $0B, nRst, $01, nG4, $0B, nRst, $01, nF4
-	dc.b	$05, nRst, $0D, nE4, $05, nRst, $0D, nC4, $05, nRst, $07, nA3
-	dc.b	$2F, nRst, $01, nD4, $05, nRst, $0D, nC4, $05, nRst, $0D, nB3
-	dc.b	$05, nRst, $01
-	smpsFMAlterVol      $F6, $BF
-	dc.b	$03, nRst, nB4, nRst, nG4, nRst, nE4, nRst, nD4, nRst, nB3, nRst
+; This sequence used a 2-byte FM volume command (dunno why it exists) while intending to use a 1-byte PSG volume command
+; This does two things:
+; 1. The volume doesn't decrease or increase as intended, since the FM command skips PSG channels
+; 2. It skips two notes, nG3 and nD5 respectively, then sets their time, changing flag-note-time into flag-time
+;    Due to SMPS-Z80s note-rest-time-time logic, these end up playing notes nD3 and nB3 respectively
+;	smpsPSGAlterVol      $0A							; erroneously used an FM command
+	dc.b	nD3, $0B, nRst, $01, nD4, $0B, nRst, $01, nG4, $0B, nRst, $01		; first note was intended to be nG3
+	dc.b	nF4, $05, nRst, $0D, nE4, $05, nRst, $0D, nC4, $05, nRst, $07
+	dc.b	nA3, $2F, nRst, $01, nD4, $05, nRst, $0D, nC4, $05, nRst, $0D
+	dc.b	nB3, $05, nRst, $01
+;	smpsPSGAlterVol      $F6							; erroneously used an FM command
+	dc.b	nB3, $03, nRst, nB4, nRst, nG4, nRst, nE4, nRst, nD4, nRst, nB3, nRst	; first note was intended to be nD5
 	dc.b	nG3, nRst, nE3, nRst, nC5, nRst, nB4, nRst, nG4, nRst, nE4, nRst
 	dc.b	nC4, nRst, nB3, nRst, nG3, nRst, nE3, nRst, nC5, nRst, nA4, nRst
 	dc.b	nF4, nRst, nD4, nRst, nC4, nRst, nA3, nRst, nF3, nRst, nD3, nRst

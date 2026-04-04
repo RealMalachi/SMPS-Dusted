@@ -4,13 +4,8 @@ Sound3C_SpindashRelease_Header:
 	smpsHeaderTempoSFX  $01
 	smpsHeaderChanSFX   $02
 
-    if FixMusicAndSFXDataBugs
-	smpsHeaderSFXChannel cFM5, Sound3C_SpindashRelease_FM5,	$10, $00
-    else
-	; The transpose value is invalid, causing this SFX to sound wrong in other SMPS drivers.
-	smpsHeaderSFXChannel cFM5, Sound3C_SpindashRelease_FM5,	$90, $00
-    endif
-	smpsHeaderSFXChannel cPSG3, Sound3C_SpindashRelease_PSG3,	$00, $00
+	smpsHeaderSFXChannel cFM5,  Sound3C_SpindashRelease_FM5,  $10, $00
+	smpsHeaderSFXChannel cPSG3, Sound3C_SpindashRelease_PSG3, $00, $00
 
 ; FM5 Data
 Sound3C_SpindashRelease_FM5:

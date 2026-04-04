@@ -336,19 +336,10 @@ Snd_Menu_Call06:
 
 ; DAC Data
 Snd_Menu_DAC:
-	smpsCall            Snd_Menu_Call00
-	smpsLoop            $00, $07, Snd_Menu_DAC
-	smpsCall            Snd_Menu_Call01
-	smpsJump            Snd_Menu_DAC
-
-Snd_Menu_Call00:
 	dc.b	dKickS3, $12, $06, dSnareS3, dSnareS3, $0C, dKickS3, dKickS3, dKickS3, $06, $0C, dSnareS3
-	smpsReturn
-
-Snd_Menu_Call01:
-	dc.b	dSnareS3, $06, dSnareS3, dSnareS3, dSnareS3, nRst, dSnareS3, dSnareS3, dSnareS3, dSnareS3, dHighTom, $0C
-	dc.b	$06, dMidTomS3, $0C, dLowTomS3
-	smpsReturn
+	smpsLoop            $00, $07, Snd_Menu_DAC
+	dc.b	dSnareS3, $06, $06, $06, $0C, $06, $06, $06, $06, dHighTom, $0C, $06, dMidTomS3, $0C, dLowTomS3
+	smpsJump            Snd_Menu_DAC
 
 Snd_Menu_Voices:
 ;	Voice $00

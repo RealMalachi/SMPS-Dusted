@@ -280,32 +280,28 @@ Snd_Ending_Call01:
 
 ; DAC Data
 Snd_Ending_DAC:
+; This could be optimized with loops and loop condition jumps, though I'm aiming for compatibility
 	smpsPan             panCenter, $00
-	dc.b	dCrashCymbal, $06, nRst, nRst, nRst, nRst, nRst, nRst, dElectricMidTom, nRst, dElectricMidTom, dElectricMidTom
-	dc.b	nRst, dElectricLowTom, dElectricLowTom, dElectricFloorTom, nRst, dCrashCymbal, $06, nRst, nRst, nRst, dMuffledSnare, nRst
-	dc.b	nRst, dMuffledSnare, nRst, nRst, dKickS3, nRst, dMuffledSnare, dKickS3, dKickS3, nRst, dKickS3, $06
-	dc.b	nRst, nRst, nRst, dMuffledSnare, nRst, nRst, dMuffledSnare, nRst, nRst, dKickS3, nRst, dMuffledSnare
-	dc.b	dKickS3, dKickS3, nRst, dKickS3, $06, nRst, nRst, nRst, dMuffledSnare, nRst, nRst, dMuffledSnare
-	dc.b	nRst, nRst, dKickS3, nRst, dMuffledSnare, dKickS3, dKickS3, nRst, dKickS3, $06, nRst, nRst
-	dc.b	nRst, dMuffledSnare, nRst, nRst, dMuffledSnare, nRst, nRst, dKickS3, nRst, dMuffledSnare, dKickS3, dKickS3
-	dc.b	nRst, dCrashCymbal, $06, nRst, nRst, nRst, dMuffledSnare, nRst, nRst, dMuffledSnare, dKickS3, nRst
-	dc.b	dKickS3, nRst, dMuffledSnare, nRst, dKickS3, dKickS3, dKickS3, $06, nRst, nRst, nRst, dMuffledSnare
-	dc.b	nRst, nRst, dMuffledSnare, dKickS3, nRst, dMuffledSnare, nRst, dMuffledSnare, nRst, dMuffledSnare, dMuffledSnare, dKickS3
-	dc.b	$06, nRst, nRst, nRst, dMuffledSnare, nRst, nRst, dMuffledSnare, dKickS3, nRst, dKickS3, nRst
-	dc.b	dMuffledSnare, nRst, dKickS3, dKickS3, dKickS3, $06, nRst, nRst, nRst, dMuffledSnare, nRst, nRst
-	dc.b	dMuffledSnare, dKickS3, nRst, dMuffledSnare, dMuffledSnare, dMuffledSnare, dMuffledSnare, dMuffledSnare, dMuffledSnare, dCrashCymbal, $06, nRst
-	dc.b	nRst, nRst, dMuffledSnare, nRst, nRst, dMuffledSnare, nRst, nRst, dKickS3, nRst, dMuffledSnare, dKickS3
-	dc.b	dKickS3, nRst, dKickS3, $06, nRst, nRst, nRst, dMuffledSnare, nRst, nRst, dMuffledSnare, nRst
-	dc.b	nRst, dKickS3, nRst, dMuffledSnare, dKickS3, dKickS3, nRst, dKickS3, $06, nRst, nRst, nRst
-	dc.b	dMuffledSnare, nRst, nRst, dMuffledSnare, nRst, nRst, dKickS3, nRst, dMuffledSnare, dKickS3, dKickS3, nRst
-	dc.b	dKickS3, $06, nRst, nRst, nRst, dMuffledSnare, nRst, nRst, dMuffledSnare, nRst, nRst, dKickS3
-	dc.b	nRst, dMuffledSnare, dKickS3, dKickS3, nRst, dCrashCymbal, $06, nRst, nRst, nRst, dMuffledSnare, nRst
-	dc.b	nRst, dMuffledSnare, dKickS3, nRst, dKickS3, nRst, dMuffledSnare, nRst, dKickS3, dKickS3, dKickS3, $06
-	dc.b	nRst, nRst, nRst, dMuffledSnare, nRst, nRst, dMuffledSnare, dKickS3, nRst, dMuffledSnare, nRst, dMuffledSnare
-	dc.b	nRst, dMuffledSnare, dMuffledSnare, dKickS3, $06, nRst, nRst, nRst, dMuffledSnare, nRst, nRst, dMuffledSnare
-	dc.b	nRst, nRst, dKickS3, nRst, dMuffledSnare, dKickS3, dKickS3, nRst, dMuffledSnare, dMuffledSnare, dMuffledSnare, dKickS3
-	dc.b	nRst, dMuffledSnare, dKickS3, dMuffledSnare, dMuffledSnare, nRst, dMuffledSnare, nRst, dKickS3, dMuffledSnare, dMuffledSnare, dCrashCymbal
+	dc.b	dCrashCymbal, $2A, dElectricMidTom, $0C, $06, $0C, dElectricLowTom, $06, $06, $0C, dCrashCymbal, $18
+
+	smpsCall            Snd_Ending_Call02
+	dc.b	dMuffledSnare, $12, $06, dKickS3, $0C, $0C, dMuffledSnare, $0C, dKickS3, $06, $06, $18
+	dc.b	dMuffledSnare, $12, $06, dKickS3, $0C, dMuffledSnare, $06, $06, $06, $06, $06, $06, dCrashCymbal, $18
+
+	smpsCall            Snd_Ending_Call02
+	dc.b	dMuffledSnare, $12, $12, dKickS3, $0C, dMuffledSnare, $06, dKickS3, dKickS3, $0C
+	dc.b	dMuffledSnare, $06, dMuffledSnare, dMuffledSnare, dKickS3, $0C, dMuffledSnare, $06, dKickS3, dMuffledSnare
+	dc.b	dMuffledSnare, $0C, $0C, dKickS3, $06, dMuffledSnare, dMuffledSnare, dCrashCymbal, $30
 	smpsStop
+
+Snd_Ending_Call02:
+	dc.b	dMuffledSnare, $12, $12, dKickS3, $0C, dMuffledSnare, $06, dKickS3, $06, $0C, $18
+	smpsLoop            $00,$03,Snd_Ending_Call02
+	dc.b	dMuffledSnare, $12, $12, dKickS3, $0C, dMuffledSnare, $06, dKickS3, $06, $0C, dCrashCymbal, $18
+	dc.b	dMuffledSnare, $12, $06, dKickS3, $0C, $0C, dMuffledSnare, $0C, dKickS3, $06, $06, $18
+	dc.b	dMuffledSnare, $12, $06, dKickS3, $0C, dMuffledSnare, $0C, $0C, $06, $06, dKickS3, $18
+	smpsReturn
+
 
 Snd_Ending_Voices:
 ;	Voice $00

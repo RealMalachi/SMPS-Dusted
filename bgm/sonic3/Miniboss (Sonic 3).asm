@@ -5,24 +5,7 @@ Snd_S3_Miniboss_Header:
 	smpsHeaderTempo     $01, $44
 
 	smpsHeaderDAC       Snd_S3_Miniboss_DAC
-    if FixMusicAndSFXDataBugs
 	smpsHeaderFM        Snd_S3_Miniboss_FM1,	$02, $03
-    else
-	; The transposition of $C2 is too low, causing the octave calculation to underflow.
-	; In drivers that don't calculate the octave (such as Sonic 1's and Sonic 2's
-	; drivers, which are derived from SMPS 68k Type 1b), this invalid transpose causes
-	; this channel's notes to play with nonsensical frequencies.
-	; Calculating the correct transposition is tricky because you have to consider that
-	; it's the sum of the transposition *with the note* that underflows the octave
-	; calculation, so the correct transposition depends on which notes it is used with.
-	; '(((x/12)&7)*12)+(x%12)' can be used to obtain a post-underflow version of the
-	; transpositon. Then, if the notes used with this transposition would cause the sum
-	; to exceed $60, then subtract $60 from the transposition.
-	; $C2 run through the formula is $02, and the notes that this displacement is used
-	; with are in the low octaves, so the sum will never exceed $60. Because of this,
-	; $02 is the correct displacement.
-	smpsHeaderFM        Snd_S3_Miniboss_FM1,	$C2, $03
-    endif
 	smpsHeaderFM        Snd_S3_Miniboss_FM2,	$0C, $0B
 	smpsHeaderFM        Snd_S3_Miniboss_FM3,	$0C, $10
 	smpsHeaderFM        Snd_S3_Miniboss_FM4,	$00, $14
@@ -137,8 +120,9 @@ Snd_S3_Miniboss_Call0C:
 ; FM2 Data
 Snd_S3_Miniboss_FM2:
 	smpsSetvoice        $00
-	dc.b	nBb2, $04, nRst, $03, $05, nRst, $07, nBb2, $05, nF2, $04, nRst
-	dc.b	$03, $05, nRst, $07, nF2, $05, nBb1, $07, nRst, $29
+	dc.b	nBb2, $04, nRst, $03, nBb2, $05, nRst, $07
+	dc.b	nBb2, $05, nF2, $04, nRst, $03, nBb2, $05, nRst, $07
+	dc.b	nF2, $05, nBb1, $07, nRst, $29
 	smpsCall            Snd_S3_Miniboss_Call03
 	smpsCall            Snd_S3_Miniboss_Call04
 	smpsCall            Snd_S3_Miniboss_Call03
@@ -177,9 +161,6 @@ Snd_S3_Miniboss_FM2:
 	dc.b	nEb2, $04, nRst, $03, nEb2, $05, nD2, $0C, nCs2, nC2, nB1, nBb1
 	dc.b	nB1, nD2, nEb2, $24, nD2, nCs2, nC2, nB1, nBb1, $6C
 	smpsJump            Snd_S3_Miniboss_FM2
-
-; Unreachable
-	smpsStop
 
 Snd_S3_Miniboss_Call03:
 	dc.b	nEb2, $04, nRst, $03, nEb2, $05, nD2, $0C, nCs2, nD2
@@ -483,35 +464,33 @@ Snd_S3_Miniboss_Call0D:
 
 ; DAC Data
 Snd_S3_Miniboss_DAC:
-	dc.b	nRst, $30, $0C, dCrashingNoiseWoo, dComeOn, nRst, dHipHopHitKick, nRst, $54, nRst, $0C, dLowerEchoedClapHitS3
-	dc.b	dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $0C, $08, $04, dEchoedClapHitS3, $0C, dBassHey, dHipHopHitKick
-	dc.b	nRst, $54, nRst, $0C, dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, dHipHopHitKick, dHipHopHitPowerKick
-	dc.b	dPowerKickHit, dLowPowerKickHit, dHipHopHitKick, nRst, $48, dHipHopHitKick, $0C, nRst, $0C, dLowerEchoedClapHitS3, dHipHopHitKick, $08
+	dc.b	nRst, $3C
+Snd_S3_Miniboss_DAC_Loop:
+	dc.b	dCrashingNoiseWoo, $0C, dComeOn, $18, dHipHopHitKick, $6C, dLowerEchoedClapHitS3, $0C
+	dc.b	dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $0C, $08, $04, dEchoedClapHitS3, $0C, dBassHey, dHipHopHitKick, $6C 
+	dc.b	dLowerEchoedClapHitS3, $0C, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, dHipHopHitKick, dHipHopHitPowerKick
+	dc.b	dPowerKickHit, dLowPowerKickHit, dHipHopHitKick, $54, dHipHopHitKick, $18, dLowerEchoedClapHitS3, $0C, dHipHopHitKick, $08
 	dc.b	dLowerEchoedClapHitS3, $04, $0C, $0C, $08, dEchoedClapHitS3, $04, dLowestPowerKickHit, $0C, dBassHey, dHipHopHitKick, $48
 	dc.b	dLowerEchoedClapHitS3, $0C, $08, $04, $08, dEchoedClapHitS3, $04, dLowerEchoedClapHitS3, $0C, $0C, $08, $04
-	dc.b	dHipHopHitKick, $0C, dHipHopHitPowerKick, nRst, dWoo, dHipHopHitKick, $0C, dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04
-	dc.b	$0C, $0C, $08, $04, dEchoedClapHitS3, $18, nRst, $0C, dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3
+	dc.b	dHipHopHitKick, $0C, dHipHopHitPowerKick, $18, dWoo, $0C, dHipHopHitKick, dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04
+	dc.b	$0C, $0C, $08, $04, dEchoedClapHitS3, $24, dLowerEchoedClapHitS3, $0C, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3
 	dc.b	$04, $0C, $14, $04, dEchoedClapHitS3, $0C, dBassHey, dHipHopHitKick, $0C, dLowerEchoedClapHitS3, dEchoedClapHitS3, $08
-	dc.b	dLowerEchoedClapHitS3, $04, $0C, $0C, $08, $04, dEchoedClapHitS3, $18, dHipHopHitKick, $07, $05, dHipHopHitPowerKick
-	dc.b	$0C, dPowerKickHit, dLowPowerKickHit, dLowerPowerKickHit, dLowPowerKickHit, dComeOn, dHipHopHitPowerKick, dHipHopHitKick, $0C, dLowerEchoedClapHitS3, dEchoedClapHitS3, $08
-	dc.b	dLowerEchoedClapHitS3, $04, $0C, $0C, $08, $04, dEchoedClapHitS3, $18, nRst, $0C, dLowerEchoedClapHitS3, dWoo
-	dc.b	$08, nRst, $04, dLowerEchoedClapHitS3, $0C, $14, $04, dEchoedClapHitS3, $0C, dBassHey, nRst, $0C
-	dc.b	dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $0C, $08, $04, dEchoedClapHitS3, $18, nRst
-	dc.b	$0C, dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, $04, $0C, dHipHopHitKick, dHipHopHitKick, dComeOn, dHipHopHitKick, dHipHopHitKick, $0C
-	dc.b	dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $0C, $08, $04, dEchoedClapHitS3, $18, nRst
-	dc.b	$0C, dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, dWoo, $0C, dLowerEchoedClapHitS3, $14, $04, dEchoedClapHitS3
-	dc.b	$0C, dBassHey, dHipHopHitKick, $0C, dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, $04, $0C, $0C, $08, $04
-	dc.b	dEchoedClapHitS3, $18, nRst, $0C, nRst, dHipHopHitKick, nRst, dHipHopHitKick, dHipHopHitKick, dComeOn, dHipHopHitKick, dHipHopHitKick
-	dc.b	$0C, dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $0C, $08, $04, dEchoedClapHitS3, $18
-	dc.b	nRst, $0C, dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $14, $04, dEchoedClapHitS3, $0C
+	dc.b	dLowerEchoedClapHitS3, $04, $0C, $0C, $08, $04, dEchoedClapHitS3, $18, dHipHopHitKick, $07, $05, dHipHopHitPowerKick, $0C
+	dc.b	dPowerKickHit, dLowPowerKickHit, dLowerPowerKickHit, dLowPowerKickHit, dComeOn, dHipHopHitPowerKick, dHipHopHitKick
+	dc.b	dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $0C, $08, $04
+	dc.b	dEchoedClapHitS3, $24, dLowerEchoedClapHitS3, $0C, dWoo, dLowerEchoedClapHitS3, $0C, $14, $04, dEchoedClapHitS3, $0C, dBassHey, $18
+	dc.b	dLowerEchoedClapHitS3, $0C, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $0C, $08, $04, dEchoedClapHitS3, $24
+	dc.b	dLowerEchoedClapHitS3, $0C, dEchoedClapHitS3, $08, $04, $0C, dHipHopHitKick, dHipHopHitKick, dComeOn, dHipHopHitKick, dHipHopHitKick, $0C
+	dc.b	dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $0C, $08, $04, dEchoedClapHitS3, $24
+	dc.b	dLowerEchoedClapHitS3, $0C, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, dWoo, $0C, dLowerEchoedClapHitS3, $14, $04, dEchoedClapHitS3, $0C
+	dc.b	dBassHey, dHipHopHitKick, $0C, dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, $04, $0C, $0C, $08, $04
+	dc.b	dEchoedClapHitS3, $30, dHipHopHitKick, $18, dHipHopHitKick, $0C, dHipHopHitKick, dComeOn, dHipHopHitKick, dHipHopHitKick
+	dc.b	dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $0C, $08, $04, dEchoedClapHitS3, $24
+	dc.b	dLowerEchoedClapHitS3, $0C, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $14, $04, dEchoedClapHitS3, $0C
 	dc.b	dBassHey, dHipHopHitKick, $0C, dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $0C, $08, $04
-	dc.b	dEchoedClapHitS3, $18, nRst, $0C, nRst, dHipHopHitKick, nRst, dHipHopHitKick, dHipHopHitKick, dComeOn, dHipHopHitKick, nRst
-	dc.b	$60, nRst, nRst, $0C, dLowerEchoedClapHitS3, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $0C, $08
-	dc.b	$04, dEchoedClapHitS3, $18
-	smpsJump            Snd_S3_Miniboss_DAC
-
-; Unreachable
-	smpsStop
+	dc.b	dEchoedClapHitS3, $30, dHipHopHitKick, $18, dHipHopHitKick, $0C, dHipHopHitKick, dComeOn, dHipHopHitKick, $78, nRst, $60
+	dc.b	dLowerEchoedClapHitS3, $0C, dEchoedClapHitS3, $08, dLowerEchoedClapHitS3, $04, $0C, $0C, $08, $04, dEchoedClapHitS3, $54
+	smpsJump            Snd_S3_Miniboss_DAC_Loop
 
 Snd_S3_Miniboss_Voices:
 ;	Voice $00

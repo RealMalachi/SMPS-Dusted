@@ -682,25 +682,24 @@ Snd_PPZ1_Loop04:
 	dc.b	dKickS3
 	smpsCall            Snd_PPZ1_Call02
 	dc.b	dKickS3, $18, $0C, dKickS3, dMuffledSnare, $06, dMuffledSnare, dMuffledSnare, dMuffledSnare, dMuffledSnare, $0C, $06
-	dc.b	dMuffledSnare, dKickS3, $18, $0C, $0C, nRst, $60, dKickS3, $06, dSnareS3, dSnareS3, dSnareS3
+	dc.b	dMuffledSnare, dKickS3, $18, $0C, $6C, dKickS3, $06, dSnareS3, dSnareS3, dSnareS3
 	dc.b	dSnareS3, dSnareS3, dSnareS3, dSnareS3, dSnareS3, dSnareS3, dSnareS3, dSnareS3, dSnareS3, dSnareS3, dSnareS3, dSnareS3
 	smpsJump            Snd_PPZ1_Loop00
 
 Snd_PPZ1_Call01:
-	dc.b	dKickS3, $18, dKickS3, dKickS3, dKickS3
+	dc.b	dKickS3, $18, $18, $18, $18
 	smpsReturn
 
 Snd_PPZ1_Call00:
-	dc.b	dKickS3, $18, dKickS3, dKickS3, dKickS3, dKickS3, dKickS3, dKickS3, dKickS3, $0C, dKickS3
+	dc.b	dKickS3, $18, $18, $18, $18, $18, $18, $18, $0C, $0C
 	smpsReturn
 
 Snd_PPZ1_Call02:
-	dc.b	dKickS3, $18, $0C, dKickS3, dKickS3, $18, $0C, $06, dKickS3
+	dc.b	dKickS3, $18, $0C, $0C, $18, $0C, $06, $06
 	smpsReturn
 
 Snd_PPZ1_Call03:
-	dc.b	dKickS3, $18, $0C, dKickS3, dKickS3, dKickS3, $06, dKickS3, dMuffledSnare, $0C, dKickS3, $06
-	dc.b	dKickS3
+	dc.b	dKickS3, $18, $0C, $0C, $0C, $06, $06, dMuffledSnare, $0C, dKickS3, $06, $06
 	smpsReturn
 
 Snd_PPZ1_Voices:

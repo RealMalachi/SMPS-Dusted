@@ -245,7 +245,7 @@ Snd_LBZ1_PSG2:
 
 ; DAC Data
 Snd_LBZ1_DAC:
-	dc.b	dModLooseKick, $12, nRst, dModLooseKick, $3C
+	dc.b	dModLooseKick, $24, dModLooseKick, $3C
 
 Snd_LBZ1_Loop00:
 	dc.b	dModLooseKick, $06, dHiHitDrum, nRst, dHiHitDrum, dLowHitDrum, nRst, dModLooseKick, dHiHitDrum, nRst, dHiHitDrum, dLowHitDrum

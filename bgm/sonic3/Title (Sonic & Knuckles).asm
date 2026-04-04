@@ -269,8 +269,8 @@ Snd_Title_PSG3:
 Snd_Title_DAC:
 	dc.b	dKickS3, $06, dKickS3, nRst, dKickS3, nRst, nRst, dKickS3, nRst, nRst, nRst, dKickS3
 	dc.b	nRst, dSnareS3, dSnareS3, nRst, nRst, dKickS3, dKickS3, nRst, dKickS3, nRst, nRst, dSnareS3
-	dc.b	nRst, nRst, nRst, dKickS3, nRst, dSnareS3, dSnareS3, dSnareS3, dSnareS3, dCrashCymbal, $06, nRst
-	dc.b	nRst, dKickS3, dSnareS3, dKickS3, dKickS3, nRst, dKickS3, nRst, dKickS3, nRst, dSnareS3, nRst
+	dc.b	nRst, nRst, nRst, dKickS3, nRst, dSnareS3, dSnareS3, dSnareS3, dSnareS3, dCrashCymbal, $12
+	dc.b	dKickS3, $06, dSnareS3, dKickS3, dKickS3, nRst, dKickS3, nRst, dKickS3, nRst, dSnareS3, nRst
 	dc.b	dKickS3, nRst, dKickS3, dKickS3, nRst, dKickS3, dSnareS3, dKickS3, dKickS3, nRst, nRst, dKickS3
 	dc.b	nRst, dKickS3, dSnareS3, dKickS3, dKickS3, nRst, dKickS3, $06, dKickS3, nRst, dKickS3, dSnareS3
 	dc.b	dKickS3, dKickS3, nRst, dKickS3, nRst, dKickS3, nRst, dSnareS3, nRst, dKickS3, nRst, dKickS3
@@ -278,7 +278,7 @@ Snd_Title_DAC:
 	dc.b	dKickS3, dKickS3, nRst, dKickS3, dKickS3, nRst, dKickS3, dSnareS3, dKickS3, dKickS3, nRst, dKickS3
 	dc.b	nRst, dKickS3, nRst, dSnareS3, nRst, dKickS3, nRst, dKickS3, dKickS3, nRst, dKickS3, dSnareS3
 	dc.b	dKickS3, dKickS3, nRst, nRst, dKickS3, nRst, dKickS3, dSnareS3, dKickS3, dKickS3, dKickS3, dKickS3
-	dc.b	nRst, nRst, nRst, dSnareS3, nRst, nRst, dSnareS3, dKickS3, $0C, dKickS3, dSnareS3, dCrashCymbal
+	dc.b	nRst, nRst, nRst, dSnareS3, nRst, nRst, dSnareS3, dKickS3, $0C, dKickS3, dSnareS3, dCrashCymbal, $20
 	smpsStop
 
 Snd_Title_Voices:

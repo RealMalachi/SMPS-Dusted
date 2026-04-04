@@ -106,10 +106,10 @@ SCZ_Call06:
 SCZ_FM1:
 	smpsSetvoice        $06
 	dc.b	nRst, $06, nG4, $03, nA4, nG4, $0C, nB4, $03, nC5, nB4, $0C
-	dc.b	nD5, $03, nE5, nD5, $30
+	dc.b	nD5, $03, nE5, nD5, $30, nRst, $12
 
 SCZ_Jump01:
-	dc.b	nRst, $12, nE6, $03, nFs6, nG6, $06, nFs6, nE6, nD6, nB5, $30
+	dc.b	nE6, $03, nFs6, nG6, $06, nFs6, nE6, nD6, nB5, $30
 	dc.b	nRst, $12, nE6, $03, nG6, nA6, $06, nG6, nFs6, nE6, nD6, $03
 	dc.b	nE6, nD6, nB5, $27, nRst, $12, nE6, $03, nG6, nFs6, $06, nD6
 	dc.b	nB5, nE6, nD6, $30, nRst, $12, nE6, $03, nG6, nA6, $06, nG6
@@ -119,10 +119,8 @@ SCZ_Jump01:
 	dc.b	nB4, $0C, nG4, nA4, nG4, $06, nA4
 	smpsCall            SCZ_Call04
 	dc.b	nB4, $30
-    if FixMusicAndSFXDataBugs
-	; This voice is set at SCZ_FM1, but never again.
+	dc.b	nRst, $12
 	smpsSetvoice        $06
-    endif
 	smpsJump            SCZ_Jump01
 
 SCZ_Call04:

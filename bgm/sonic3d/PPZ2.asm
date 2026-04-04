@@ -259,42 +259,51 @@ Snd_PPZ2_Call00:
 
 ; DAC Data
 Snd_PPZ2_DAC:
-	dc.b	dCrashCymbal, $18, dKickS3, dKickS3, dKickS3
+	dc.b	dCrashCymbal, $18
 
 Snd_PPZ2_Loop00:
-	dc.b	dKickS3, $18, dKickS3, dKickS3, dKickS3
-	smpsLoop            $00, $06, Snd_PPZ2_Loop00
-	dc.b	dKickS3, $18, dKickS3, dKickS3, dElectricFloorTom, $06, dElectricFloorTom, nRst, dElectricFloorTom, dCrashCymbal, $18, dSnareS3
-	dc.b	dKickS3, dSnareS3
+	dc.b	dKickS3;, $18
+	smpsLoop            $00, $1E, Snd_PPZ2_Loop00
+	dc.b	dElectricFloorTom, $06, $0C, $06, dCrashCymbal, $18, dSnareS3
 
 Snd_PPZ2_Loop01:
-	dc.b	dKickS3, $18, dSnareS3, dKickS3, dSnareS3
-	smpsLoop            $00, $06, Snd_PPZ2_Loop01
-	dc.b	dKickS3, $06, nRst, dKickS3, dKickS3, dSnareS3, nRst, dKickS3, dKickS3, dKickS3, dSnareS3, nRst
-	dc.b	dKickS3, dElectricHighTom, nRst, dElectricMidTom, dElectricLowTom
+	dc.b	dKickS3, dSnareS3
+	smpsLoop            $00, $0D, Snd_PPZ2_Loop01
+	dc.b	dKickS3, $0C, $06, $06, dSnareS3, $0C, dKickS3, $06, $06, $06, dSnareS3, $0C, dKickS3, $06
+	dc.b	dElectricHighTom, $0C, dElectricMidTom, $06, dElectricLowTom
 
 Snd_PPZ2_Loop02:
-	dc.b	dKickS3, $18, dSnareS3, dKickS3, dSnareS3
-	smpsLoop            $00, $07, Snd_PPZ2_Loop02
-	dc.b	dKickS3, $06, dKickS3, nRst, dKickS3, dSnareS3, nRst, dKickS3, dKickS3, nRst, dSnareS3, nRst
-	dc.b	dKickS3, dSnareS3, dSnareS3, dSnareS3, dSnareS3, dCrashCymbal, $18, dKickS3, dKickS3, dKickS3
+	dc.b	dKickS3, $18, dSnareS3
+	smpsLoop            $00, $0E, Snd_PPZ2_Loop02
+	dc.b	dKickS3, $06, $0C, $06, dSnareS3, $0C, dKickS3, $06, $0C, dSnareS3, $0C
+	dc.b	dKickS3, $06, dSnareS3, dSnareS3, dSnareS3, dSnareS3, dCrashCymbal, $18
 
 Snd_PPZ2_Loop03:
-	dc.b	dKickS3, $18, dKickS3, dKickS3, dKickS3
-	smpsLoop            $00, $06, Snd_PPZ2_Loop03
-	dc.b	dKickS3, $06, nRst, nRst, dKickS3, dSnareS3, nRst, dKickS3, dKickS3, nRst, dSnareS3, nRst
-	dc.b	nRst, dSnareS3, dSnareS3, dSnareS3, dSnareS3, dCrashCymbal, $18, dSnareS3, dKickS3, dSnareS3, dKickS3, $06
-	dc.b	nRst, nRst, nRst, dSnareS3, nRst, dKickS3, dKickS3, nRst, dSnareS3, dKickS3, nRst, dSnareS3
-	dc.b	nRst, nRst, nRst, dKickS3, $06, nRst, nRst, nRst, dSnareS3, nRst, dKickS3, dKickS3
-	dc.b	nRst, dSnareS3, dKickS3, nRst, dSnareS3, nRst, dSnareS3, dSnareS3, dCrashCymbal, $18, dSnareS3, dKickS3
-	dc.b	dSnareS3, dKickS3, $18, dSnareS3, dKickS3, dSnareS3, dKickS3, $18, dSnareS3, dKickS3, dSnareS3, dKickS3
-	dc.b	$06, nRst, nRst, nRst, dSnareS3, nRst, dKickS3, dKickS3, nRst, dSnareS3, dKickS3, nRst
-	dc.b	dSnareS3, nRst, dSnareS3, dSnareS3, dCrashCymbal, $18, dSnareS3, dKickS3, dSnareS3, dKickS3, $18, dSnareS3
-	dc.b	dKickS3, dSnareS3, dKickS3, $18, dSnareS3, dKickS3, dSnareS3, dKickS3, $18, dSnareS3, dKickS3, dSnareS3
-	dc.b	$06, dSnareS3, nRst, dSnareS3, dKickS3, $06, dSnareS3, nRst, nRst, dSnareS3, dSnareS3, nRst
-	dc.b	dSnareS3, dKickS3, dSnareS3, dSnareS3, dElectricHighTom, dElectricMidTom, dElectricLowTom, dElectricFloorTom, dElectricFloorTom, dKickS3, $06, dKickS3
-	dc.b	dKickS3, dKickS3, nRst, nRst, dSnareS3, dSnareS3, nRst, dElectricLowTom, dElectricLowTom, dElectricFloorTom, dElectricFloorTom, dElectricFloorTom
-	dc.b	dElectricFloorTom, dElectricFloorTom
+	dc.b	dKickS3;, $18
+	smpsLoop            $00, $1B, Snd_PPZ2_Loop03
+
+	dc.b	dKickS3, $12, $06, dSnareS3, $0C, dKickS3, $06, $0C, dSnareS3, $12, dSnareS3, $06, $06, $06, $06
+	dc.b	dCrashCymbal, $18, dSnareS3, dKickS3
+
+Snd_PPZ2_Loop09:
+	dc.b	dSnareS3, $18, dKickS3, dSnareS3, $0C, dKickS3, $06, $0C, dSnareS3, $06, dKickS3, $0C
+	smpsLoop            $00, $02, Snd_PPZ2_Loop09
+
+	dc.b	dSnareS3, $0C, $06, $06, dCrashCymbal, $18
+Snd_PPZ2_Loop0A:
+	dc.b	dSnareS3, dKickS3
+	smpsLoop            $00, $06, Snd_PPZ2_Loop0A
+
+	dc.b	dSnareS3, $0C, dKickS3, $06, $0C, dSnareS3, $06, dKickS3, $0C
+	dc.b	dSnareS3, $0C, $06, $06, dCrashCymbal, $18
+Snd_PPZ2_Loop0B:
+	dc.b	dSnareS3, dKickS3
+	smpsLoop            $00, $07, Snd_PPZ2_Loop0B
+
+	dc.b	dSnareS3, $06, $0C, $06, dKickS3, dSnareS3, $12, $06, $0C, $06, dKickS3, dSnareS3, dSnareS3
+	dc.b	dElectricHighTom, dElectricMidTom, dElectricLowTom, dElectricFloorTom, dElectricFloorTom
+	dc.b	dKickS3, $06, $06, $06, $12, dSnareS3, $06, $0C
+	dc.b	dElectricLowTom, $06, $06, dElectricFloorTom, dElectricFloorTom, dElectricFloorTom, dElectricFloorTom, dElectricFloorTom
 	smpsJump            Snd_PPZ2_DAC
 
 Snd_PPZ2_Voices:

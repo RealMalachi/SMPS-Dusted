@@ -261,19 +261,32 @@ Snd_S3DIntro_Call04:
 ; DAC Data
 Snd_S3DIntro_DAC:
 	smpsPan             panCenter, $00
-	dc.b	dKickS3, $06, nRst, dKickS3, nRst, dMuffledSnare, nRst, dKickS3, dMuffledSnare, nRst, dMuffledSnare, dKickS3
-	dc.b	nRst, dMuffledSnare, dKickS3, dMuffledSnare, nRst, dKickS3, nRst, dKickS3, nRst, dMuffledSnare, nRst, dKickS3
-	dc.b	dMuffledSnare, nRst, dMuffledSnare, dKickS3, nRst, dMuffledSnare, dMuffledSnare, dMuffledSnare, dMuffledSnare, dIntroKick, $06, nRst
-	dc.b	nRst, nRst, dMuffledSnare, nRst, dKickS3, dMuffledSnare, nRst, dMuffledSnare, dKickS3, nRst, dMuffledSnare, dKickS3
-	dc.b	dMuffledSnare, nRst
+	smpsCall            Snd_S3DIntro_Call07
+	smpsCall            Snd_S3DIntro_Call05
+	dc.b	dMuffledSnare, $06, dMuffledSnare, dMuffledSnare, dIntroKick, $18
+	smpsCall            Snd_S3DIntro_Call06
+	smpsCall            Snd_S3DIntro_Call08
 
 Snd_S3DIntro_Loop00:
-	dc.b	dKickS3, $06, nRst, dKickS3, nRst, dMuffledSnare, nRst, dKickS3, dMuffledSnare, nRst, dMuffledSnare, dKickS3
-	dc.b	nRst, dMuffledSnare, dKickS3, dMuffledSnare, nRst
+	smpsCall            Snd_S3DIntro_Call07
 	smpsLoop            $00, $06, Snd_S3DIntro_Loop00
-	dc.b	dMuffledSnare, dMuffledSnare, dMuffledSnare, dKickS3, nRst, dMuffledSnare, dKickS3, dMuffledSnare, dMuffledSnare, nRst, dMuffledSnare, nRst
-	dc.b	dKickS3, dMuffledSnare, dMuffledSnare, dIntroKick
+	dc.b	dMuffledSnare, $06, dMuffledSnare, dMuffledSnare, dKickS3, $0C, dMuffledSnare, $06, dKickS3, dMuffledSnare, dMuffledSnare, $0C, dMuffledSnare
+	dc.b	dKickS3, $06, dMuffledSnare, dMuffledSnare, dIntroKick, $20
 	smpsStop
+
+Snd_S3DIntro_Call07:
+	smpsCall            Snd_S3DIntro_Call05
+
+Snd_S3DIntro_Call08:
+	dc.b	dKickS3, $06, dMuffledSnare, $0C
+	smpsReturn
+
+Snd_S3DIntro_Call05:
+	dc.b	dKickS3, $0C, dKickS3
+
+Snd_S3DIntro_Call06:
+	dc.b	dMuffledSnare, $0C, dKickS3, $06, dMuffledSnare, $0C, dMuffledSnare, $06, dKickS3, $0C, dMuffledSnare, $06
+	smpsReturn
 
 Snd_S3DIntro_Voices:
 ;	Voice $00

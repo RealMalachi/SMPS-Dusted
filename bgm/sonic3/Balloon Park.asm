@@ -400,19 +400,19 @@ Snd_BPZ_DAC:
 	dc.b	dSnareS3, $06, dSnareS3, dKickS3, $0C, dSnareS3, dKickS3
 
 Snd_BPZ_Jump00:
-	dc.b	dCrashCymbal, $0C, nRst, dSnareS3, dKickS3, dKickS3, $06, dSnareS3, dKickS3, $0C, dSnareS3, dKickS3
-	dc.b	dKickS3, dKickS3, dSnareS3, dKickS3, dKickS3, $06, dSnareS3, dKickS3, $0C, dSnareS3, dKickS3, dKickS3
-	dc.b	nRst, dSnareS3, dKickS3, dKickS3, $06, dSnareS3, dKickS3, $0C, dSnareS3, dKickS3, dKickS3, dKickS3
+	dc.b	dCrashCymbal, $18, dSnareS3, $0C, dKickS3, dKickS3, $06, dSnareS3, dKickS3, $0C, dSnareS3, dKickS3
+	dc.b	dKickS3, dKickS3, dSnareS3, dKickS3, dKickS3, $06, dSnareS3, dKickS3, $0C, dSnareS3, dKickS3, dKickS3, $18
+	dc.b	dSnareS3, $0C, dKickS3, dKickS3, $06, dSnareS3, dKickS3, $0C, dSnareS3, dKickS3, dKickS3, dKickS3
 	dc.b	dSnareS3, dKickS3, dKickS3, $06, dSnareS3, dKickS3, $0C, dSnareS3, dSnareS3
 
 Snd_BPZ_Loop00:
 	dc.b	dKickS3, dSnareS3, $12, dKickS3, $06, dSnareS3, $0C, dKickS3, dSnareS3, $12, dKickS3, $06
 	dc.b	dSnareS3, $0C
 	smpsLoop            $00, $02, Snd_BPZ_Loop00
-	dc.b	dCrashCymbal, nRst, dSnareS3, dKickS3, dKickS3, $06, dSnareS3, dKickS3, $0C, dSnareS3, dKickS3, dKickS3
-	dc.b	dKickS3, dSnareS3, dKickS3, dKickS3, $06, dSnareS3, dKickS3, $0C, dSnareS3, dSnareS3, dCrashCymbal, nRst
-	dc.b	dSnareS3, dKickS3, dKickS3, $06, dSnareS3, dKickS3, $0C, dSnareS3, dKickS3, dKickS3, dKickS3, dSnareS3
-	dc.b	dKickS3, dKickS3, $06, dSnareS3, dKickS3, $0C, dSnareS3, dKickS3, dKickS3, nRst, dSnareS3, dKickS3
+	dc.b	dCrashCymbal, $18, dSnareS3, $0C, dKickS3, dKickS3, $06, dSnareS3, dKickS3, $0C, dSnareS3, dKickS3, dKickS3
+	dc.b	dKickS3, dSnareS3, dKickS3, dKickS3, $06, dSnareS3, dKickS3, $0C, dSnareS3, dSnareS3, dCrashCymbal, $18
+	dc.b	dSnareS3, $0C, dKickS3, dKickS3, $06, dSnareS3, dKickS3, $0C, dSnareS3, dKickS3, dKickS3, dKickS3, dSnareS3
+	dc.b	dKickS3, dKickS3, $06, dSnareS3, dKickS3, $0C, dSnareS3, dKickS3, dKickS3, $18, dSnareS3, $0C, dKickS3
 	dc.b	dKickS3, $06, dSnareS3, dKickS3, $0C, dSnareS3, dKickS3, dKickS3, dKickS3, dSnareS3, dKickS3, dKickS3
 	dc.b	$06, dSnareS3, dKickS3, $0C, dSnareS3, dSnareS3
 
@@ -420,7 +420,7 @@ Snd_BPZ_Loop01:
 	dc.b	dKickS3, dSnareS3, $12, dKickS3, $06, dSnareS3, $0C, dKickS3, dSnareS3, $12, dKickS3, $06
 	dc.b	dSnareS3, $0C
 	smpsLoop            $00, $02, Snd_BPZ_Loop01
-	dc.b	dCrashCymbal, nRst, dSnareS3, dKickS3, dKickS3, $06, dSnareS3, dKickS3, $0C, dSnareS3, dKickS3, dKickS3
+	dc.b	dCrashCymbal, $18, dSnareS3, $0C, dKickS3, dKickS3, $06, dSnareS3, dKickS3, $0C, dSnareS3, dKickS3, dKickS3
 	dc.b	dKickS3, dSnareS3, dKickS3, dKickS3, $06, dSnareS3, dKickS3, $0C, dSnareS3, dSnareS3
 
 Snd_BPZ_Loop02:
