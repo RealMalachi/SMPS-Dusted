@@ -18,6 +18,7 @@ Additionally, the base sonic games versions of SMPS use byte-sized IDs whereas s
 		move.b	#mus_song,d0		; Don't do this
 		moveq	#mus_song,d0		; Only do this if you know the ID will be below $80
 		move.w	#mus_song,d0		; Do this
+		move.l	#mus_song,d0		; This works, but isn't necessary
 		jsr		(QueueSound).w		; The subroutine
 ```
 

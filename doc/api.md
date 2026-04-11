@@ -1,5 +1,7 @@
 # How the API works
-SMPS-Dusted 68K is primarily provided in a binary blob, akin to many homebrew drivers nowadays. At the start of the blob is a LUT for every subroutine the user should have immediate access to.
+SMPS-Dusted 68K is primarily provided in a binary blob, akin to many homebrew drivers nowadays.
+
+At the start of the blob is a LUT for subroutines and data that the user should have immediate access to.
 
 ## InitDriver
 relative address: +0

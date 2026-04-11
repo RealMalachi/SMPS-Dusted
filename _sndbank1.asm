@@ -2,11 +2,9 @@
 ; SMPS-Dusted driver data
 ; ---------------------------------------------------------------------------
 SMPS_Start:
-	if MOMPASS=1
-.s:	dc.w 0,0,0
-	else
-.s:	dc.w bgm__Last-bgm__First,sfx__Last-sfx__First,pcm__Last-pcm__First
-	endif
+.s:	dc.w bgm__Last-bgm__First
+	dc.w sfx__Last-sfx__First
+	dc.w pcm__Last-pcm__First
 	dc.w __smpsDataVer
 	dc.w SMPS_MusicIndex-.s
 	dc.w SMPS_SoundIndex-.s
@@ -17,26 +15,6 @@ SMPS_Start:
 	dc.w SMPS_FmDrumTable-.s
 	dc.w SMPS_PsgDrumTable-.s
 	dc.w SMPS_PcmDrumTable-.s
-; ---------------------------------------------------------------------------
-	cmddef smpsramsize,	v_endofram
-	cmddef cmd__First,	$F000
-	cmddef cmd_FadeoutBGM,	$F000
-	cmddef cmd_Fadeout,	$F100
-	cmddef cmd_Fadein,	$F200
-	cmddef cmd_StopAll,	$F300
-	cmddef cmd_StopBGM,	$F301
-	cmddef cmd_StopSFX,	$F302
-	cmddef cmd_StopBSFX,	$F304
-	cmddef cmd_StopPSFX,	$F308
-	cmddef cmd_SpeedOff,	$F400
-	cmddef cmd_SpeedOn,	$F401
-	cmddef cmd_PanStereo,	$F402
-	cmddef cmd_PanMono,	$F403
-	cmddef cmd_SsgOn,	$F404
-	cmddef cmd_SsgOff,	$F405
-	cmddef cmd_MuffleOn,	$F406
-	cmddef cmd_MuffleOff,	$F407
-	cmddef cmd__Last,	$F500
 ; ---------------------------------------------------------------------------
 ; Universal Modulation Envelopes
 ; ---------------------------------------------------------------------------
@@ -1460,1210 +1438,1210 @@ SMPS_SampleTable:
 ; ---------------------------------------------------------------------------
 ; Sound effect data
 ; ---------------------------------------------------------------------------
-SfxTest:	include "sfx/_tester.asm"
+SfxTest:	include "res/sfx/_tester.asm"
 		even
-SfxFlicky:	include "sfx/Flicky Tweet.asm"
+SfxFlicky:	include "res/sfx/Flicky Tweet.asm"
 		even
-SfxFlickyGrab:	include "sfx/Flicky Grab Jingle.asm"
+SfxFlickyGrab:	include "res/sfx/Flicky Grab Jingle.asm"
 		even
-SfxSpindash:	include "sfx/Spin Dash Rev.asm"
+SfxSpindash:	include "res/sfx/Spin Dash Rev.asm"
 		even
-SfxSpikeMove:	include "sfx/Spike Move.asm"
+SfxSpikeMove:	include "res/sfx/Spike Move.asm"
 		even
-SfxSkidPSG:	include "sfx/Skid PSG.asm"
+SfxSkidPSG:	include "res/sfx/Skid PSG.asm"
 		even
-SfxSkidFM:	include "sfx/Skid FM.asm"
-		even
-
-SfxS1A0:	include "sfx/sonic1/SndA0 - Jump.asm"
-		even
-SfxS1A1:	include "sfx/sonic1/SndA1 - Lamppost.asm"
-		even
-SfxS1A2:	include "sfx/sonic1/SndA2.asm"
-		even
-SfxS1A3:	include "sfx/sonic1/SndA3 - Death.asm"
-		even
-SfxS1A4:	include "sfx/sonic1/SndA4 - Skid.asm"
-		even
-SfxS1A5:	include "sfx/sonic1/SndA5.asm"
-		even
-SfxS1A6:	include "sfx/sonic1/SndA6 - Hit Spikes.asm"
-		even
-SfxS1A7:	include "sfx/sonic1/SndA7 - Push Block.asm"
-		even
-SfxS1A8:	include "sfx/sonic1/SndA8 - SS Goal.asm"
-		even
-SfxS1A9:	include "sfx/sonic1/SndA9 - SS Item.asm"
-		even
-SfxS1AA:	include "sfx/sonic1/SndAA - Splash.asm"
-		even
-SfxS1AB:	include "sfx/sonic1/SndAB.asm"
-		even
-SfxS1AC:	include "sfx/sonic1/SndAC - Hit Boss.asm"
-		even
-SfxS1AD:	include "sfx/sonic1/SndAD - Get Bubble.asm"
-		even
-SfxS1AE:	include "sfx/sonic1/SndAE - Fireball.asm"
-		even
-SfxS1AF:	include "sfx/sonic1/SndAF - Shield.asm"
-		even
-SfxS1B0:	include "sfx/sonic1/SndB0 - Saw.asm"
-		even
-SfxS1B1:	include "sfx/sonic1/SndB1 - Electric.asm"
-		even
-SfxS1B2:	include "sfx/sonic1/SndB2 - Drown Death.asm"
-		even
-SfxS1B3:	include "sfx/sonic1/SndB3 - Flamethrower.asm"
-		even
-SfxS1B4:	include "sfx/sonic1/SndB4 - Bumper.asm"
-		even
-SfxS1B5:	include "sfx/sonic1/SndB5 - Ring.asm"
-		even
-SfxS1B6:	include "sfx/sonic1/SndB6 - Spikes Move.asm"
-		even
-SfxS1B7:	include "sfx/sonic1/SndB7 - Rumbling.asm"
-		even
-SfxS1B8:	include "sfx/sonic1/SndB8.asm"
-		even
-SfxS1B9:	include "sfx/sonic1/SndB9 - Collapse.asm"
-		even
-SfxS1BA:	include "sfx/sonic1/SndBA - SS Glass.asm"
-		even
-SfxS1BB:	include "sfx/sonic1/SndBB - Door.asm"
-		even
-SfxS1BC:	include "sfx/sonic1/SndBC - Teleport.asm"
-		even
-SfxS1BD:	include "sfx/sonic1/SndBD - ChainStomp.asm"
-		even
-SfxS1BE:	include "sfx/sonic1/SndBE - Roll.asm"
-		even
-SfxS1BF:	include "sfx/sonic1/SndBF - Get Continue.asm"
-		even
-SfxS1C0:	include "sfx/sonic1/SndC0 - Basaran Flap.asm"
-		even
-SfxS1C1:	include "sfx/sonic1/SndC1 - Break Item.asm"
-		even
-SfxS1C2:	include "sfx/sonic1/SndC2 - Drown Warning.asm"
-		even
-SfxS1C3:	include "sfx/sonic1/SndC3 - Giant Ring.asm"
-		even
-SfxS1C4:	include "sfx/sonic1/SndC4 - Bomb.asm"
-		even
-SfxS1C5:	include "sfx/sonic1/SndC5 - Cash Register.asm"
-		even
-SfxS1C6:	include "sfx/sonic1/SndC6 - Ring Loss.asm"
-		even
-SfxS1C7:	include "sfx/sonic1/SndC7 - Chain Rising.asm"
-		even
-SfxS1C8:	include "sfx/sonic1/SndC8 - Burning.asm"
-		even
-SfxS1C9:	include "sfx/sonic1/SndC9 - Hidden Bonus.asm"
-		even
-SfxS1CA:	include "sfx/sonic1/SndCA - Enter SS.asm"
-		even
-SfxS1CB:	include "sfx/sonic1/SndCB - Wall Smash.asm"
-		even
-SfxS1CC:	include "sfx/sonic1/SndCC - Spring.asm"
-		even
-SfxS1CD:	include "sfx/sonic1/SndCD - Switch.asm"
-		even
-SfxS1CE:	include "sfx/sonic1/SndCE - Ring Left Speaker.asm"
-		even
-SfxS1CF:	include "sfx/sonic1/SndCF - Signpost.asm"
-		even
-BfxS1D0:	include "sfx/sonic1/SndD0 - Waterfall.asm"
+SfxSkidFM:	include "res/sfx/Skid FM.asm"
 		even
 
-SfxS2A0:	include "sfx/sonic2/A0 - Jump.asm"
+SfxS1A0:	include "res/sfx/sonic1/SndA0 - Jump.asm"
 		even
-SfxS2A1:	include "sfx/sonic2/A1 - Checkpoint.asm"
+SfxS1A1:	include "res/sfx/sonic1/SndA1 - Lamppost.asm"
 		even
-SfxS2A2:	include "sfx/sonic2/A2 - Spike Switch.asm"
+SfxS1A2:	include "res/sfx/sonic1/SndA2.asm"
 		even
-SfxS2A3:	include "sfx/sonic2/A3 - Hurt.asm"
+SfxS1A3:	include "res/sfx/sonic1/SndA3 - Death.asm"
 		even
-SfxS2A4:	include "sfx/sonic2/A4 - Skidding.asm"
+SfxS1A4:	include "res/sfx/sonic1/SndA4 - Skid.asm"
 		even
-SfxS2A5:	include "sfx/sonic2/A5 - Block Push.asm"
+SfxS1A5:	include "res/sfx/sonic1/SndA5.asm"
 		even
-SfxS2A6:	include "sfx/sonic2/A6 - Hurt by Spikes.asm"
+SfxS1A6:	include "res/sfx/sonic1/SndA6 - Hit Spikes.asm"
 		even
-SfxS2A7:	include "sfx/sonic2/A7 - Sparkle.asm"
+SfxS1A7:	include "res/sfx/sonic1/SndA7 - Push Block.asm"
 		even
-SfxS2A8:	include "sfx/sonic2/A8 - Beep.asm"
+SfxS1A8:	include "res/sfx/sonic1/SndA8 - SS Goal.asm"
 		even
-SfxS2A9:	include "sfx/sonic2/A9 - Special Stage Item (Unused).asm"
+SfxS1A9:	include "res/sfx/sonic1/SndA9 - SS Item.asm"
 		even
-SfxS2AA:	include "sfx/sonic2/AA - Splash.asm"
+SfxS1AA:	include "res/sfx/sonic1/SndAA - Splash.asm"
 		even
-SfxS2AB:	include "sfx/sonic2/AB - Swish.asm"
+SfxS1AB:	include "res/sfx/sonic1/SndAB.asm"
 		even
-SfxS2B9:	include "sfx/sonic2/B9 - Smash.asm"		; shares FM instrument with Boss Hit
+SfxS1AC:	include "res/sfx/sonic1/SndAC - Hit Boss.asm"
 		even
-SfxS2CB:	include "sfx/sonic2/CB - Slow Smash.asm"	; shares FM instrument with Boss Hit
+SfxS1AD:	include "res/sfx/sonic1/SndAD - Get Bubble.asm"
 		even
-SfxS2AC:	include "sfx/sonic2/AC - Boss Hit.asm"
+SfxS1AE:	include "res/sfx/sonic1/SndAE - Fireball.asm"
 		even
-SfxS2AD:	include "sfx/sonic2/AD - Inhaling Bubble.asm"
+SfxS1AF:	include "res/sfx/sonic1/SndAF - Shield.asm"
 		even
-SfxS2B3:	include "sfx/sonic2/B3 - Fire Burn.asm"		; shares FM instrument with Lava Ball
+SfxS1B0:	include "res/sfx/sonic1/SndB0 - Saw.asm"
 		even
-SfxS2AE:	include "sfx/sonic2/AE - Lava Ball.asm"
+SfxS1B1:	include "res/sfx/sonic1/SndB1 - Electric.asm"
 		even
-SfxS2AF:	include "sfx/sonic2/AF - Shield.asm"
+SfxS1B2:	include "res/sfx/sonic1/SndB2 - Drown Death.asm"
 		even
-SfxS2B0:	include "sfx/sonic2/B0 - Laser Beam.asm"
+SfxS1B3:	include "res/sfx/sonic1/SndB3 - Flamethrower.asm"
 		even
-SfxS2B1:	include "sfx/sonic2/B1 - Electricity (Unused).asm"
+SfxS1B4:	include "res/sfx/sonic1/SndB4 - Bumper.asm"
 		even
-SfxS2B2:	include "sfx/sonic2/B2 - Drown.asm"
+SfxS1B5:	include "res/sfx/sonic1/SndB5 - Ring.asm"
 		even
-SfxS2B4:	include "sfx/sonic2/B4 - Bumper.asm"
+SfxS1B6:	include "res/sfx/sonic1/SndB6 - Spikes Move.asm"
 		even
-SfxS2C6:	include "sfx/sonic2/C6 - Ring Spill.asm"	; shares FM instrument with Ring
+SfxS1B7:	include "res/sfx/sonic1/SndB7 - Rumbling.asm"
 		even
-SfxS2CE:	include "sfx/sonic2/CE - Ring Left Speaker.asm"	; shares FM instrument with Ring
+SfxS1B8:	include "res/sfx/sonic1/SndB8.asm"
 		even
-SfxS2B5:	include "sfx/sonic2/B5 - Ring.asm"
+SfxS1B9:	include "res/sfx/sonic1/SndB9 - Collapse.asm"
 		even
-SfxS2B6:	include "sfx/sonic2/B6 - Spikes Move.asm"
+SfxS1BA:	include "res/sfx/sonic1/SndBA - SS Glass.asm"
 		even
-SfxS2B7:	include "sfx/sonic2/B7 - Rumbling.asm"
+SfxS1BB:	include "res/sfx/sonic1/SndBB - Door.asm"
 		even
-SfxS2B8:	include "sfx/sonic2/B8 - Unknown (Unused).asm"
+SfxS1BC:	include "res/sfx/sonic1/SndBC - Teleport.asm"
 		even
-SfxS2BA:	include "sfx/sonic2/BA - Special Stage Glass (Unused).asm"
+SfxS1BD:	include "res/sfx/sonic1/SndBD - ChainStomp.asm"
 		even
-SfxS2BB:	include "sfx/sonic2/BB - Door Slam.asm"
+SfxS1BE:	include "res/sfx/sonic1/SndBE - Roll.asm"
 		even
-SfxS2BC:	include "sfx/sonic2/BC - Spin Dash Release.asm"
+SfxS1BF:	include "res/sfx/sonic1/SndBF - Get Continue.asm"
 		even
-SfxS2BD:	include "sfx/sonic2/BD - Hammer.asm"
+SfxS1C0:	include "res/sfx/sonic1/SndC0 - Basaran Flap.asm"
 		even
-SfxS2BE:	include "sfx/sonic2/BE - Roll.asm"
+SfxS1C1:	include "res/sfx/sonic1/SndC1 - Break Item.asm"
 		even
-SfxS2C0:	include "sfx/sonic2/C0 - Casino Bonus.asm"	; shares FM instrument with Continue jingle
+SfxS1C2:	include "res/sfx/sonic1/SndC2 - Drown Warning.asm"
 		even
-SfxS2C2:	include "sfx/sonic2/C2 - Water Warning.asm"	; shares FM instrument with Continue jingle
+SfxS1C3:	include "res/sfx/sonic1/SndC3 - Giant Ring.asm"
 		even
-SfxS2BF:	include "sfx/sonic2/BF - Continue Jingle.asm"
+SfxS1C4:	include "res/sfx/sonic1/SndC4 - Bomb.asm"
 		even
-SfxS2C1:	include "sfx/sonic2/C1 - Explosion.asm"
+SfxS1C5:	include "res/sfx/sonic1/SndC5 - Cash Register.asm"
 		even
-SfxS2C3:	include "sfx/sonic2/C3 - Enter Giant Ring (Unused).asm"
+SfxS1C6:	include "res/sfx/sonic1/SndC6 - Ring Loss.asm"
 		even
-SfxS2C4:	include "sfx/sonic2/C4 - Boss Explosion.asm"
+SfxS1C7:	include "res/sfx/sonic1/SndC7 - Chain Rising.asm"
 		even
-SfxS2C5:	include "sfx/sonic2/C5 - Tally End.asm"
+SfxS1C8:	include "res/sfx/sonic1/SndC8 - Burning.asm"
 		even
-SfxS2C7:	include "sfx/sonic2/C7 - Chain Rise (Unused).asm"
+SfxS1C9:	include "res/sfx/sonic1/SndC9 - Hidden Bonus.asm"
 		even
-SfxS2C8:	include "sfx/sonic2/C8 - Flamethrower.asm"
+SfxS1CA:	include "res/sfx/sonic1/SndCA - Enter SS.asm"
 		even
-SfxS2C9:	include "sfx/sonic2/C9 - Hidden Bonus (Unused).asm"
+SfxS1CB:	include "res/sfx/sonic1/SndCB - Wall Smash.asm"
 		even
-SfxS2CA:	include "sfx/sonic2/CA - Special Stage Entry.asm"
+SfxS1CC:	include "res/sfx/sonic1/SndCC - Spring.asm"
 		even
-SfxS2CC:	include "sfx/sonic2/CC - Spring.asm"
+SfxS1CD:	include "res/sfx/sonic1/SndCD - Switch.asm"
 		even
-SfxS2CD:	include "sfx/sonic2/CD - Switch.asm"
+SfxS1CE:	include "res/sfx/sonic1/SndCE - Ring Left Speaker.asm"
 		even
-SfxS2CF:	include "sfx/sonic2/CF - Signpost.asm"
+SfxS1CF:	include "res/sfx/sonic1/SndCF - Signpost.asm"
 		even
-SfxS2D0:	include "sfx/sonic2/D0 - CNZ Boss Zap.asm"
-		even
-SfxS2D1:	include "sfx/sonic2/D1 - Unknown (Unused).asm"
-		even
-SfxS2D2:	include "sfx/sonic2/D2 - Unknown (Unused).asm"
-		even
-SfxS2D3:	include "sfx/sonic2/D3 - Signpost 2P.asm"
-		even
-SfxS2D4:	include "sfx/sonic2/D4 - OOZ Lid Pop.asm"
-		even
-SfxS2D5:	include "sfx/sonic2/D5 - Sliding Spike.asm"
-		even
-SfxS2D6:	include "sfx/sonic2/D6 - CNZ Elevator.asm"
-		even
-SfxS2D7:	include "sfx/sonic2/D7 - Platform Knock.asm"
-		even
-SfxS2D8:	include "sfx/sonic2/D8 - Bonus Bumper.asm"
-		even
-SfxS2D9:	include "sfx/sonic2/D9 - Large Bumper.asm"
-		even
-SfxS2DA:	include "sfx/sonic2/DA - Gloop.asm"
-		even
-SfxS2DB:	include "sfx/sonic2/DB - Pre-Arrow Firing.asm"
-		even
-SfxS2DC:	include "sfx/sonic2/DC - Fire.asm"
-		even
-SfxS2DD:	include "sfx/sonic2/DD - Arrow Stick.asm"
-		even
-SfxS2DE:	include "sfx/sonic2/DE - Helicopter.asm"
-		even
-SfxS2EC:	include "sfx/sonic2/EC - Teleport.asm"		; shares PSG sequences with super transform
-		even
-SfxS2DF:	include "sfx/sonic2/DF - Super Transform.asm"
-		even
-SfxS2E0:	include "sfx/sonic2/E0 - Spin Dash Rev.asm"
-		even
-SfxS2E1:	include "sfx/sonic2/E1 - Rumbling 2.asm"
-		even
-SfxS2E2:	include "sfx/sonic2/E2 - CNZ Launch.asm"
-		even
-SfxS2E3:	include "sfx/sonic2/E3 - Flipper.asm"
-		even
-SfxS2E4:	include "sfx/sonic2/E4 - HTZ Lift Click.asm"
-		even
-SfxS2E5:	include "sfx/sonic2/E5 - Leaves.asm"
-		even
-SfxS2E6:	include "sfx/sonic2/E6 - Mega Mack Drop.asm"
-		even
-SfxS2E7:	include "sfx/sonic2/E7 - Drawbridge Move.asm"
-		even
-SfxS2E8:	include "sfx/sonic2/E8 - Quick Door Slam.asm"
-		even
-SfxS2E9:	include "sfx/sonic2/E9 - Drawbridge Down.asm"
-		even
-SfxS2EF:	include "sfx/sonic2/EF - Large Laser.asm"	; shares FM instrument with Laser Burst
-		even
-SfxS2EA:	include "sfx/sonic2/EA - Laser Burst.asm"
-		even
-SfxS2EB:	include "sfx/sonic2/EB - Scatter.asm"
-		even
-SfxS2ED:	include "sfx/sonic2/ED - Error.asm"
-		even
-SfxS2EE:	include "sfx/sonic2/EE - Mecha Sonic Buzz.asm"
-		even
-SfxS2F0:	include "sfx/sonic2/F0 - Oil Slide.asm"
+BfxS1D0:	include "res/sfx/sonic1/SndD0 - Waterfall.asm"
 		even
 
-SfxS2BD0:	include "sfx/sonic2-wai/D0 - CNZ Boss Zap.asm"
+SfxS2A0:	include "res/sfx/sonic2/A0 - Jump.asm"
 		even
-SfxS2BD1:	include "sfx/sonic2-wai/D1 - Unknown (Unused).asm"
+SfxS2A1:	include "res/sfx/sonic2/A1 - Checkpoint.asm"
 		even
-SfxS2BD2:	include "sfx/sonic2-wai/D2 - Unknown (Unused).asm"
+SfxS2A2:	include "res/sfx/sonic2/A2 - Spike Switch.asm"
 		even
-SfxS2BD3:	include "sfx/sonic2-wai/D3 - Signpost 2P.asm"
+SfxS2A3:	include "res/sfx/sonic2/A3 - Hurt.asm"
 		even
-SfxS2BD4:	include "sfx/sonic2-wai/D4 - OOZ Lid Pop.asm"
+SfxS2A4:	include "res/sfx/sonic2/A4 - Skidding.asm"
 		even
-SfxS2BD5:	include "sfx/sonic2-wai/D5 - Sliding Spike.asm"
+SfxS2A5:	include "res/sfx/sonic2/A5 - Block Push.asm"
 		even
-SfxS2BD6:	include "sfx/sonic2-wai/D6 - CNZ Elevator.asm"
+SfxS2A6:	include "res/sfx/sonic2/A6 - Hurt by Spikes.asm"
 		even
-SfxS2BD7:	include "sfx/sonic2-wai/D7 - Platform Knock.asm"
+SfxS2A7:	include "res/sfx/sonic2/A7 - Sparkle.asm"
 		even
-SfxS2BD8:	include "sfx/sonic2-wai/D8 - Bonus Bumper.asm"
+SfxS2A8:	include "res/sfx/sonic2/A8 - Beep.asm"
 		even
-SfxS2BD9:	include "sfx/sonic2-wai/D9 - Large Bumper.asm"
+SfxS2A9:	include "res/sfx/sonic2/A9 - Special Stage Item (Unused).asm"
 		even
-SfxS2BDA:	include "sfx/sonic2-wai/DA - Gloop.asm"
+SfxS2AA:	include "res/sfx/sonic2/AA - Splash.asm"
 		even
-SfxS2BDB:	include "sfx/sonic2-wai/DB - Pre-Arrow Firing.asm"
+SfxS2AB:	include "res/sfx/sonic2/AB - Swish.asm"
 		even
-SfxS2BDC:	include "sfx/sonic2-wai/DC - Fire.asm"
+SfxS2B9:	include "res/sfx/sonic2/B9 - Smash.asm"		; shares FM instrument with Boss Hit
 		even
-SfxS2BDD:	include "sfx/sonic2-wai/DD - Arrow Stick.asm"
+SfxS2CB:	include "res/sfx/sonic2/CB - Slow Smash.asm"	; shares FM instrument with Boss Hit
 		even
-SfxS2BDE:	include "sfx/sonic2-wai/DE - Helicopter.asm"
+SfxS2AC:	include "res/sfx/sonic2/AC - Boss Hit.asm"
 		even
-SfxS2BDF:	include "sfx/sonic2-wai/DF - Super Transform.asm"
+SfxS2AD:	include "res/sfx/sonic2/AD - Inhaling Bubble.asm"
 		even
-SfxS2BE0:	include "sfx/sonic2-wai/E0 - Spin Dash Rev.asm"
+SfxS2B3:	include "res/sfx/sonic2/B3 - Fire Burn.asm"		; shares FM instrument with Lava Ball
+		even
+SfxS2AE:	include "res/sfx/sonic2/AE - Lava Ball.asm"
+		even
+SfxS2AF:	include "res/sfx/sonic2/AF - Shield.asm"
+		even
+SfxS2B0:	include "res/sfx/sonic2/B0 - Laser Beam.asm"
+		even
+SfxS2B1:	include "res/sfx/sonic2/B1 - Electricity (Unused).asm"
+		even
+SfxS2B2:	include "res/sfx/sonic2/B2 - Drown.asm"
+		even
+SfxS2B4:	include "res/sfx/sonic2/B4 - Bumper.asm"
+		even
+SfxS2C6:	include "res/sfx/sonic2/C6 - Ring Spill.asm"	; shares FM instrument with Ring
+		even
+SfxS2CE:	include "res/sfx/sonic2/CE - Ring Left Speaker.asm"	; shares FM instrument with Ring
+		even
+SfxS2B5:	include "res/sfx/sonic2/B5 - Ring.asm"
+		even
+SfxS2B6:	include "res/sfx/sonic2/B6 - Spikes Move.asm"
+		even
+SfxS2B7:	include "res/sfx/sonic2/B7 - Rumbling.asm"
+		even
+SfxS2B8:	include "res/sfx/sonic2/B8 - Unknown (Unused).asm"
+		even
+SfxS2BA:	include "res/sfx/sonic2/BA - Special Stage Glass (Unused).asm"
+		even
+SfxS2BB:	include "res/sfx/sonic2/BB - Door Slam.asm"
+		even
+SfxS2BC:	include "res/sfx/sonic2/BC - Spin Dash Release.asm"
+		even
+SfxS2BD:	include "res/sfx/sonic2/BD - Hammer.asm"
+		even
+SfxS2BE:	include "res/sfx/sonic2/BE - Roll.asm"
+		even
+SfxS2C0:	include "res/sfx/sonic2/C0 - Casino Bonus.asm"	; shares FM instrument with Continue jingle
+		even
+SfxS2C2:	include "res/sfx/sonic2/C2 - Water Warning.asm"	; shares FM instrument with Continue jingle
+		even
+SfxS2BF:	include "res/sfx/sonic2/BF - Continue Jingle.asm"
+		even
+SfxS2C1:	include "res/sfx/sonic2/C1 - Explosion.asm"
+		even
+SfxS2C3:	include "res/sfx/sonic2/C3 - Enter Giant Ring (Unused).asm"
+		even
+SfxS2C4:	include "res/sfx/sonic2/C4 - Boss Explosion.asm"
+		even
+SfxS2C5:	include "res/sfx/sonic2/C5 - Tally End.asm"
+		even
+SfxS2C7:	include "res/sfx/sonic2/C7 - Chain Rise (Unused).asm"
+		even
+SfxS2C8:	include "res/sfx/sonic2/C8 - Flamethrower.asm"
+		even
+SfxS2C9:	include "res/sfx/sonic2/C9 - Hidden Bonus (Unused).asm"
+		even
+SfxS2CA:	include "res/sfx/sonic2/CA - Special Stage Entry.asm"
+		even
+SfxS2CC:	include "res/sfx/sonic2/CC - Spring.asm"
+		even
+SfxS2CD:	include "res/sfx/sonic2/CD - Switch.asm"
+		even
+SfxS2CF:	include "res/sfx/sonic2/CF - Signpost.asm"
+		even
+SfxS2D0:	include "res/sfx/sonic2/D0 - CNZ Boss Zap.asm"
+		even
+SfxS2D1:	include "res/sfx/sonic2/D1 - Unknown (Unused).asm"
+		even
+SfxS2D2:	include "res/sfx/sonic2/D2 - Unknown (Unused).asm"
+		even
+SfxS2D3:	include "res/sfx/sonic2/D3 - Signpost 2P.asm"
+		even
+SfxS2D4:	include "res/sfx/sonic2/D4 - OOZ Lid Pop.asm"
+		even
+SfxS2D5:	include "res/sfx/sonic2/D5 - Sliding Spike.asm"
+		even
+SfxS2D6:	include "res/sfx/sonic2/D6 - CNZ Elevator.asm"
+		even
+SfxS2D7:	include "res/sfx/sonic2/D7 - Platform Knock.asm"
+		even
+SfxS2D8:	include "res/sfx/sonic2/D8 - Bonus Bumper.asm"
+		even
+SfxS2D9:	include "res/sfx/sonic2/D9 - Large Bumper.asm"
+		even
+SfxS2DA:	include "res/sfx/sonic2/DA - Gloop.asm"
+		even
+SfxS2DB:	include "res/sfx/sonic2/DB - Pre-Arrow Firing.asm"
+		even
+SfxS2DC:	include "res/sfx/sonic2/DC - Fire.asm"
+		even
+SfxS2DD:	include "res/sfx/sonic2/DD - Arrow Stick.asm"
+		even
+SfxS2DE:	include "res/sfx/sonic2/DE - Helicopter.asm"
+		even
+SfxS2EC:	include "res/sfx/sonic2/EC - Teleport.asm"		; shares PSG sequences with super transform
+		even
+SfxS2DF:	include "res/sfx/sonic2/DF - Super Transform.asm"
+		even
+SfxS2E0:	include "res/sfx/sonic2/E0 - Spin Dash Rev.asm"
+		even
+SfxS2E1:	include "res/sfx/sonic2/E1 - Rumbling 2.asm"
+		even
+SfxS2E2:	include "res/sfx/sonic2/E2 - CNZ Launch.asm"
+		even
+SfxS2E3:	include "res/sfx/sonic2/E3 - Flipper.asm"
+		even
+SfxS2E4:	include "res/sfx/sonic2/E4 - HTZ Lift Click.asm"
+		even
+SfxS2E5:	include "res/sfx/sonic2/E5 - Leaves.asm"
+		even
+SfxS2E6:	include "res/sfx/sonic2/E6 - Mega Mack Drop.asm"
+		even
+SfxS2E7:	include "res/sfx/sonic2/E7 - Drawbridge Move.asm"
+		even
+SfxS2E8:	include "res/sfx/sonic2/E8 - Quick Door Slam.asm"
+		even
+SfxS2E9:	include "res/sfx/sonic2/E9 - Drawbridge Down.asm"
+		even
+SfxS2EF:	include "res/sfx/sonic2/EF - Large Laser.asm"	; shares FM instrument with Laser Burst
+		even
+SfxS2EA:	include "res/sfx/sonic2/EA - Laser Burst.asm"
+		even
+SfxS2EB:	include "res/sfx/sonic2/EB - Scatter.asm"
+		even
+SfxS2ED:	include "res/sfx/sonic2/ED - Error.asm"
+		even
+SfxS2EE:	include "res/sfx/sonic2/EE - Mecha Sonic Buzz.asm"
+		even
+SfxS2F0:	include "res/sfx/sonic2/F0 - Oil Slide.asm"
 		even
 
-SfxCdSKID:	include "sfx/soniccd/90 - Skid.asm"
+SfxS2BD0:	include "res/sfx/sonic2-wai/D0 - CNZ Boss Zap.asm"
 		even
-SfxCd91:	include "sfx/soniccd/91.asm"
+SfxS2BD1:	include "res/sfx/sonic2-wai/D1 - Unknown (Unused).asm"
 		even
-SfxCdJUMP:	include "sfx/soniccd/92 - Jump.asm"
+SfxS2BD2:	include "res/sfx/sonic2-wai/D2 - Unknown (Unused).asm"
 		even
-SfxCdHURT:	include "sfx/soniccd/93 - Hurt.asm"
+SfxS2BD3:	include "res/sfx/sonic2-wai/D3 - Signpost 2P.asm"
 		even
-SfxCdRINGLOSS:	include "sfx/soniccd/94 - Ring Loss.asm"
+SfxS2BD4:	include "res/sfx/sonic2-wai/D4 - OOZ Lid Pop.asm"
 		even
-SfxCdRING:	include "sfx/soniccd/95 - Ring Right.asm"
+SfxS2BD5:	include "res/sfx/sonic2-wai/D5 - Sliding Spike.asm"
 		even
-SfxCdDESTROY:	include "sfx/soniccd/96 - Destroy.asm"
+SfxS2BD6:	include "res/sfx/sonic2-wai/D6 - CNZ Elevator.asm"
 		even
-SfxCdSHIELD:	include "sfx/soniccd/97 - Shield.asm"
+SfxS2BD7:	include "res/sfx/sonic2-wai/D7 - Platform Knock.asm"
 		even
-SfxCdSPRING:	include "sfx/soniccd/98 - Spring.asm"
+SfxS2BD8:	include "res/sfx/sonic2-wai/D8 - Bonus Bumper.asm"
 		even
-SfxCd99:	include "sfx/soniccd/99.asm"
+SfxS2BD9:	include "res/sfx/sonic2-wai/D9 - Large Bumper.asm"
 		even
-SfxCdKACHING:	include "sfx/soniccd/9A - Kaching.asm"
+SfxS2BDA:	include "res/sfx/sonic2-wai/DA - Gloop.asm"
 		even
-SfxCd9B:	include "sfx/soniccd/9B.asm"
+SfxS2BDB:	include "res/sfx/sonic2-wai/DB - Pre-Arrow Firing.asm"
 		even
-SfxCd9C:	include "sfx/soniccd/9C.asm"
+SfxS2BDC:	include "res/sfx/sonic2-wai/DC - Fire.asm"
 		even
-SfxCdSIGNPOST:	include "sfx/soniccd/9D - Signpost.asm"
+SfxS2BDD:	include "res/sfx/sonic2-wai/DD - Arrow Stick.asm"
 		even
-SfxCdEXPLODE:	include "sfx/soniccd/9E - Explode.asm"
+SfxS2BDE:	include "res/sfx/sonic2-wai/DE - Helicopter.asm"
 		even
-SfxCd9F:	include "sfx/soniccd/9F.asm"
+SfxS2BDF:	include "res/sfx/sonic2-wai/DF - Super Transform.asm"
 		even
-SfxCdA0:	include "sfx/soniccd/A0.asm"
-		even
-SfxCdA1:	include "sfx/soniccd/A1.asm"
-		even
-SfxCdA2:	include "sfx/soniccd/A2.asm"
-		even
-SfxCdA3:	include "sfx/soniccd/A3.asm"
-		even
-SfxCdA4:	include "sfx/soniccd/A4.asm"
-		even
-SfxCdA5:	include "sfx/soniccd/A5.asm"
-		even
-SfxCdA6:	include "sfx/soniccd/A6.asm"
-		even
-SfxCdA7:	include "sfx/soniccd/A7.asm"
-		even
-SfxCdRINGL:	include "sfx/soniccd/A8 - Ring Left.asm"
-		even
-SfxCdA9:	include "sfx/soniccd/A9 - Null.asm"
-		even
-SfxCdCHARGESTOP:include "sfx/soniccd/AB - Charge Stop.asm"	; shares patch with AA
-		even
-SfxCdAA:	include "sfx/soniccd/AA.asm"
-		even
-SfxCdAC:	include "sfx/soniccd/AC.asm"
-		even
-SfxCdAD:	include "sfx/soniccd/AD.asm"
-		even
-SfxCdCHECKPOINT:include "sfx/soniccd/AE - Checkpoint.asm"
-		even
-SfxCdBIGRING:	include "sfx/soniccd/AF - Big Ring.asm"
-		even
-SfxCdB0:	include "sfx/soniccd/B0.asm"
-		even
-SfxCdB1:	include "sfx/soniccd/B1.asm"
-		even
-SfxCdB2:	include "sfx/soniccd/B2.asm"
-		even
-SfxCdB3:	include "sfx/soniccd/B3.asm"
-		even
-SfxCdB4:	include "sfx/soniccd/B4.asm"
-		even
-SfxCdB5:	include "sfx/soniccd/B5.asm"
-		even
-SfxCdB6:	include "sfx/soniccd/B6.asm"
-		even
-SfxCdB7:	include "sfx/soniccd/B7.asm"
-		even
-SfxCdB8:	include "sfx/soniccd/B8.asm"
-		even
-SfxCdB9:	include "sfx/soniccd/B9.asm"
-		even
-SfxCdBA:	include "sfx/soniccd/BA.asm"
-		even
-SfxCdBB:	include "sfx/soniccd/BB.asm"
-		even
-SfxCdBC:	include "sfx/soniccd/BC.asm"
-		even
-SfxCdTALLY:	include "sfx/soniccd/BD - Tally.asm"
-		even
-SfxCdBE:	include "sfx/soniccd/BE.asm"
-		even
-SfxCdBF:	include "sfx/soniccd/BF.asm"
-		even
-SfxCdC0:	include "sfx/soniccd/C0.asm"
-		even
-SfxCdC1:	include "sfx/soniccd/C1.asm"
-		even
-SfxCdC2:	include "sfx/soniccd/C2.asm"
-		even
-SfxCdC3:	include "sfx/soniccd/C3.asm"
-		even
-SfxCdC4:	include "sfx/soniccd/C4.asm"
-		even
-SfxCdC5:	include "sfx/soniccd/C5.asm"
-		even
-SfxCdC6:	include "sfx/soniccd/C6.asm"
-		even
-SfxCdC7:	include "sfx/soniccd/C7.asm"
-		even
-SfxCdSSWARP:	include "sfx/soniccd/C8 - SS Warp.asm"
-		even
-SfxCdC9:	include "sfx/soniccd/C9.asm"
-		even
-SfxCdCA:	include "sfx/soniccd/CA.asm"
-		even
-SfxCdCB:	include "sfx/soniccd/CB.asm"
-		even
-SfxCdCC:	include "sfx/soniccd/CC.asm"
-		even
-SfxCdCD:	include "sfx/soniccd/CD.asm"
-		even
-SfxCdCE:	include "sfx/soniccd/CE.asm"
-		even
-SfxCdCF:	include "sfx/soniccd/CF.asm"
-		even
-SfxCdD0:	include "sfx/soniccd/D0.asm"
-		even
-SfxCdD1:	include "sfx/soniccd/D1.asm"
-		even
-SfxCdD2:	include "sfx/soniccd/D2.asm"
-		even
-SfxCdD3:	include "sfx/soniccd/D3.asm"
-		even
-SfxCdD4:	include "sfx/soniccd/D4.asm"
-		even
-SfxCdD5:	include "sfx/soniccd/D5.asm"
-		even
-SfxCdD6:	include "sfx/soniccd/D6.asm"
-		even
-SfxCdD7:	include "sfx/soniccd/D7.asm"
-		even
-SfxCdD9:	include "sfx/soniccd/D9.asm"
-		even
-SfxCdDA:	include "sfx/soniccd/DA.asm"
-		even
-SfxCdDB:	include "sfx/soniccd/DB.asm"
-		even
-SfxCdDC:	include "sfx/soniccd/DC.asm"
-		even
-SfxCdDD:	include "sfx/soniccd/DD.asm"
-		even
-SfxCdDE:	include "sfx/soniccd/DE.asm"
-		even
-SfxCdDF:	include "sfx/soniccd/DF.asm"
+SfxS2BE0:	include "res/sfx/sonic2-wai/E0 - Spin Dash Rev.asm"
 		even
 
-SfxS3B9:	include "sfx/sonic3/B9.asm"	; shares patch with 33
+SfxCdSKID:	include "res/sfx/soniccd/90 - Skid.asm"
 		even
-SfxS334:	include "sfx/sonic3/34.asm"	; shares patch with 33
+SfxCd91:	include "res/sfx/soniccd/91.asm"
 		even
-SfxS333:	include "sfx/sonic3/33.asm"
+SfxCdJUMP:	include "res/sfx/soniccd/92 - Jump.asm"
 		even
-SfxS335:	include "sfx/sonic3/35.asm"
+SfxCdHURT:	include "res/sfx/soniccd/93 - Hurt.asm"
 		even
-SfxS336:	include "sfx/sonic3/36.asm"
+SfxCdRINGLOSS:	include "res/sfx/soniccd/94 - Ring Loss.asm"
 		even
-SfxS337:	include "sfx/sonic3/37.asm"
+SfxCdRING:	include "res/sfx/soniccd/95 - Ring Right.asm"
 		even
-SfxS338:	include "sfx/sonic3/38.asm"
+SfxCdDESTROY:	include "res/sfx/soniccd/96 - Destroy.asm"
 		even
-SfxS357:	include "sfx/sonic3/57.asm"	; shares patch with 39
+SfxCdSHIELD:	include "res/sfx/soniccd/97 - Shield.asm"
 		even
-SfxS36C:	include "sfx/sonic3/6C.asm"	; shares patch with 39
+SfxCdSPRING:	include "res/sfx/soniccd/98 - Spring.asm"
 		even
-SfxS339:	include "sfx/sonic3/39.asm"
+SfxCd99:	include "res/sfx/soniccd/99.asm"
 		even
-SfxS371:	include "sfx/sonic3/71.asm"	; shares patch with 3A
+SfxCdKACHING:	include "res/sfx/soniccd/9A - Kaching.asm"
 		even
-SfxS33A:	include "sfx/sonic3/3A.asm"
+SfxCd9B:	include "res/sfx/soniccd/9B.asm"
 		even
-SfxS33B:	include "sfx/sonic3/3B.asm"
+SfxCd9C:	include "res/sfx/soniccd/9C.asm"
 		even
-SfxS33C:	include "sfx/sonic3/3C.asm"
+SfxCdSIGNPOST:	include "res/sfx/soniccd/9D - Signpost.asm"
 		even
-SfxS33D:	include "sfx/sonic3/3D.asm"
+SfxCdEXPLODE:	include "res/sfx/soniccd/9E - Explode.asm"
 		even
-SfxS33F:	include "sfx/sonic3/3F.asm"	; shares patch with 3E
+SfxCd9F:	include "res/sfx/soniccd/9F.asm"
 		even
-SfxS340:	include "sfx/sonic3/40.asm"	; shares patch with 3E
+SfxCdA0:	include "res/sfx/soniccd/A0.asm"
 		even
-SfxS341:	include "sfx/sonic3/41.asm"	; shares patch with 3E
+SfxCdA1:	include "res/sfx/soniccd/A1.asm"
 		even
-SfxS33E:	include "sfx/sonic3/3E.asm"
+SfxCdA2:	include "res/sfx/soniccd/A2.asm"
 		even
-SfxS342:	include "sfx/sonic3/42.asm"
+SfxCdA3:	include "res/sfx/soniccd/A3.asm"
 		even
-SfxS343:	include "sfx/sonic3/43.asm"
+SfxCdA4:	include "res/sfx/soniccd/A4.asm"
 		even
-SfxS344:	include "sfx/sonic3/44.asm"
+SfxCdA5:	include "res/sfx/soniccd/A5.asm"
 		even
-SfxS345:	include "sfx/sonic3/45.asm"
+SfxCdA6:	include "res/sfx/soniccd/A6.asm"
 		even
-SfxS346:	include "sfx/sonic3/46.asm"
+SfxCdA7:	include "res/sfx/soniccd/A7.asm"
 		even
-SfxS347:	include "sfx/sonic3/47.asm"
+SfxCdRINGL:	include "res/sfx/soniccd/A8 - Ring Left.asm"
 		even
-SfxS348:	include "sfx/sonic3/48.asm"
+SfxCdA9:	include "res/sfx/soniccd/A9 - Null.asm"
 		even
-SfxS349:	include "sfx/sonic3/49.asm"
+SfxCdCHARGESTOP:include "res/sfx/soniccd/AB - Charge Stop.asm"	; shares patch with AA
 		even
-SfxS34A:	include "sfx/sonic3/4A.asm"
+SfxCdAA:	include "res/sfx/soniccd/AA.asm"
 		even
-SfxS34B:	include "sfx/sonic3/4B.asm"
+SfxCdAC:	include "res/sfx/soniccd/AC.asm"
 		even
-SfxS356:	include "sfx/sonic3/56.asm"	; shares patch with 4C
+SfxCdAD:	include "res/sfx/soniccd/AD.asm"
 		even
-SfxS34C:	include "sfx/sonic3/4C.asm"
+SfxCdCHECKPOINT:include "res/sfx/soniccd/AE - Checkpoint.asm"
 		even
-SfxS34D:	include "sfx/sonic3/4D.asm"
+SfxCdBIGRING:	include "res/sfx/soniccd/AF - Big Ring.asm"
 		even
-SfxS34E:	include "sfx/sonic3/4E.asm"
+SfxCdB0:	include "res/sfx/soniccd/B0.asm"
 		even
-SfxS34F:	include "sfx/sonic3/4F.asm"
+SfxCdB1:	include "res/sfx/soniccd/B1.asm"
 		even
-SfxS350:	include "sfx/sonic3/50.asm"
+SfxCdB2:	include "res/sfx/soniccd/B2.asm"
 		even
-SfxS351:	include "sfx/sonic3/51.asm"
+SfxCdB3:	include "res/sfx/soniccd/B3.asm"
 		even
-SfxS352:	include "sfx/sonic3/52.asm"
+SfxCdB4:	include "res/sfx/soniccd/B4.asm"
 		even
-SfxS353:	include "sfx/sonic3/53.asm"
+SfxCdB5:	include "res/sfx/soniccd/B5.asm"
 		even
-SfxS354:	include "sfx/sonic3/54.asm"
+SfxCdB6:	include "res/sfx/soniccd/B6.asm"
 		even
-SfxS355:	include "sfx/sonic3/55.asm"
+SfxCdB7:	include "res/sfx/soniccd/B7.asm"
 		even
-SfxS358:	include "sfx/sonic3/58.asm"
+SfxCdB8:	include "res/sfx/soniccd/B8.asm"
 		even
-SfxS359:	include "sfx/sonic3/59.asm"
+SfxCdB9:	include "res/sfx/soniccd/B9.asm"
 		even
-SfxS35A:	include "sfx/sonic3/5A.asm"
+SfxCdBA:	include "res/sfx/soniccd/BA.asm"
 		even
-SfxS35B:	include "sfx/sonic3/5B.asm"
+SfxCdBB:	include "res/sfx/soniccd/BB.asm"
 		even
-SfxS35C:	include "sfx/sonic3/5C.asm"
+SfxCdBC:	include "res/sfx/soniccd/BC.asm"
 		even
-SfxS35D:	include "sfx/sonic3/5D.asm"
+SfxCdTALLY:	include "res/sfx/soniccd/BD - Tally.asm"
 		even
-SfxS35E:	include "sfx/sonic3/5E.asm"
+SfxCdBE:	include "res/sfx/soniccd/BE.asm"
 		even
-SfxS35F:	include "sfx/sonic3/5F.asm"
+SfxCdBF:	include "res/sfx/soniccd/BF.asm"
 		even
-SfxS360:	include "sfx/sonic3/60.asm"
+SfxCdC0:	include "res/sfx/soniccd/C0.asm"
 		even
-SfxS361:	include "sfx/sonic3/61.asm"
+SfxCdC1:	include "res/sfx/soniccd/C1.asm"
 		even
-SfxS362:	include "sfx/sonic3/62.asm"
+SfxCdC2:	include "res/sfx/soniccd/C2.asm"
 		even
-SfxS363:	include "sfx/sonic3/63.asm"
+SfxCdC3:	include "res/sfx/soniccd/C3.asm"
 		even
-SfxS364:	include "sfx/sonic3/64.asm"
+SfxCdC4:	include "res/sfx/soniccd/C4.asm"
 		even
-SfxS365:	include "sfx/sonic3/65.asm"
+SfxCdC5:	include "res/sfx/soniccd/C5.asm"
 		even
-SfxS366:	include "sfx/sonic3/66.asm"
+SfxCdC6:	include "res/sfx/soniccd/C6.asm"
 		even
-SfxS367:	include "sfx/sonic3/67.asm"
+SfxCdC7:	include "res/sfx/soniccd/C7.asm"
 		even
-SfxS368:	include "sfx/sonic3/68.asm"
+SfxCdSSWARP:	include "res/sfx/soniccd/C8 - SS Warp.asm"
 		even
-SfxS369:	include "sfx/sonic3/69.asm"
+SfxCdC9:	include "res/sfx/soniccd/C9.asm"
 		even
-SfxS36A:	include "sfx/sonic3/6A.asm"
+SfxCdCA:	include "res/sfx/soniccd/CA.asm"
 		even
-SfxS36B:	include "sfx/sonic3/6B.asm"
+SfxCdCB:	include "res/sfx/soniccd/CB.asm"
 		even
-SfxS36D:	include "sfx/sonic3/6D.asm"
+SfxCdCC:	include "res/sfx/soniccd/CC.asm"
 		even
-SfxS36E:	include "sfx/sonic3/6E.asm"
+SfxCdCD:	include "res/sfx/soniccd/CD.asm"
 		even
-SfxS36F:	include "sfx/sonic3/6F.asm"	; shares sequence with CB
+SfxCdCE:	include "res/sfx/soniccd/CE.asm"
 		even
-CsfxS3CB:	include "sfx/sonic3/CB.asm"
+SfxCdCF:	include "res/sfx/soniccd/CF.asm"
 		even
-SfxS370:	include "sfx/sonic3/70.asm"
+SfxCdD0:	include "res/sfx/soniccd/D0.asm"
 		even
-SfxS372:	include "sfx/sonic3/72.asm"
+SfxCdD1:	include "res/sfx/soniccd/D1.asm"
 		even
-SfxS373:	include "sfx/sonic3/73.asm"
+SfxCdD2:	include "res/sfx/soniccd/D2.asm"
 		even
-SfxS374:	include "sfx/sonic3/74.asm"
+SfxCdD3:	include "res/sfx/soniccd/D3.asm"
 		even
-SfxS375:	include "sfx/sonic3/75.asm"
+SfxCdD4:	include "res/sfx/soniccd/D4.asm"
 		even
-SfxS376:	include "sfx/sonic3/76.asm"
+SfxCdD5:	include "res/sfx/soniccd/D5.asm"
 		even
-SfxS377:	include "sfx/sonic3/77.asm"
+SfxCdD6:	include "res/sfx/soniccd/D6.asm"
 		even
-SfxS378:	include "sfx/sonic3/78.asm"
+SfxCdD7:	include "res/sfx/soniccd/D7.asm"
 		even
-SfxS379:	include "sfx/sonic3/79.asm"
+SfxCdD9:	include "res/sfx/soniccd/D9.asm"
 		even
-SfxS37A:	include "sfx/sonic3/7A.asm"
+SfxCdDA:	include "res/sfx/soniccd/DA.asm"
 		even
-SfxS37B:	include "sfx/sonic3/7B.asm"
+SfxCdDB:	include "res/sfx/soniccd/DB.asm"
 		even
-SfxS37C:	include "sfx/sonic3/7C.asm"
+SfxCdDC:	include "res/sfx/soniccd/DC.asm"
 		even
-SfxS37D:	include "sfx/sonic3/7D.asm"
+SfxCdDD:	include "res/sfx/soniccd/DD.asm"
 		even
-SfxS37E:	include "sfx/sonic3/7E.asm"
+SfxCdDE:	include "res/sfx/soniccd/DE.asm"
 		even
-SfxS37F:	include "sfx/sonic3/7F.asm"
-		even
-SfxS380:	include "sfx/sonic3/80.asm"
-		even
-SfxS381:	include "sfx/sonic3/81.asm"
-		even
-SfxS382:	include "sfx/sonic3/82.asm"
-		even
-SfxS383:	include "sfx/sonic3/83.asm"
-		even
-SfxS384:	include "sfx/sonic3/84.asm"
-		even
-SfxS385:	include "sfx/sonic3/85.asm"
-		even
-SfxS386:	include "sfx/sonic3/86.asm"
-		even
-SfxS387:	include "sfx/sonic3/87.asm"
-		even
-SfxS388:	include "sfx/sonic3/88.asm"
-		even
-SfxS389:	include "sfx/sonic3/89.asm"
-		even
-SfxS38A:	include "sfx/sonic3/8A.asm"
-		even
-SfxS38B:	include "sfx/sonic3/8B.asm"
-		even
-SfxS38C:	include "sfx/sonic3/8C.asm"
-		even
-SfxS38D:	include "sfx/sonic3/8D.asm"
-		even
-SfxS38E:	include "sfx/sonic3/8E.asm"
-		even
-SfxS38F:	include "sfx/sonic3/8F.asm"
-		even
-SfxS390:	include "sfx/sonic3/90.asm"
-		even
-SfxS391:	include "sfx/sonic3/91.asm"
-		even
-SfxS392:	include "sfx/sonic3/92.asm"
-		even
-SfxS393:	include "sfx/sonic3/93.asm"
-		even
-SfxS394:	include "sfx/sonic3/94.asm"
-		even
-SfxS395:	include "sfx/sonic3/95.asm"
-		even
-SfxS396:	include "sfx/sonic3/96.asm"
-		even
-SfxS397:	include "sfx/sonic3/97.asm"
-		even
-SfxS398:	include "sfx/sonic3/98.asm"
-		even
-SfxS399:	include "sfx/sonic3/99.asm"
-		even
-SfxS39A:	include "sfx/sonic3/9A.asm"
-		even
-SfxS39B:	include "sfx/sonic3/9B (Sonic 3).asm"
-		even
-SfxSK9B:	include "sfx/sonic3/9B (Sonic & Knuckles).asm"
-		even
-SfxS39C:	include "sfx/sonic3/9C.asm"
-		even
-SfxS39D:	include "sfx/sonic3/9D.asm"
-		even
-SfxS39E:	include "sfx/sonic3/9E.asm"
-		even
-SfxS39F:	include "sfx/sonic3/9F.asm"
-		even
-SfxS3A0:	include "sfx/sonic3/A0.asm"
-		even
-SfxS3A1:	include "sfx/sonic3/A1.asm"
-		even
-SfxS3A2:	include "sfx/sonic3/A2.asm"
-		even
-SfxS3A3:	include "sfx/sonic3/A3.asm"
-		even
-SfxS3A4:	include "sfx/sonic3/A4.asm"
-		even
-SfxS3A5:	include "sfx/sonic3/A5.asm"
-		even
-SfxS3A6:	include "sfx/sonic3/A6.asm"
-		even
-SfxS3AD:	include "sfx/sonic3/AD (Sonic & Knuckles).asm"	; shares patch with A7
-		even
-SfxS3A7:	include "sfx/sonic3/A7.asm"
-		even
-SfxS3A8:	include "sfx/sonic3/A8.asm"
-		even
-SfxS3A9:	include "sfx/sonic3/A9.asm"
-		even
-SfxS3AA:	include "sfx/sonic3/AA.asm"
-		even
-SfxS3AB:	include "sfx/sonic3/AB.asm"
-		even
-SfxS3AC:	include "sfx/sonic3/AC.asm"
-		even
-SfxS3AE:	include "sfx/sonic3/AE.asm"
-		even
-SfxS3AF:	include "sfx/sonic3/AF.asm"
-		even
-SfxS3B0:	include "sfx/sonic3/B0.asm"
-		even
-SfxS3B1:	include "sfx/sonic3/B1.asm"
-		even
-SfxS3B2:	include "sfx/sonic3/B2.asm"
-		even
-SfxS3B3:	include "sfx/sonic3/B3.asm"
-		even
-SfxS3B4:	include "sfx/sonic3/B4.asm"
-		even
-SfxS3B5:	include "sfx/sonic3/B5.asm"
-		even
-SfxS3B6:	include "sfx/sonic3/B6.asm"
-		even
-SfxS3B7:	include "sfx/sonic3/B7.asm"
-		even
-SfxS3B8:	include "sfx/sonic3/B8.asm"
-		even
-SfxS3BB:	include "sfx/sonic3/BB.asm"	; shares patch with BA
-		even
-SfxS3BA:	include "sfx/sonic3/BA.asm"
+SfxCdDF:	include "res/sfx/soniccd/DF.asm"
 		even
 
-CsfxS3C8:	include "sfx/sonic3/C8.asm"	; shares patch with BC
+SfxS3B9:	include "res/sfx/sonic3/B9.asm"	; shares patch with 33
 		even
-CsfxS3BC:	include "sfx/sonic3/BC.asm"
+SfxS334:	include "res/sfx/sonic3/34.asm"	; shares patch with 33
 		even
-CsfxS3BD:	include "sfx/sonic3/BD.asm"
+SfxS333:	include "res/sfx/sonic3/33.asm"
 		even
-CsfxS3BE:	include "sfx/sonic3/BE.asm"
+SfxS335:	include "res/sfx/sonic3/35.asm"
 		even
-CsfxS3BF:	include "sfx/sonic3/BF.asm"
+SfxS336:	include "res/sfx/sonic3/36.asm"
 		even
-CsfxS3C0:	include "sfx/sonic3/C0.asm"
+SfxS337:	include "res/sfx/sonic3/37.asm"
 		even
-CsfxS3C1:	include "sfx/sonic3/C1.asm"
+SfxS338:	include "res/sfx/sonic3/38.asm"
 		even
-CsfxS3C2:	include "sfx/sonic3/C2.asm"
+SfxS357:	include "res/sfx/sonic3/57.asm"	; shares patch with 39
 		even
-CsfxS3C3:	include "sfx/sonic3/C3.asm"
+SfxS36C:	include "res/sfx/sonic3/6C.asm"	; shares patch with 39
 		even
-CsfxS3C4:	include "sfx/sonic3/C4.asm"
+SfxS339:	include "res/sfx/sonic3/39.asm"
 		even
-CsfxS3C5:	include "sfx/sonic3/C5.asm"
+SfxS371:	include "res/sfx/sonic3/71.asm"	; shares patch with 3A
 		even
-CsfxS3C6:	include "sfx/sonic3/C6.asm"
+SfxS33A:	include "res/sfx/sonic3/3A.asm"
 		even
-CsfxS3C7:	include "sfx/sonic3/C7.asm"
+SfxS33B:	include "res/sfx/sonic3/3B.asm"
 		even
-CsfxS3C9:	include "sfx/sonic3/C9.asm"
+SfxS33C:	include "res/sfx/sonic3/3C.asm"
 		even
-CsfxS3CA:	include "sfx/sonic3/CA.asm"
+SfxS33D:	include "res/sfx/sonic3/3D.asm"
 		even
-CsfxS3CC:	include "sfx/sonic3/CC.asm"
+SfxS33F:	include "res/sfx/sonic3/3F.asm"	; shares patch with 3E
 		even
-CsfxS3CD:	include "sfx/sonic3/CD.asm"
+SfxS340:	include "res/sfx/sonic3/40.asm"	; shares patch with 3E
 		even
-CsfxS3CF:	include "sfx/sonic3/CF.asm"	; shares patch with CE
+SfxS341:	include "res/sfx/sonic3/41.asm"	; shares patch with 3E
 		even
-CsfxS3CE:	include "sfx/sonic3/CE.asm"
+SfxS33E:	include "res/sfx/sonic3/3E.asm"
 		even
-CsfxS3D0:	include "sfx/sonic3/D0.asm"
+SfxS342:	include "res/sfx/sonic3/42.asm"
 		even
-CsfxS3D1:	include "sfx/sonic3/D1.asm"
+SfxS343:	include "res/sfx/sonic3/43.asm"
 		even
-CsfxS3D2:	include "sfx/sonic3/D2.asm"
+SfxS344:	include "res/sfx/sonic3/44.asm"
 		even
-CsfxS3D3:	include "sfx/sonic3/D3.asm"
+SfxS345:	include "res/sfx/sonic3/45.asm"
 		even
-CsfxS3D4:	include "sfx/sonic3/D4.asm"
+SfxS346:	include "res/sfx/sonic3/46.asm"
 		even
-CsfxS3D5:	include "sfx/sonic3/D5.asm"
+SfxS347:	include "res/sfx/sonic3/47.asm"
 		even
-CsfxS3D6:	include "sfx/sonic3/D6.asm"
+SfxS348:	include "res/sfx/sonic3/48.asm"
 		even
-CsfxS3D7:	include "sfx/sonic3/D7.asm"
+SfxS349:	include "res/sfx/sonic3/49.asm"
 		even
-CsfxS3D8:	include "sfx/sonic3/D8.asm"
+SfxS34A:	include "res/sfx/sonic3/4A.asm"
 		even
-CsfxS3D9:	include "sfx/sonic3/D9.asm"
+SfxS34B:	include "res/sfx/sonic3/4B.asm"
 		even
-CsfxS3DA:	include "sfx/sonic3/DA.asm"
+SfxS356:	include "res/sfx/sonic3/56.asm"	; shares patch with 4C
 		even
-CsfxS3DB:	include "sfx/sonic3/DB.asm"
+SfxS34C:	include "res/sfx/sonic3/4C.asm"
+		even
+SfxS34D:	include "res/sfx/sonic3/4D.asm"
+		even
+SfxS34E:	include "res/sfx/sonic3/4E.asm"
+		even
+SfxS34F:	include "res/sfx/sonic3/4F.asm"
+		even
+SfxS350:	include "res/sfx/sonic3/50.asm"
+		even
+SfxS351:	include "res/sfx/sonic3/51.asm"
+		even
+SfxS352:	include "res/sfx/sonic3/52.asm"
+		even
+SfxS353:	include "res/sfx/sonic3/53.asm"
+		even
+SfxS354:	include "res/sfx/sonic3/54.asm"
+		even
+SfxS355:	include "res/sfx/sonic3/55.asm"
+		even
+SfxS358:	include "res/sfx/sonic3/58.asm"
+		even
+SfxS359:	include "res/sfx/sonic3/59.asm"
+		even
+SfxS35A:	include "res/sfx/sonic3/5A.asm"
+		even
+SfxS35B:	include "res/sfx/sonic3/5B.asm"
+		even
+SfxS35C:	include "res/sfx/sonic3/5C.asm"
+		even
+SfxS35D:	include "res/sfx/sonic3/5D.asm"
+		even
+SfxS35E:	include "res/sfx/sonic3/5E.asm"
+		even
+SfxS35F:	include "res/sfx/sonic3/5F.asm"
+		even
+SfxS360:	include "res/sfx/sonic3/60.asm"
+		even
+SfxS361:	include "res/sfx/sonic3/61.asm"
+		even
+SfxS362:	include "res/sfx/sonic3/62.asm"
+		even
+SfxS363:	include "res/sfx/sonic3/63.asm"
+		even
+SfxS364:	include "res/sfx/sonic3/64.asm"
+		even
+SfxS365:	include "res/sfx/sonic3/65.asm"
+		even
+SfxS366:	include "res/sfx/sonic3/66.asm"
+		even
+SfxS367:	include "res/sfx/sonic3/67.asm"
+		even
+SfxS368:	include "res/sfx/sonic3/68.asm"
+		even
+SfxS369:	include "res/sfx/sonic3/69.asm"
+		even
+SfxS36A:	include "res/sfx/sonic3/6A.asm"
+		even
+SfxS36B:	include "res/sfx/sonic3/6B.asm"
+		even
+SfxS36D:	include "res/sfx/sonic3/6D.asm"
+		even
+SfxS36E:	include "res/sfx/sonic3/6E.asm"
+		even
+SfxS36F:	include "res/sfx/sonic3/6F.asm"	; shares sequence with CB
+		even
+CsfxS3CB:	include "res/sfx/sonic3/CB.asm"
+		even
+SfxS370:	include "res/sfx/sonic3/70.asm"
+		even
+SfxS372:	include "res/sfx/sonic3/72.asm"
+		even
+SfxS373:	include "res/sfx/sonic3/73.asm"
+		even
+SfxS374:	include "res/sfx/sonic3/74.asm"
+		even
+SfxS375:	include "res/sfx/sonic3/75.asm"
+		even
+SfxS376:	include "res/sfx/sonic3/76.asm"
+		even
+SfxS377:	include "res/sfx/sonic3/77.asm"
+		even
+SfxS378:	include "res/sfx/sonic3/78.asm"
+		even
+SfxS379:	include "res/sfx/sonic3/79.asm"
+		even
+SfxS37A:	include "res/sfx/sonic3/7A.asm"
+		even
+SfxS37B:	include "res/sfx/sonic3/7B.asm"
+		even
+SfxS37C:	include "res/sfx/sonic3/7C.asm"
+		even
+SfxS37D:	include "res/sfx/sonic3/7D.asm"
+		even
+SfxS37E:	include "res/sfx/sonic3/7E.asm"
+		even
+SfxS37F:	include "res/sfx/sonic3/7F.asm"
+		even
+SfxS380:	include "res/sfx/sonic3/80.asm"
+		even
+SfxS381:	include "res/sfx/sonic3/81.asm"
+		even
+SfxS382:	include "res/sfx/sonic3/82.asm"
+		even
+SfxS383:	include "res/sfx/sonic3/83.asm"
+		even
+SfxS384:	include "res/sfx/sonic3/84.asm"
+		even
+SfxS385:	include "res/sfx/sonic3/85.asm"
+		even
+SfxS386:	include "res/sfx/sonic3/86.asm"
+		even
+SfxS387:	include "res/sfx/sonic3/87.asm"
+		even
+SfxS388:	include "res/sfx/sonic3/88.asm"
+		even
+SfxS389:	include "res/sfx/sonic3/89.asm"
+		even
+SfxS38A:	include "res/sfx/sonic3/8A.asm"
+		even
+SfxS38B:	include "res/sfx/sonic3/8B.asm"
+		even
+SfxS38C:	include "res/sfx/sonic3/8C.asm"
+		even
+SfxS38D:	include "res/sfx/sonic3/8D.asm"
+		even
+SfxS38E:	include "res/sfx/sonic3/8E.asm"
+		even
+SfxS38F:	include "res/sfx/sonic3/8F.asm"
+		even
+SfxS390:	include "res/sfx/sonic3/90.asm"
+		even
+SfxS391:	include "res/sfx/sonic3/91.asm"
+		even
+SfxS392:	include "res/sfx/sonic3/92.asm"
+		even
+SfxS393:	include "res/sfx/sonic3/93.asm"
+		even
+SfxS394:	include "res/sfx/sonic3/94.asm"
+		even
+SfxS395:	include "res/sfx/sonic3/95.asm"
+		even
+SfxS396:	include "res/sfx/sonic3/96.asm"
+		even
+SfxS397:	include "res/sfx/sonic3/97.asm"
+		even
+SfxS398:	include "res/sfx/sonic3/98.asm"
+		even
+SfxS399:	include "res/sfx/sonic3/99.asm"
+		even
+SfxS39A:	include "res/sfx/sonic3/9A.asm"
+		even
+SfxS39B:	include "res/sfx/sonic3/9B (Sonic 3).asm"
+		even
+SfxSK9B:	include "res/sfx/sonic3/9B (Sonic & Knuckles).asm"
+		even
+SfxS39C:	include "res/sfx/sonic3/9C.asm"
+		even
+SfxS39D:	include "res/sfx/sonic3/9D.asm"
+		even
+SfxS39E:	include "res/sfx/sonic3/9E.asm"
+		even
+SfxS39F:	include "res/sfx/sonic3/9F.asm"
+		even
+SfxS3A0:	include "res/sfx/sonic3/A0.asm"
+		even
+SfxS3A1:	include "res/sfx/sonic3/A1.asm"
+		even
+SfxS3A2:	include "res/sfx/sonic3/A2.asm"
+		even
+SfxS3A3:	include "res/sfx/sonic3/A3.asm"
+		even
+SfxS3A4:	include "res/sfx/sonic3/A4.asm"
+		even
+SfxS3A5:	include "res/sfx/sonic3/A5.asm"
+		even
+SfxS3A6:	include "res/sfx/sonic3/A6.asm"
+		even
+SfxS3AD:	include "res/sfx/sonic3/AD (Sonic & Knuckles).asm"	; shares patch with A7
+		even
+SfxS3A7:	include "res/sfx/sonic3/A7.asm"
+		even
+SfxS3A8:	include "res/sfx/sonic3/A8.asm"
+		even
+SfxS3A9:	include "res/sfx/sonic3/A9.asm"
+		even
+SfxS3AA:	include "res/sfx/sonic3/AA.asm"
+		even
+SfxS3AB:	include "res/sfx/sonic3/AB.asm"
+		even
+SfxS3AC:	include "res/sfx/sonic3/AC.asm"
+		even
+SfxS3AE:	include "res/sfx/sonic3/AE.asm"
+		even
+SfxS3AF:	include "res/sfx/sonic3/AF.asm"
+		even
+SfxS3B0:	include "res/sfx/sonic3/B0.asm"
+		even
+SfxS3B1:	include "res/sfx/sonic3/B1.asm"
+		even
+SfxS3B2:	include "res/sfx/sonic3/B2.asm"
+		even
+SfxS3B3:	include "res/sfx/sonic3/B3.asm"
+		even
+SfxS3B4:	include "res/sfx/sonic3/B4.asm"
+		even
+SfxS3B5:	include "res/sfx/sonic3/B5.asm"
+		even
+SfxS3B6:	include "res/sfx/sonic3/B6.asm"
+		even
+SfxS3B7:	include "res/sfx/sonic3/B7.asm"
+		even
+SfxS3B8:	include "res/sfx/sonic3/B8.asm"
+		even
+SfxS3BB:	include "res/sfx/sonic3/BB.asm"	; shares patch with BA
+		even
+SfxS3BA:	include "res/sfx/sonic3/BA.asm"
+		even
+
+CsfxS3C8:	include "res/sfx/sonic3/C8.asm"	; shares patch with BC
+		even
+CsfxS3BC:	include "res/sfx/sonic3/BC.asm"
+		even
+CsfxS3BD:	include "res/sfx/sonic3/BD.asm"
+		even
+CsfxS3BE:	include "res/sfx/sonic3/BE.asm"
+		even
+CsfxS3BF:	include "res/sfx/sonic3/BF.asm"
+		even
+CsfxS3C0:	include "res/sfx/sonic3/C0.asm"
+		even
+CsfxS3C1:	include "res/sfx/sonic3/C1.asm"
+		even
+CsfxS3C2:	include "res/sfx/sonic3/C2.asm"
+		even
+CsfxS3C3:	include "res/sfx/sonic3/C3.asm"
+		even
+CsfxS3C4:	include "res/sfx/sonic3/C4.asm"
+		even
+CsfxS3C5:	include "res/sfx/sonic3/C5.asm"
+		even
+CsfxS3C6:	include "res/sfx/sonic3/C6.asm"
+		even
+CsfxS3C7:	include "res/sfx/sonic3/C7.asm"
+		even
+CsfxS3C9:	include "res/sfx/sonic3/C9.asm"
+		even
+CsfxS3CA:	include "res/sfx/sonic3/CA.asm"
+		even
+CsfxS3CC:	include "res/sfx/sonic3/CC.asm"
+		even
+CsfxS3CD:	include "res/sfx/sonic3/CD.asm"
+		even
+CsfxS3CF:	include "res/sfx/sonic3/CF.asm"	; shares patch with CE
+		even
+CsfxS3CE:	include "res/sfx/sonic3/CE.asm"
+		even
+CsfxS3D0:	include "res/sfx/sonic3/D0.asm"
+		even
+CsfxS3D1:	include "res/sfx/sonic3/D1.asm"
+		even
+CsfxS3D2:	include "res/sfx/sonic3/D2.asm"
+		even
+CsfxS3D3:	include "res/sfx/sonic3/D3.asm"
+		even
+CsfxS3D4:	include "res/sfx/sonic3/D4.asm"
+		even
+CsfxS3D5:	include "res/sfx/sonic3/D5.asm"
+		even
+CsfxS3D6:	include "res/sfx/sonic3/D6.asm"
+		even
+CsfxS3D7:	include "res/sfx/sonic3/D7.asm"
+		even
+CsfxS3D8:	include "res/sfx/sonic3/D8.asm"
+		even
+CsfxS3D9:	include "res/sfx/sonic3/D9.asm"
+		even
+CsfxS3DA:	include "res/sfx/sonic3/DA.asm"
+		even
+CsfxS3DB:	include "res/sfx/sonic3/DB.asm"
 		even
 
 ; ---------------------------------------------------------------------------
 ; Music data
 ; ---------------------------------------------------------------------------
-BgmTest:	include "bgm/_tester.asm"
+BgmTest:	include "res/bgm/_tester.asm"
 		even
-BgmSoccer:	include "bgm/MDSoccer-Title.asm"
+BgmSoccer:	include "res/bgm/MDSoccer-Title.asm"
 		even
-BgmSCDTimeTravel:	include "bgm/CD Time Travel.asm"
-		even
-
-BgmS1Title:	include "bgm/sonic1/S1-Title.asm"
-		even
-BgmS1GHZ:	include "bgm/sonic1/S1-GHZ.asm"
-		even
-BgmS1LZ:	include "bgm/sonic1/S1-LZ.asm"
-		even
-BgmS1MZ:	include "bgm/sonic1/S1-MZ.asm"
-		even
-BgmS1SLZ:	include "bgm/sonic1/S1-SLZ.asm"
-		even
-BgmS1SYZ:	include "bgm/sonic1/S1-SYZ.asm"
-		even
-BgmS1SBZ:	include "bgm/sonic1/S1-SBZ.asm"
-		even
-BgmS1FZ:	include "bgm/sonic1/S1-FZ.asm"
-		even
-BgmS1Boss:	include "bgm/sonic1/S1-Boss.asm"
-		even
-BgmS1Special:	include "bgm/sonic1/S1-SpecialStage.asm"
-		even
-BgmS1Invinc:	include "bgm/sonic1/S1-Invincibility.asm"
-		even
-BgmS1ActClear:	include "bgm/sonic1/S1-ActClear.asm"
-		even
-BgmS1ExtraLife:	include "bgm/sonic1/S1-ExtraLife.asm"
-		even
-BgmS1Continue:	include "bgm/sonic1/S1-Continue.asm"
-		even
-BgmS1Emerald:	include "bgm/sonic1/S1-Emerald.asm"
-		even
-BgmS1Drowning:	include "bgm/sonic1/S1-Drowning.asm"
-		even
-BgmS1GameOver:	include "bgm/sonic1/S1-GameOver.asm"
-		even
-BgmS1Ending:	include "bgm/sonic1/S1-Ending.asm"
-		even
-BgmS1Credits:	include "bgm/sonic1/S1-Credits.asm"
+BgmSCDTimeTravel:	include "res/bgm/CD Time Travel.asm"
 		even
 
-BgmS2Title:	include "bgm/sonic2/S2-Title.asm"
+BgmS1Title:	include "res/bgm/sonic1/S1-Title.asm"
 		even
-BgmS2EHZ:	include "bgm/sonic2/S2-EHZ.asm"
+BgmS1GHZ:	include "res/bgm/sonic1/S1-GHZ.asm"
 		even
-BgmS2EHZ2P:	include "bgm/sonic2/S2-EHZ2P.asm"
+BgmS1LZ:	include "res/bgm/sonic1/S1-LZ.asm"
 		even
-BgmS2CPZ:	include "bgm/sonic2/S2-CPZ.asm"
+BgmS1MZ:	include "res/bgm/sonic1/S1-MZ.asm"
 		even
-BgmS2ARZ:	include "bgm/sonic2/S2-ARZ.asm"
+BgmS1SLZ:	include "res/bgm/sonic1/S1-SLZ.asm"
 		even
-BgmS2CNZ:	include "bgm/sonic2/S2-CNZ.asm"
+BgmS1SYZ:	include "res/bgm/sonic1/S1-SYZ.asm"
 		even
-BgmS2CNZ2P:	include "bgm/sonic2/S2-CNZ2P.asm"
+BgmS1SBZ:	include "res/bgm/sonic1/S1-SBZ.asm"
 		even
-BgmS2HTZ:	include "bgm/sonic2/S2-HTZ.asm"
+BgmS1FZ:	include "res/bgm/sonic1/S1-FZ.asm"
 		even
-BgmS2MCZ:	include "bgm/sonic2/S2-MCZ.asm"
+BgmS1Boss:	include "res/bgm/sonic1/S1-Boss.asm"
 		even
-BgmS2MCZ2P:	include "bgm/sonic2/S2-MCZ2P.asm"
+BgmS1Special:	include "res/bgm/sonic1/S1-SpecialStage.asm"
 		even
-BgmS2OOZ:	include "bgm/sonic2/S2-OOZ.asm"
+BgmS1Invinc:	include "res/bgm/sonic1/S1-Invincibility.asm"
 		even
-BgmS2MTZ:	include "bgm/sonic2/S2-MTZ.asm"
+BgmS1ActClear:	include "res/bgm/sonic1/S1-ActClear.asm"
 		even
-BgmS2SCZ:	include "bgm/sonic2/S2-SCZ.asm"
+BgmS1ExtraLife:	include "res/bgm/sonic1/S1-ExtraLife.asm"
 		even
-BgmS2WFZ:	include "bgm/sonic2/S2-WFZ.asm"
+BgmS1Continue:	include "res/bgm/sonic1/S1-Continue.asm"
 		even
-BgmS2DEZ:	include "bgm/sonic2/S2-DEZ.asm"
+BgmS1Emerald:	include "res/bgm/sonic1/S1-Emerald.asm"
 		even
-BgmS2HPZ:	include "bgm/sonic2/S2-HPZ.asm"
+BgmS1Drowning:	include "res/bgm/sonic1/S1-Drowning.asm"
 		even
-BgmS2Special:	include "bgm/sonic2/S2-SpecialStage.asm"
+BgmS1GameOver:	include "res/bgm/sonic1/S1-GameOver.asm"
 		even
-BgmS2Boss:	include "bgm/sonic2/S2-Boss.asm"
+BgmS1Ending:	include "res/bgm/sonic1/S1-Ending.asm"
 		even
-BgmS2FinalBoss:	include "bgm/sonic2/S2-FinalBoss.asm"
-		even
-BgmS2ActClear:	include "bgm/sonic2/S2-ActClear.asm"
-		even
-BgmS2Invinc:	include "bgm/sonic2/S2-Invincibility.asm"
-		even
-BgmS2Super:	include "bgm/sonic2/S2-SuperSonic.asm"
-		even
-BgmS2ExtraLife:	include "bgm/sonic2/S2-ExtraLife.asm"
-		even
-BgmS2GameOver:	include "bgm/sonic2/S2-GameOver.asm"
-		even
-BgmS2Options:	include "bgm/sonic2/S2-Options.asm"
-		even
-BgmS2Menu2P:	include "bgm/sonic2/S2-2PMenu.asm"
-		even
-BgmS2Ending:	include "bgm/sonic2/S2-Ending.asm"
-		even
-BgmS2Credits:	include "bgm/sonic2/S2-Credits.asm"
+BgmS1Credits:	include "res/bgm/sonic1/S1-Credits.asm"
 		even
 
-BgmS2BTitle:	include "bgm/sonic2-wai/Title screen.asm"
+BgmS2Title:	include "res/bgm/sonic2/S2-Title.asm"
 		even
-BgmS2BGHZ:	include "bgm/sonic2-wai/GHZ.asm"
+BgmS2EHZ:	include "res/bgm/sonic2/S2-EHZ.asm"
 		even
-BgmS2BCPZ:	include "bgm/sonic2-wai/CPZ.asm"
+BgmS2EHZ2P:	include "res/bgm/sonic2/S2-EHZ2P.asm"
 		even
-BgmS2BNGHZ:	include "bgm/sonic2-wai/NGHZ.asm"
+BgmS2CPZ:	include "res/bgm/sonic2/S2-CPZ.asm"
 		even
-BgmS2BCNZ:	include "bgm/sonic2-wai/CNZ.asm"
+BgmS2ARZ:	include "res/bgm/sonic2/S2-ARZ.asm"
 		even
-BgmS2BHTZ:	include "bgm/sonic2-wai/HTZ.asm"
+BgmS2CNZ:	include "res/bgm/sonic2/S2-CNZ.asm"
 		even
-BgmS2BDHZ:	include "bgm/sonic2-wai/DHZ.asm"
+BgmS2CNZ2P:	include "res/bgm/sonic2/S2-CNZ2P.asm"
 		even
-BgmS2BOOZ:	include "bgm/sonic2-wai/OOZ.asm"
+BgmS2HTZ:	include "res/bgm/sonic2/S2-HTZ.asm"
 		even
-BgmS2BMTZ:	include "bgm/sonic2-wai/MTZ.asm"
+BgmS2MCZ:	include "res/bgm/sonic2/S2-MCZ.asm"
 		even
-BgmS2BSSZ:	include "bgm/sonic2-wai/SSZ.asm"
+BgmS2MCZ2P:	include "res/bgm/sonic2/S2-MCZ2P.asm"
 		even
-BgmS2BRWZ:	include "bgm/sonic2-wai/RWZ.asm"
+BgmS2OOZ:	include "res/bgm/sonic2/S2-OOZ.asm"
 		even
-BgmS2BDEZ:	include "bgm/sonic2-wai/DEZ.asm"
+BgmS2MTZ:	include "res/bgm/sonic2/S2-MTZ.asm"
 		even
-BgmS2BBOZ:	include "bgm/sonic2-wai/BOZ.asm"
+BgmS2SCZ:	include "res/bgm/sonic2/S2-SCZ.asm"
 		even
-BgmS2BHPZ:	include "bgm/sonic2-wai/HPZ.asm"
+BgmS2WFZ:	include "res/bgm/sonic2/S2-WFZ.asm"
 		even
-BgmS2BLevelSelect:	include "bgm/sonic2-wai/Level select.asm"
+BgmS2DEZ:	include "res/bgm/sonic2/S2-DEZ.asm"
 		even
-BgmS2BSpecial:	include "bgm/sonic2-wai/Special Stage.asm"
+BgmS2HPZ:	include "res/bgm/sonic2/S2-HPZ.asm"
 		even
-BgmS2BBoss:	include "bgm/sonic2-wai/Boss.asm"
+BgmS2Special:	include "res/bgm/sonic2/S2-SpecialStage.asm"
 		even
-BgmS2BFinalBoss:	include "bgm/sonic2-wai/Final boss.asm"
+BgmS2Boss:	include "res/bgm/sonic2/S2-Boss.asm"
 		even
-BgmS2BWFZ:	include "bgm/sonic2-wai/Unused 1.asm"
+BgmS2FinalBoss:	include "res/bgm/sonic2/S2-FinalBoss.asm"
 		even
-BgmS2BMenu2P:	include "bgm/sonic2-wai/Unused 2.asm"
+BgmS2ActClear:	include "res/bgm/sonic2/S2-ActClear.asm"
+		even
+BgmS2Invinc:	include "res/bgm/sonic2/S2-Invincibility.asm"
+		even
+BgmS2Super:	include "res/bgm/sonic2/S2-SuperSonic.asm"
+		even
+BgmS2ExtraLife:	include "res/bgm/sonic2/S2-ExtraLife.asm"
+		even
+BgmS2GameOver:	include "res/bgm/sonic2/S2-GameOver.asm"
+		even
+BgmS2Options:	include "res/bgm/sonic2/S2-Options.asm"
+		even
+BgmS2Menu2P:	include "res/bgm/sonic2/S2-2PMenu.asm"
+		even
+BgmS2Ending:	include "res/bgm/sonic2/S2-Ending.asm"
+		even
+BgmS2Credits:	include "res/bgm/sonic2/S2-Credits.asm"
 		even
 
-BgmS3Complete:	include "bgm/sonic3/Game Complete (Sonic 3).asm"	; shares sequence data with s3title
+BgmS2BTitle:	include "res/bgm/sonic2-wai/Title screen.asm"
 		even
-BgmSKComplete:	include "bgm/sonic3/Game Complete (Sonic & Knuckles).asm"
+BgmS2BGHZ:	include "res/bgm/sonic2-wai/GHZ.asm"
 		even
-BgmS3Title:	include "bgm/sonic3/Title (Sonic 3).asm"
+BgmS2BCPZ:	include "res/bgm/sonic2-wai/CPZ.asm"
 		even
-BgmSKitle:	include "bgm/sonic3/Title (Sonic & Knuckles).asm"
+BgmS2BNGHZ:	include "res/bgm/sonic2-wai/NGHZ.asm"
 		even
-BgmS3AIZ1:	include "bgm/sonic3/AIZ1.asm"
+BgmS2BCNZ:	include "res/bgm/sonic2-wai/CNZ.asm"
 		even
-BgmS3AIZ2:	include "bgm/sonic3/AIZ2.asm"
+BgmS2BHTZ:	include "res/bgm/sonic2-wai/HTZ.asm"
 		even
-BgmS3HCZ1:	include "bgm/sonic3/HCZ1.asm"
+BgmS2BDHZ:	include "res/bgm/sonic2-wai/DHZ.asm"
 		even
-BgmS3HCZ2:	include "bgm/sonic3/HCZ2.asm"
+BgmS2BOOZ:	include "res/bgm/sonic2-wai/OOZ.asm"
 		even
-BgmS3MGZ1:	include "bgm/sonic3/MGZ1.asm"
+BgmS2BMTZ:	include "res/bgm/sonic2-wai/MTZ.asm"
 		even
-BgmS3MZZ2:	include "bgm/sonic3/MGZ2.asm"
+BgmS2BSSZ:	include "res/bgm/sonic2-wai/SSZ.asm"
 		even
-BgmS3CNZ1:	include "bgm/sonic3/CNZ1.asm"
+BgmS2BRWZ:	include "res/bgm/sonic2-wai/RWZ.asm"
 		even
-BgmS3CNZ2:	include "bgm/sonic3/CNZ2.asm"
+BgmS2BDEZ:	include "res/bgm/sonic2-wai/DEZ.asm"
 		even
-BgmS3ICZ2:	include "bgm/sonic3/ICZ2.asm"	; shares FM instruments with ICZ1
+BgmS2BBOZ:	include "res/bgm/sonic2-wai/BOZ.asm"
 		even
-BgmS3ICZ1:	include "bgm/sonic3/ICZ1.asm"
+BgmS2BHPZ:	include "res/bgm/sonic2-wai/HPZ.asm"
 		even
-BgmS3LBZ1:	include "bgm/sonic3/LBZ1.asm"
+BgmS2BLevelSelect:	include "res/bgm/sonic2-wai/Level select.asm"
 		even
-BgmS3LBZ2:	include "bgm/sonic3/LBZ2.asm"
+BgmS2BSpecial:	include "res/bgm/sonic2-wai/Special Stage.asm"
 		even
-BgmSKMHZ1:	include "bgm/sonic3/MHZ1.asm"
+BgmS2BBoss:	include "res/bgm/sonic2-wai/Boss.asm"
 		even
-BgmSKMHZ2:	include "bgm/sonic3/MHZ2.asm"
+BgmS2BFinalBoss:	include "res/bgm/sonic2-wai/Final boss.asm"
 		even
-BgmSKFBZ1:	include "bgm/sonic3/FBZ1 (Sonic & Knuckles).asm"
+BgmS2BWFZ:	include "res/bgm/sonic2-wai/Unused 1.asm"
 		even
-BgmSKFBZ2:	include "bgm/sonic3/FBZ2.asm"
-		even
-BgmSKSOZ1:	include "bgm/sonic3/SOZ1.asm"
-		even
-BgmSKSOZ2:	include "bgm/sonic3/SOZ2.asm"
-		even
-BgmSKLRZ1:	include "bgm/sonic3/LRZ1.asm"
-		even
-BgmSKLRZ2:	include "bgm/sonic3/LRZ2.asm"
-		even
-BgmSKSSZ:	include "bgm/sonic3/SSZ (Sonic & Knuckles).asm"
-		even
-BgmSKDEZ1:	include "bgm/sonic3/DEZ1.asm"
-		even
-BgmSKDEZ2:	include "bgm/sonic3/DEZ2.asm"
-		even
-BgmSKDDZ:	include "bgm/sonic3/DDZ.asm"
-		even
-BgmS3Gumball:	include "bgm/sonic3/Gum Ball Machine.asm"
-		even
-BgmSKPachinko:	include "bgm/sonic3/Pachinko.asm"
-		even
-BgmSKSlots:	include "bgm/sonic3/Slots.asm"
-		even
-BgmS3Special:	include "bgm/sonic3/Special Stage.asm"
-		even
-BgmS3MiniBoss:	include "bgm/sonic3/Miniboss (Sonic 3).asm"
-		even
-BgmSKMiniBoss:	include "bgm/sonic3/Miniboss (Sonic & Knuckles).asm"
-		even
-BgmS3ZoneBoss:	include "bgm/sonic3/Zone boss.asm"
-		even
-BgmS3FinalBoss:	include "bgm/sonic3/Final boss.asm"
-		even
-BgmS3Knuckles:	include "bgm/sonic3/Knuckles (Sonic 3).asm"
-		even
-BgmSKKnuckles:	include "bgm/sonic3/Knuckles (Sonic & Knuckles).asm"
-		even
-BgmS3Invinc:	include "bgm/sonic3/Invincible (Sonic 3).asm"
-		even
-BgmSKInvinc:	include "bgm/sonic3/Invincible (Sonic & Knuckles).asm"
-		even
-BgmS3ExtraLife:	include "bgm/sonic3/1UP (Sonic 3).asm"
-		even
-BgmSKExtraLife:	include "bgm/sonic3/1UP (Sonic & Knuckles).asm"
-		even
-BgmS3ActClear:	include "bgm/sonic3/Level Outro.asm"
-		even
-BgmS3Drowning:	include "bgm/sonic3/Countdown.asm"
-		even
-BgmS3GameOver:	include "bgm/sonic3/Game Over.asm"
-		even
-BgmS3Continue:	include "bgm/sonic3/Continue (Sonic & Knuckles).asm"
-		even
-BgmS3CompMenu:	include "bgm/sonic3/Competition Menu.asm"
-		even
-BgmS3ALZ:	include "bgm/sonic3/Azure Lake.asm"
-		even
-BgmS3BPZ:	include "bgm/sonic3/Balloon Park.asm"
-		even
-BgmS3CGZ:	include "bgm/sonic3/Chrome Gadget.asm"
-		even
-BgmS3DPZ:	include "bgm/sonic3/Desert Palace.asm"
-		even
-BgmS3EMZ:	include "bgm/sonic3/Endless Mine.asm"
-		even
-BgmS3Credits:	include "bgm/sonic3/Credits (Sonic 3).asm"
-		even
-BgmSKCredits:	include "bgm/sonic3/Credits (Sonic & Knuckles).asm"
+BgmS2BMenu2P:	include "res/bgm/sonic2-wai/Unused 2.asm"
 		even
 
-BgmS3BCNZ1:	include "bgm/sonic3-1103/CNZ1.asm"
+BgmS3Complete:	include "res/bgm/sonic3/Game Complete (Sonic 3).asm"	; shares sequence data with s3title
 		even
-BgmS3BCNZ2:	include "bgm/sonic3-1103/CNZ2.asm"
+BgmSKComplete:	include "res/bgm/sonic3/Game Complete (Sonic & Knuckles).asm"
 		even
-BgmS3BICZ1:	include "bgm/sonic3-1103/ICZ1.asm"
+BgmS3Title:	include "res/bgm/sonic3/Title (Sonic 3).asm"
 		even
-BgmS3BICZ2:	include "bgm/sonic3-1103/ICZ2.asm"
+BgmSKitle:	include "res/bgm/sonic3/Title (Sonic & Knuckles).asm"
 		even
-BgmS3BLBZ1:	include "bgm/sonic3-1103/LBZ1.asm"
+BgmS3AIZ1:	include "res/bgm/sonic3/AIZ1.asm"
 		even
-BgmS3BLBZ2:	include "bgm/sonic3-1103/LBZ2.asm"
+BgmS3AIZ2:	include "res/bgm/sonic3/AIZ2.asm"
 		even
-BgmS3BKnuckles:	include "bgm/sonic3-1103/Knuckles.asm"
+BgmS3HCZ1:	include "res/bgm/sonic3/HCZ1.asm"
 		even
-BgmS3BCompMenu:	include "bgm/sonic3-1103/Competition Menu.asm"
+BgmS3HCZ2:	include "res/bgm/sonic3/HCZ2.asm"
 		even
-BgmS3BCredits:	include "bgm/sonic3-1103/Credits.asm"
+BgmS3MGZ1:	include "res/bgm/sonic3/MGZ1.asm"
 		even
-BgmS3BUnused:	include "bgm/sonic3-1103/Unused Theme.asm"
+BgmS3MZZ2:	include "res/bgm/sonic3/MGZ2.asm"
+		even
+BgmS3CNZ1:	include "res/bgm/sonic3/CNZ1.asm"
+		even
+BgmS3CNZ2:	include "res/bgm/sonic3/CNZ2.asm"
+		even
+BgmS3ICZ2:	include "res/bgm/sonic3/ICZ2.asm"	; shares FM instruments with ICZ1
+		even
+BgmS3ICZ1:	include "res/bgm/sonic3/ICZ1.asm"
+		even
+BgmS3LBZ1:	include "res/bgm/sonic3/LBZ1.asm"
+		even
+BgmS3LBZ2:	include "res/bgm/sonic3/LBZ2.asm"
+		even
+BgmSKMHZ1:	include "res/bgm/sonic3/MHZ1.asm"
+		even
+BgmSKMHZ2:	include "res/bgm/sonic3/MHZ2.asm"
+		even
+BgmSKFBZ1:	include "res/bgm/sonic3/FBZ1 (Sonic & Knuckles).asm"
+		even
+BgmSKFBZ2:	include "res/bgm/sonic3/FBZ2.asm"
+		even
+BgmSKSOZ1:	include "res/bgm/sonic3/SOZ1.asm"
+		even
+BgmSKSOZ2:	include "res/bgm/sonic3/SOZ2.asm"
+		even
+BgmSKLRZ1:	include "res/bgm/sonic3/LRZ1.asm"
+		even
+BgmSKLRZ2:	include "res/bgm/sonic3/LRZ2.asm"
+		even
+BgmSKSSZ:	include "res/bgm/sonic3/SSZ (Sonic & Knuckles).asm"
+		even
+BgmSKDEZ1:	include "res/bgm/sonic3/DEZ1.asm"
+		even
+BgmSKDEZ2:	include "res/bgm/sonic3/DEZ2.asm"
+		even
+BgmSKDDZ:	include "res/bgm/sonic3/DDZ.asm"
+		even
+BgmS3Gumball:	include "res/bgm/sonic3/Gum Ball Machine.asm"
+		even
+BgmSKPachinko:	include "res/bgm/sonic3/Pachinko.asm"
+		even
+BgmSKSlots:	include "res/bgm/sonic3/Slots.asm"
+		even
+BgmS3Special:	include "res/bgm/sonic3/Special Stage.asm"
+		even
+BgmS3MiniBoss:	include "res/bgm/sonic3/Miniboss (Sonic 3).asm"
+		even
+BgmSKMiniBoss:	include "res/bgm/sonic3/Miniboss (Sonic & Knuckles).asm"
+		even
+BgmS3ZoneBoss:	include "res/bgm/sonic3/Zone boss.asm"
+		even
+BgmS3FinalBoss:	include "res/bgm/sonic3/Final boss.asm"
+		even
+BgmS3Knuckles:	include "res/bgm/sonic3/Knuckles (Sonic 3).asm"
+		even
+BgmSKKnuckles:	include "res/bgm/sonic3/Knuckles (Sonic & Knuckles).asm"
+		even
+BgmS3Invinc:	include "res/bgm/sonic3/Invincible (Sonic 3).asm"
+		even
+BgmSKInvinc:	include "res/bgm/sonic3/Invincible (Sonic & Knuckles).asm"
+		even
+BgmS3ExtraLife:	include "res/bgm/sonic3/1UP (Sonic 3).asm"
+		even
+BgmSKExtraLife:	include "res/bgm/sonic3/1UP (Sonic & Knuckles).asm"
+		even
+BgmS3ActClear:	include "res/bgm/sonic3/Level Outro.asm"
+		even
+BgmS3Drowning:	include "res/bgm/sonic3/Countdown.asm"
+		even
+BgmS3GameOver:	include "res/bgm/sonic3/Game Over.asm"
+		even
+BgmS3Continue:	include "res/bgm/sonic3/Continue (Sonic & Knuckles).asm"
+		even
+BgmS3CompMenu:	include "res/bgm/sonic3/Competition Menu.asm"
+		even
+BgmS3ALZ:	include "res/bgm/sonic3/Azure Lake.asm"
+		even
+BgmS3BPZ:	include "res/bgm/sonic3/Balloon Park.asm"
+		even
+BgmS3CGZ:	include "res/bgm/sonic3/Chrome Gadget.asm"
+		even
+BgmS3DPZ:	include "res/bgm/sonic3/Desert Palace.asm"
+		even
+BgmS3EMZ:	include "res/bgm/sonic3/Endless Mine.asm"
+		even
+BgmS3Credits:	include "res/bgm/sonic3/Credits (Sonic 3).asm"
+		even
+BgmSKCredits:	include "res/bgm/sonic3/Credits (Sonic & Knuckles).asm"
 		even
 
-BgmS3DIntro:	include "bgm/sonic3D/Intro.asm"
+BgmS3BCNZ1:	include "res/bgm/sonic3-1103/CNZ1.asm"
 		even
-BgmS3DMenu:	include "bgm/sonic3D/Menu.asm"
+BgmS3BCNZ2:	include "res/bgm/sonic3-1103/CNZ2.asm"
 		even
-BgmS3DGrGZ1:	include "bgm/sonic3D/GreenGZ1.asm"
+BgmS3BICZ1:	include "res/bgm/sonic3-1103/ICZ1.asm"
 		even
-BgmS3DGrGZ2:	include "bgm/sonic3D/GreenGZ2.asm"
+BgmS3BICZ2:	include "res/bgm/sonic3-1103/ICZ2.asm"
 		even
-BgmS3DRRZ1:	include "bgm/sonic3D/RRZ1.asm"
+BgmS3BLBZ1:	include "res/bgm/sonic3-1103/LBZ1.asm"
 		even
-BgmS3DRRZ2:	include "bgm/sonic3D/RRZ2.asm"
+BgmS3BLBZ2:	include "res/bgm/sonic3-1103/LBZ2.asm"
 		even
-BgmS3DSSZ1:	include "bgm/sonic3D/SSZ1.asm"
+BgmS3BKnuckles:	include "res/bgm/sonic3-1103/Knuckles.asm"
 		even
-BgmS3DSSZ2:	include "bgm/sonic3D/SSZ2.asm"
+BgmS3BCompMenu:	include "res/bgm/sonic3-1103/Competition Menu.asm"
 		even
-BgmS3DDDZ1:	include "bgm/sonic3D/DDZ1.asm"
+BgmS3BCredits:	include "res/bgm/sonic3-1103/Credits.asm"
 		even
-BgmS3DDDZ2:	include "bgm/sonic3D/DDZ2.asm"
+BgmS3BUnused:	include "res/bgm/sonic3-1103/Unused Theme.asm"
 		even
-BgmS3VVDZ1:	include "bgm/sonic3D/VVZ1.asm"
+
+BgmS3DIntro:	include "res/bgm/sonic3D/Intro.asm"
 		even
-BgmS3VVDZ2:	include "bgm/sonic3D/VVZ2.asm"
+BgmS3DMenu:	include "res/bgm/sonic3D/Menu.asm"
 		even
-BgmS3DGeGZ1:	include "bgm/sonic3D/GeneGZ1.asm"
+BgmS3DGrGZ1:	include "res/bgm/sonic3D/GreenGZ1.asm"
 		even
-BgmS3DGeGZ2:	include "bgm/sonic3D/GeneGZ2.asm"
+BgmS3DGrGZ2:	include "res/bgm/sonic3D/GreenGZ2.asm"
 		even
-BgmS3PPDZ1:	include "bgm/sonic3D/PPZ1.asm"
+BgmS3DRRZ1:	include "res/bgm/sonic3D/RRZ1.asm"
 		even
-BgmS3PPDZ2:	include "bgm/sonic3D/PPZ2.asm"
+BgmS3DRRZ2:	include "res/bgm/sonic3D/RRZ2.asm"
 		even
-BgmS3DSpecial:	include "bgm/sonic3D/Special Stage.asm"
+BgmS3DSSZ1:	include "res/bgm/sonic3D/SSZ1.asm"
 		even
-BgmS3DInvinc:	include "bgm/sonic3D/Invincible.asm"
+BgmS3DSSZ2:	include "res/bgm/sonic3D/SSZ2.asm"
 		even
-BgmS3DBoss1:	include "bgm/sonic3D/Boss1.asm"
+BgmS3DDDZ1:	include "res/bgm/sonic3D/DDZ1.asm"
 		even
-BgmS3DBoss2:	include "bgm/sonic3D/Boss2.asm"
+BgmS3DDDZ2:	include "res/bgm/sonic3D/DDZ2.asm"
 		even
-BgmS3DBoss3:	include "bgm/sonic3D/Unused boss theme.asm"
+BgmS3VVDZ1:	include "res/bgm/sonic3D/VVZ1.asm"
 		even
-BgmS3DFinalBoss:	include "bgm/sonic3D/The Final Fight.asm"
+BgmS3VVDZ2:	include "res/bgm/sonic3D/VVZ2.asm"
 		even
-BgmS3DEnding:	include "bgm/sonic3D/Ending.asm"
+BgmS3DGeGZ1:	include "res/bgm/sonic3D/GeneGZ1.asm"
 		even
-BgmS3DCredits:	include "bgm/sonic3D/Credits.asm"
+BgmS3DGeGZ2:	include "res/bgm/sonic3D/GeneGZ2.asm"
+		even
+BgmS3PPDZ1:	include "res/bgm/sonic3D/PPZ1.asm"
+		even
+BgmS3PPDZ2:	include "res/bgm/sonic3D/PPZ2.asm"
+		even
+BgmS3DSpecial:	include "res/bgm/sonic3D/Special Stage.asm"
+		even
+BgmS3DInvinc:	include "res/bgm/sonic3D/Invincible.asm"
+		even
+BgmS3DBoss1:	include "res/bgm/sonic3D/Boss1.asm"
+		even
+BgmS3DBoss2:	include "res/bgm/sonic3D/Boss2.asm"
+		even
+BgmS3DBoss3:	include "res/bgm/sonic3D/Unused boss theme.asm"
+		even
+BgmS3DFinalBoss:	include "res/bgm/sonic3D/The Final Fight.asm"
+		even
+BgmS3DEnding:	include "res/bgm/sonic3D/Ending.asm"
+		even
+BgmS3DCredits:	include "res/bgm/sonic3D/Credits.asm"
 		even
 ; ---------------------------------------------------------------
 ; PCM data
 ; ---------------------------------------------------------------
 	pcminc START
-	pcminc Kick,			"pcm/sonic2/Kick.dpcm"
-	pcminc Snare,			"pcm/sonic2/Snare.pcm"
-	pcminc Timpani,			"pcm/sonic2/Timpani.dpcm"
-	pcminc Clap,			"pcm/sonic2/Clap.dpcm"
-	pcminc Tom,			"pcm/sonic2/Tom.pcm"
-	pcminc Scratch,			"pcm/sonic2/Scratch.dpcm"
-	pcminc Bongo,			"pcm/sonic2/Bongo.dpcm"
+	pcminc Kick,			"res/pcm/sonic2/Kick.dpcm"
+	pcminc Snare,			"res/pcm/sonic2/Snare.pcm"
+	pcminc Timpani,			"res/pcm/sonic2/Timpani.dpcm"
+	pcminc Clap,			"res/pcm/sonic2/Clap.dpcm"
+	pcminc Tom,			"res/pcm/sonic2/Tom.pcm"
+	pcminc Scratch,			"res/pcm/sonic2/Scratch.dpcm"
+	pcminc Bongo,			"res/pcm/sonic2/Bongo.dpcm"
 
-	pcminc SnareS3,			"pcm/sonic3/SnareS3.dpcm"
-	pcminc TomS3,			"pcm/sonic3/TomS3.dpcm"
-	pcminc KickS3,			"pcm/sonic3/KickS3.dpcm"
-	pcminc MuffledSnare,		"pcm/sonic3/MuffledSnare.dpcm"
-	pcminc CrashCymbalS3,		"pcm/sonic3/CrashCymbalS3.dpcm"
-	pcminc RideCymbal,		"pcm/sonic3/RideCymbal.dpcm"
-	pcminc MetalHit,		"pcm/sonic3/MetalHit.dpcm"
-	pcminc HighMetalHit,		"pcm/sonic3/HighMetalHit.dpcm"
-	pcminc HigherMetalHit,		"pcm/sonic3/HigherMetalHit.dpcm"
-	pcminc ClapS3,			"pcm/sonic3/ClapS3.dpcm"
-	pcminc ElectricTomS3,		"pcm/sonic3/ElectricTomS3.dpcm"
-	pcminc PitchSnareS3,		"pcm/sonic3/PitchSnareS3.dpcm"
-	pcminc TimpaniS3,		"pcm/sonic3/TimpaniS3.dpcm"
-	pcminc QuickLooseSnare,		"pcm/sonic3/QuickLooseSnare.dpcm"
-	pcminc Click,			"pcm/sonic3/Click.dpcm"
-	pcminc PowerKick,		"pcm/sonic3/PowerKick.dpcm"
-	pcminc QuickGlassCrash,		"pcm/sonic3/QuickGlassCrash.dpcm"
-	pcminc GlassCrashSnare,		"pcm/sonic3/GlassCrashSnare.dpcm"
-	pcminc GlassCrash,		"pcm/sonic3/GlassCrash.dpcm"
-	pcminc GlassCrashKick,		"pcm/sonic3/GlassCrashKick.dpcm"
-	pcminc QuietGlassCrash,		"pcm/sonic3/QuietGlassCrash.dpcm"
-	pcminc OddSnareKick,		"pcm/sonic3/OddSnareKick.dpcm"
-	pcminc KickExtraBass,		"pcm/sonic3/KickExtraBass.dpcm"
-	pcminc ComeOn,			"pcm/sonic3/ComeOn.dpcm"
-	pcminc DanceSnare,		"pcm/sonic3/DanceSnare.dpcm"
-	pcminc LooseKick,		"pcm/sonic3/LooseKick.dpcm"
-	pcminc ModLooseKick,		"pcm/sonic3/ModLooseKick.dpcm"
-	pcminc Woo,			"pcm/sonic3/Woo.dpcm"
-	pcminc Go,			"pcm/sonic3/Go.dpcm"
-	pcminc SnareGo,			"pcm/sonic3/SnareGo.dpcm"
-	pcminc PowerTom,		"pcm/sonic3/PowerTom.dpcm"
-	pcminc WoodBlock,		"pcm/sonic3/WoodBlock.dpcm"
-	pcminc HitDrum,			"pcm/sonic3/HitDrum.dpcm"
-	pcminc MetalCrashHit,		"pcm/sonic3/MetalCrashHit.dpcm"
-	pcminc EchoedClapHitSK,		"pcm/sonic3/EchoedClapHitSK.dpcm"
-	pcminc EchoedClapHitS3,		"pcm/sonic3/EchoedClapHitS3.dpcm"
-	pcminc PowerKickHit,		"pcm/sonic3/PowerKickHit.dpcm"
-	pcminc HipHopHitPowerKick,	"pcm/sonic3/HipHopHitPowerKick.dpcm"
-	pcminc BassHey,			"pcm/sonic3/BassHey.dpcm"
-	pcminc DanceStyleKick,		"pcm/sonic3/DanceStyleKick.dpcm"
-	pcminc HipHopHitKick,		"pcm/sonic3/HipHopHitKick.dpcm"
-	pcminc ReverseFadingWind,	"pcm/sonic3/ReverseFadingWind.dpcm"
-	pcminc ScratchS3,		"pcm/sonic3/ScratchS3.dpcm"
-	pcminc LooseSnareNoise,		"pcm/sonic3/LooseSnareNoise.dpcm"
-	pcminc PowerKick2,		"pcm/sonic3/PowerKick2.dpcm"
-	pcminc CrashingNoiseWoo,	"pcm/sonic3/CrashingNoiseWoo.dpcm"
-	pcminc QuickHit,		"pcm/sonic3/QuickHit.dpcm"
-	pcminc KickHey,			"pcm/sonic3/KickHey.dpcm"
+	pcminc SnareS3,			"res/pcm/sonic3/SnareS3.dpcm"
+	pcminc TomS3,			"res/pcm/sonic3/TomS3.dpcm"
+	pcminc KickS3,			"res/pcm/sonic3/KickS3.dpcm"
+	pcminc MuffledSnare,		"res/pcm/sonic3/MuffledSnare.dpcm"
+	pcminc CrashCymbalS3,		"res/pcm/sonic3/CrashCymbalS3.dpcm"
+	pcminc RideCymbal,		"res/pcm/sonic3/RideCymbal.dpcm"
+	pcminc MetalHit,		"res/pcm/sonic3/MetalHit.dpcm"
+	pcminc HighMetalHit,		"res/pcm/sonic3/HighMetalHit.dpcm"
+	pcminc HigherMetalHit,		"res/pcm/sonic3/HigherMetalHit.dpcm"
+	pcminc ClapS3,			"res/pcm/sonic3/ClapS3.dpcm"
+	pcminc ElectricTomS3,		"res/pcm/sonic3/ElectricTomS3.dpcm"
+	pcminc PitchSnareS3,		"res/pcm/sonic3/PitchSnareS3.dpcm"
+	pcminc TimpaniS3,		"res/pcm/sonic3/TimpaniS3.dpcm"
+	pcminc QuickLooseSnare,		"res/pcm/sonic3/QuickLooseSnare.dpcm"
+	pcminc Click,			"res/pcm/sonic3/Click.dpcm"
+	pcminc PowerKick,		"res/pcm/sonic3/PowerKick.dpcm"
+	pcminc QuickGlassCrash,		"res/pcm/sonic3/QuickGlassCrash.dpcm"
+	pcminc GlassCrashSnare,		"res/pcm/sonic3/GlassCrashSnare.dpcm"
+	pcminc GlassCrash,		"res/pcm/sonic3/GlassCrash.dpcm"
+	pcminc GlassCrashKick,		"res/pcm/sonic3/GlassCrashKick.dpcm"
+	pcminc QuietGlassCrash,		"res/pcm/sonic3/QuietGlassCrash.dpcm"
+	pcminc OddSnareKick,		"res/pcm/sonic3/OddSnareKick.dpcm"
+	pcminc KickExtraBass,		"res/pcm/sonic3/KickExtraBass.dpcm"
+	pcminc ComeOn,			"res/pcm/sonic3/ComeOn.dpcm"
+	pcminc DanceSnare,		"res/pcm/sonic3/DanceSnare.dpcm"
+	pcminc LooseKick,		"res/pcm/sonic3/LooseKick.dpcm"
+	pcminc ModLooseKick,		"res/pcm/sonic3/ModLooseKick.dpcm"
+	pcminc Woo,			"res/pcm/sonic3/Woo.dpcm"
+	pcminc Go,			"res/pcm/sonic3/Go.dpcm"
+	pcminc SnareGo,			"res/pcm/sonic3/SnareGo.dpcm"
+	pcminc PowerTom,		"res/pcm/sonic3/PowerTom.dpcm"
+	pcminc WoodBlock,		"res/pcm/sonic3/WoodBlock.dpcm"
+	pcminc HitDrum,			"res/pcm/sonic3/HitDrum.dpcm"
+	pcminc MetalCrashHit,		"res/pcm/sonic3/MetalCrashHit.dpcm"
+	pcminc EchoedClapHitSK,		"res/pcm/sonic3/EchoedClapHitSK.dpcm"
+	pcminc EchoedClapHitS3,		"res/pcm/sonic3/EchoedClapHitS3.dpcm"
+	pcminc PowerKickHit,		"res/pcm/sonic3/PowerKickHit.dpcm"
+	pcminc HipHopHitPowerKick,	"res/pcm/sonic3/HipHopHitPowerKick.dpcm"
+	pcminc BassHey,			"res/pcm/sonic3/BassHey.dpcm"
+	pcminc DanceStyleKick,		"res/pcm/sonic3/DanceStyleKick.dpcm"
+	pcminc HipHopHitKick,		"res/pcm/sonic3/HipHopHitKick.dpcm"
+	pcminc ReverseFadingWind,	"res/pcm/sonic3/ReverseFadingWind.dpcm"
+	pcminc ScratchS3,		"res/pcm/sonic3/ScratchS3.dpcm"
+	pcminc LooseSnareNoise,		"res/pcm/sonic3/LooseSnareNoise.dpcm"
+	pcminc PowerKick2,		"res/pcm/sonic3/PowerKick2.dpcm"
+	pcminc CrashingNoiseWoo,	"res/pcm/sonic3/CrashingNoiseWoo.dpcm"
+	pcminc QuickHit,		"res/pcm/sonic3/QuickHit.dpcm"
+	pcminc KickHey,			"res/pcm/sonic3/KickHey.dpcm"
 
-	pcminc IntroKick,		"pcm/sonic3d/IntroKick.dpcm"
-	pcminc FinalFightMetalCrash,	"pcm/sonic3d/FinalFightMetalCrash.dpcm"
+	pcminc IntroKick,		"res/pcm/sonic3d/IntroKick.dpcm"
+	pcminc FinalFightMetalCrash,	"res/pcm/sonic3d/FinalFightMetalCrash.dpcm"
 
-	pcminc SegaPCM,			"pcm/Sega.pcm"
-;	pcminc Rizzmas,			"pcm/rizzmas.wav"
+	pcminc SegaPCM,			"res/pcm/Sega.pcm"
+;	pcminc Rizzmas,			"res/pcm/rizzmas.wav"
 	pcminc END
 ; ---------------------------------------------------------------
 	even

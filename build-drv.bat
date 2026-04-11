@@ -2,21 +2,34 @@
 if not exist _out mkdir _out
 REM // https://github.com/Clownacy/p2bin
 echo ============================================
-echo Building SMPS driver release blob
-tools\asw.exe -xx -n -q -A -L -U -g map -i . -olist _out\drv.lst -E _out\drv.log build-drv.asm -D __smpsDebug=0
+echo Building MegaPCM1
+tools\sjasmplus\sjasmplus.exe "src-z80/mpcm1/main.asm" --raw=_out/mpcm1.bin --exp=_out/mpcm1.exp --lst=_out/mpcm1.lst >_out/mpcm1.txt
+echo ============================================
+echo Building MegaPCM2
+tools\sjasmplus\sjasmplus.exe "src-z80/mpcm2/megapcm.asm" --raw=_out/mpcm2.bin --exp=_out/mpcm2.exp --lst=_out/mpcm2.lst >_out/mpcm2.txt
+echo ============================================
+echo Building Z80 driver release blob
+REM // tools\sjasmplus\sjasmplus.exe "src-z80/build.asm" --raw=smps-drvz80.bin --exp=_out/drvz80.exp --lst=_out/drvz80.lst >_out/drvz80.txt
+echo ============================================
+echo Compression Z80 code
+tools\clownlzss\clownlzss.exe -kp "_out/mpcm1.bin" "_out/mpcm1.kosp"
+tools\clownlzss\clownlzss.exe -kp "_out/mpcm2.bin" "_out/mpcm2.kosp"
+
+echo ============================================
+echo Building 68K driver release blob
+tools\asw\asw.exe -xx -n -q -A -L -U -g map -i . -olist _out\drv.lst -E _out\drv.log build-drv.asm -D __smpsDebug=0
 if not exist build-drv.p goto _BUILDTYPE_ERROR_RELEASE
-tools\p2bin.exe "build-drv.p" "smps-drv.bin" ""
+tools\asw\p2bin.exe "build-drv.p" "smps-drv.bin" ""
 move build-drv.p _out/build-drv.p
 if exist build-drv.map move build-drv.map _out/build-drv.map
 
 if exist _out\drv.log echo Build warning for release build: check _out\drv.log
 if not exist _out\drv.log echo Release blob build successful
-
 echo ============================================
-echo Building SMPS driver debug blob
-tools\asw.exe -xx -n -q -A -L -U -g map -i . -olist _out\drv-debug.lst -E _out\drv-debug.log build-drv.asm -D __smpsDebug=1
+echo Building 68K driver debug blob
+tools\asw\asw.exe -xx -n -q -A -L -U -g map -i . -olist _out\drv-debug.lst -E _out\drv-debug.log build-drv.asm -D __smpsDebug=1
 if not exist build-drv.p goto _BUILDTYPE_ERROR_DEBUG
-tools\p2bin.exe "build-drv.p" "smps-drv-debug.bin" ""
+tools\asw\p2bin.exe "build-drv.p" "smps-drv-debug.bin" ""
 move build-drv.p _out/build-drv-debug.p
 if exist build-drv.map move build-drv.map _out/build-drv-debug.map
 

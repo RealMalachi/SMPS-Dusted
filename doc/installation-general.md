@@ -5,17 +5,14 @@ Run `build-drv.bat`, this builds two binary blobs for the sound driver, one of w
 Run `build-snd.bat`, this builds the sound data used by the driver and a definitions file containing all the IDs
 
 # Step 2
-Include the following definitions file before ram allocation
-```
-	include "sound/smps-ids.asm"
-```
+Include the generated `smps-ids.asm` file before allocating ram
 
 # Step 3
 Allocate ram for the sound driver
 The included definitions file contains the constant `smpsramsize`, this specifies exactly how much ram the driver needs to operate
 ```
-; the label name doesn't matter, all that matters is that you're gonna be using this across every API call
-v_soundram:			ds.b smpsramsize
+; the label name doesn't matter, all that matters is that you're using the same ram location for every API call
+v_soundram:			rs.b smpsramsize
 ```
 
 # Step 4
@@ -32,9 +29,9 @@ SMPS_ResumeDriver		= *+28
 SMPS_SetupPianoRoll		= *+32
 SMPS_SetDriverDataPointer	= *+36
 SMPS_Signature			= *+64	; ASCII with zero-terminator
-	incbin "sound/smps-drv.bin"
+	incbin "smps-drv.bin"
 SMPS_DriverData:
-	incbin "sound/smps-snd.bin"
+	incbin "smps-snd.bin"
 ```
 
 # Step 4.5
@@ -42,9 +39,9 @@ If your rom building process supports separate debug builds via an assembler fla
 *cough cough vladikcomper error handler*
 ```
 	if def(__debug__)
-	incbin "sound/smps-drv-debug.bin"
+	incbin "smps-drv-debug.bin"
 	else
-	incbin "sound/smps-drv.bin"
+	incbin "smps-drv.bin"
 	endif
 ```
 

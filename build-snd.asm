@@ -59,7 +59,27 @@ musidtrack set musidtrack+1
 	endif
 	endm
 ; ---------------------------------------------------------------------------
-	include "src/smps-def.asm"
+	cmddef smpsramsize,	v_endofram
+	cmddef cmd__First,	$F000
+	cmddef cmd_FadeoutBGM,	$F000
+	cmddef cmd_Fadeout,	$F100
+	cmddef cmd_Fadein,	$F200
+	cmddef cmd_StopAll,	$F300
+	cmddef cmd_StopBGM,	$F301
+	cmddef cmd_StopSFX,	$F302
+	cmddef cmd_StopBSFX,	$F304
+	cmddef cmd_StopPSFX,	$F308
+	cmddef cmd_SpeedOff,	$F400
+	cmddef cmd_SpeedOn,	$F401
+	cmddef cmd_PanStereo,	$F402
+	cmddef cmd_PanMono,	$F403
+	cmddef cmd_SsgOn,	$F404
+	cmddef cmd_SsgOff,	$F405
+	cmddef cmd_MuffleOn,	$F406
+	cmddef cmd_MuffleOff,	$F407
+	cmddef cmd__Last,	$F500
+; ---------------------------------------------------------------------------
+	include "src-68k/smps-def.asm"
 	include "_smps2asm.asm"
 	org 0
 	include "_sndbank1.asm"
