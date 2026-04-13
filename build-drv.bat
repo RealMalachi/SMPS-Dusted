@@ -18,7 +18,7 @@ REM // tools\clownlzss\clownlzss.exe -kp "_out/mpcm2.bin" "_out/mpcm2.kosp"
 
 echo ============================================
 echo Building 68K driver release blob
-tools\asw\asw.exe -xx -n -q -A -L -U -g map -i . -olist _out\build-drv.lst -E _out\build-drv.log build-drv.asm -D __smpsDebug=0
+tools\asw\asw.exe -xx -n -q -A -L -U -g map -i . -a -shareout smps-def.asm -olist _out\build-drv.lst -E _out\build-drv.log build-drv.asm -D __smpsDebug=0
 if not exist build-drv.p goto _BUILDTYPE_ERROR_RELEASE
 tools\asw\p2bin.exe "build-drv.p" "smps-drv.bin" ""
 move build-drv.p _out/build-drv.p
@@ -28,7 +28,7 @@ if exist _out\build-drv.log type _out\build-drv.log
 if not exist _out\build-drv.log echo Release driver build successful
 echo ============================================
 echo Building 68K driver debug blob
-tools\asw\asw.exe -xx -n -q -A -L -U -g map -i . -olist _out\build-drv-debug.lst -E _out\build-drv-debug.log build-drv.asm -D __smpsDebug=1
+tools\asw\asw.exe -xx -n -q -A -L -U -g map -i . -a -shareout smps-def-debug.asm -olist _out\build-drv-debug.lst -E _out\build-drv-debug.log build-drv.asm -D __smpsDebug=1
 if not exist build-drv.p goto _BUILDTYPE_ERROR_DEBUG
 tools\asw\p2bin.exe "build-drv.p" "smps-drv-debug.bin" ""
 move build-drv.p _out/build-drv-debug.p

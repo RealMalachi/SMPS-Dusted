@@ -1,17 +1,24 @@
 The Comprehensive General SMPS-Dusted Installation Guide (TCGSDIG)
 
 # Step 1
-Run `build-drv.bat`, this builds two binary blobs for the sound driver, one of which used for debugging
+Run `build-drv.bat`, this builds two binary blobs for the sound driver and two definition files for important information about the driver, one of each being used for debug builds
+
 Run `build-snd.bat`, this builds the sound data used by the driver and a definitions file containing all the IDs
 
 # Step 2
-Include the generated `smps-ids.asm` file before allocating ram
+Include the generated definition files before allocating the games ram
+```
+	include "smps-def.asm"
+	include "smps-ids.asm"
+```
 
 # Step 3
 Allocate ram for the sound driver
-The included definitions file contains the constant `smpsramsize`, this specifies exactly how much ram the driver needs to operate
+
+`smps-def.asm` contains the constant `smpsramsize`, this specifies how much ram the driver needs to operate
+
+The rams label name doesn't matter, all that matters is that you're using the same ram location for every API call
 ```
-; the label name doesn't matter, all that matters is that you're using the same ram location for every API call
 v_soundram:			rs.b smpsramsize
 ```
 
@@ -38,6 +45,12 @@ SMPS_DriverData:
 If your rom building process supports separate debug builds via an assembler flag, consider using it to include the debug driver:
 *cough cough vladikcomper error handler*
 ```
+	if def(__debug__)
+	include "smps-def-debug.asm"
+	else
+	include "smps-def.asm"
+	endif
+...
 	if def(__debug__)
 	incbin "smps-drv-debug.bin"
 	else

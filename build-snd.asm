@@ -15,11 +15,6 @@ moveq_ macro val,reg
 	!moveq	#(-(((val)&(1<<7))<<1))|(val),reg
 	endm
 ; ---------------------------------------------------------------------------
-cmddef macro command,cmpid
-command equ cmpid
-	shared command
-	endm
-
 musidtrack set -1
 musidoff set 0
 musdef macro flag1up,flagpalslow,flagnomuffle,loc,cmpid
@@ -59,28 +54,25 @@ musidtrack set musidtrack+1
 	endif
 	endm
 ; ---------------------------------------------------------------------------
-	cmddef smpsramsize,	v_endofram
-	cmddef cmd__First,	$F000
-	cmddef cmd_FadeoutBGM,	$F000
-	cmddef cmd_Fadeout,	$F100
-	cmddef cmd_Fadein,	$F200
-	cmddef cmd_StopAll,	$F300
-	cmddef cmd_StopBGM,	$F301
-	cmddef cmd_StopSFX,	$F302
-	cmddef cmd_StopBSFX,	$F304
-	cmddef cmd_StopPSFX,	$F308
-	cmddef cmd_SpeedOff,	$F400
-	cmddef cmd_SpeedOn,	$F401
-	cmddef cmd_PanStereo,	$F402
-	cmddef cmd_PanMono,	$F403
-	cmddef cmd_SsgOn,	$F404
-	cmddef cmd_SsgOff,	$F405
-	cmddef cmd_MuffleOn,	$F406
-	cmddef cmd_MuffleOff,	$F407
-	cmddef cmd__Last,	$F500
-; ---------------------------------------------------------------------------
-	include "src-68k/smps-def.asm"
+	include "_settings.asm"
 	include "_smps2asm.asm"
+	if (__smpsPCM=="null") || (__smpsTarget=="fuckFM")
+	include "src-68k/null/smps-pcm-def.asm"
+;	elseif __smpsPCM=="DirtyPCM"
+;	include "src-68k/dirtypcm/smps-pcm-def.asm"
+	elseif __smpsPCM=="MegaPCM1"
+	include "src-68k/mpcm1/smps-pcm-def.asm"
+	elseif __smpsPCM=="MegaPCM2"
+	include "src-68k/mpcm2/smps-pcm-def.asm"
+;	elseif __smpsPCM=="DualPCM"
+;	include "src-68k/dualpcm/smps-pcm-def.asm"
+;	elseif __smpsPCM=="DualPCM-FlexEd"
+;	include "src-68k/dualpcm-flexed/smps-pcm-def.asm"
+;	elseif __smpsPCM=="DualClown"
+;	include "src-68k/dualclown/smps-pcm-def.asm"
+	else
+	fatal "Unknown PCM type"
+	endif
 	org 0
 	include "_sndbank1.asm"
 ; ---------------------------------------------------------------------------
