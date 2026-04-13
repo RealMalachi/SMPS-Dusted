@@ -2,6 +2,7 @@
 __smpsDataVer		equ 2
 __smpsTarget		equ "md68k"	; read below
 __smpsPCM		equ "MegaPCM2"	; read below
+__smpsRestPCM		equ 1		; 0 holds (including when the track stops), 1 rests
 __smpsJingle		equ 1
 __smpsBFX		equ 1
 __smpsModEnv		equ 1

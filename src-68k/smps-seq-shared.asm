@@ -1177,9 +1177,14 @@ cfStopTrack:
 		;bpl.s	.fm
 .fm:		bra.w	FMNoteOff
 .psg:		bra.w	PSGNoteOff
-.dac:		moveq	#$3F,d0
+.dac:
+	if __smpsRestPCM=0
+		rts
+	else
+		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
 		bra.w	DACStopSample
+	endif
 
 ; found channel to restore, initiate the new one
 .restore:

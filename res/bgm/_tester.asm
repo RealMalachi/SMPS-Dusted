@@ -12,6 +12,8 @@ Mus_TestBgm_DAC:
 	dc.b	dIntroKick, $18
 ; pcm rest test
 	dc.b	dIntroKick, $0C, nRst, $0C
+; pcm rest time time test
+;	dc.b	dIntroKick, $0C, nRst, $02, $0A
 ; pcm note timeout test
 	smpsNoteFill $0C, 0
 	dc.b	dIntroKick, $18

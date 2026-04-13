@@ -141,22 +141,22 @@ When initialized channels have default value for their frequency/sample, which i
 ```
 
 ### rest on PCM
-- on smps-68k rests hold the dac, but it's common for driver variants to make them rest the dac
-- on smps-z80 rests hold the dac
-- on smps-dusted rests rest the dac
+- on smps-68k, rests hold the dac, but it's common for driver variants to make them rest the dac
+- on smps-z80, rests hold the dac
+- on smps-dusted, rest logic depends on a driver flag
 
-There's two main ways to emulate not stopping on smps-dusted:
+there's two main ways to emulate holds for rests when rests are enabled:
 1. don't use rests, simply increase the time the pcm is played
-2. use holds or an indefinite hold
+2. (smps-dusted exclusive) use holds or an indefinite hold
 ```
 ; sequences like this:
         dc.b dKick,$02,nRst,nRst,dSnare,dKick
 ; need to be changed to this:
         dc.b dKick,$06,dSnare,$02,dKick
-; or this:
+; or this (smps-dusted exclusive):
         dc.b dKick,$02,smpsNoAttack,nRst,smpsNoAttack,nRst,dSnare,dKick    ; syntax 1
         dc.b dKick,$02,smpsHoldNote,nRst,smpsHoldNote,nRst,dSnare,dKick    ; syntax 2
-; or this:
+; or this (very smps-dusted exclusive):
         smpsHoldNotes
         dc.b dKick,$02,nRst,nRst,dSnare,dKick
         smpsReleaseNotes

@@ -14,10 +14,7 @@ PCMUpdateTrack:
 		and.b	TrackVoiceControl(a5),d0
 		moveq	#0,d1
 		move.b	TrackSavedDAC(a5),d1
-		bpl.w	DACQueueSample
-		btst	#_noattack,TrackPlaybackControl(a5)
-		bne.s	.locret
-		bra.w	DACStopSample
+		bra.w	DACQueueSample
 ; ---------------------------------------------------------------------------
 .sampleongoing:
 		bsr.w	NoteTimeoutUpdate			; bsr is necessary for stack reasons
@@ -71,6 +68,10 @@ PCMSetDAC:
 		rts
 .rest:		or.b	#1<<_resting,TrackPlaybackControl(a5)
 		move.w	#-1,TrackFreq(a5)
+		if __smpsRestPCM=0
+		rts
+		else
 		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
 		bra.w	DACStopSample
+		endif
