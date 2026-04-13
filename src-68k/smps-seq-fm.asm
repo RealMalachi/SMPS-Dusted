@@ -210,6 +210,7 @@ SetVoicePan:
 .stereo:	bsr.w	WriteFMIorII
 		;bra.s	SetVoice
 SetVoice:
+		fmstart	a0
 		move.l	TrackFmVoicePtr(a5),a1		; voice pointer
 		moveq	#0,d1
 		move.b	TrackFmVoiceIndex(a5),d1	; Current voice
@@ -220,8 +221,34 @@ SetVoice:
 		moveq	#(FMInstrumentOperatorTable_End-FMInstrumentOperatorTable)-1,d3
 .loop:		move.b	(a2)+,d0
 		move.b	(a1)+,d1
-		bsr.w	WriteFMIorII
+; inlined WriteFMIorIIMain
+; TODO: calculating the FM channel once and reusing that would be nice, especially for PCM players with an FM buffer
+		move.b	TrackVoiceControl(a5),d2	; Get voice control bits
+		subq.w	#1<<2,d2			; Is this bound for part I or II? (also clear chip toggle)
+		bcc.s	.fm2				; Branch if for part II
+		addq.w	#1<<2,d2
+		if __smpsDebug
+		cmp.b	#2,d2
+		bls.s	.ass1
+		SMPS_assert "SetVoice: Invalid FM-1 channel, TODO: print channel"
+.ass1:
+		endif
+		add.b	d0,d2				; Add in voice control bits
+		fmwrite	a0,d2,d1,0
 		dbf	d3,.loop
+		bra.s	.loopend
+.fm2:
+		if __smpsDebug
+		cmp.b	#2,d2
+		bls.s	.ass2
+		SMPS_assert "SetVoice: Invalid FM-2 channel, TODO: print channel"
+.ass2:
+		endif
+		add.b	d0,d2
+		fmwrite	a0,d2,d1,1
+		dbf	d3,.loop
+.loopend:
+		fmstop	a0
 		btst	#4,v_driverflags(a6)		; if SSG-EG is disabled, uhh, disable it.
 		beq.s	SendVoiceSSG.gotptr
 		rts
