@@ -1,19 +1,20 @@
 @echo off
 if not exist _out mkdir _out
-REM // https://github.com/Clownacy/p2bin
 echo ============================================
 echo Building MegaPCM1
-tools\sjasmplus\sjasmplus.exe "src-z80/mpcm1/main.asm" --raw=_out/mpcm1.bin --exp=_out/mpcm1.exp --lst=_out/mpcm1.lst >_out/mpcm1.txt
+tools\sjasmplus\sjasmplus.exe src-z80/mpcm1/main.asm --raw=_out/mpcm1.bin --exp=_out/mpcm1.exp --lst=_out/mpcm1.lst >_out/mpcm1.txt
+echo Compressing MegaPCM1
+tools\clownlzss\clownlzss.exe -kp "_out/mpcm1.bin" "_out/mpcm1.kosp"
 echo ============================================
 echo Building MegaPCM2
-tools\sjasmplus\sjasmplus.exe "src-z80/mpcm2/megapcm.asm" --raw=_out/mpcm2.bin --exp=_out/mpcm2.exp --lst=_out/mpcm2.lst >_out/mpcm2.txt
-echo ============================================
-echo Building Z80 driver release blob
-REM // tools\sjasmplus\sjasmplus.exe "src-z80/build.asm" --raw=smps-drvz80.bin --exp=_out/drvz80.exp --lst=_out/drvz80.lst >_out/drvz80.txt
-echo ============================================
-echo Compression Z80 code
-tools\clownlzss\clownlzss.exe -kp "_out/mpcm1.bin" "_out/mpcm1.kosp"
+tools\sjasmplus\sjasmplus.exe src-z80/mpcm2/megapcm.asm -DOUTPATH=\"_out/mpcm2.bin\" -DTRACEPATH=\"_out/mpcm2.tracedata.txt\" --exp=_out/mpcm2.exp.sym --sym=_out/mpcm2.sym --lst=_out/mpcm2.lst >_out/mpcm2.txt
+echo Compressing MegaPCM2
 tools\clownlzss\clownlzss.exe -kp "_out/mpcm2.bin" "_out/mpcm2.kosp"
+REM // echo ============================================
+REM // echo Building Z80 driver release blob
+REM // tools\sjasmplus\sjasmplus.exe "src-z80/build.asm" --raw=smps-drvz80.bin --exp=_out/drvz80.exp --lst=_out/drvz80.lst >_out/drvz80.txt
+REM // echo Compressing Z80 driver release blob
+REM // tools\clownlzss\clownlzss.exe -kp "_out/mpcm2.bin" "_out/mpcm2.kosp"
 
 echo ============================================
 echo Building 68K driver release blob

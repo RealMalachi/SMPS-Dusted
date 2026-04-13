@@ -33,13 +33,19 @@ Todo:
 - FM3 multi-channel and CSM mode
 - LFO
 
+## Tools
+- [flamewings asl macro assembler fork](https://github.com/flamewing/asl-releases), labelled as asw for... some reason
+- [clownacys p2bin](https://github.com/Clownacy/p2bin)
+- [sjasmplus](https://github.com/z00m128/sjasmplus)
+- [clownlzss](https://github.com/NaotoNTP/clownlzss)
+
 ## Special Thanks
 | person | thing |
 | - | - |
 | Alex Field | Disassembling Sonic 2 Simon Wai |
 | Devon | Disassembling Sonic CD |
-| Flamewing | Disassembling/compiling Sonic 3D Blasts OST |
-| Clownacy | Clone Driver, "Dual-Clown" |
+| Flamewing | Disassembling/compiling Sonic 3D Blasts OST, asl |
+| Clownacy | Clone Driver, "Dual-Clown", p2bin, clownlzss |
 | Undying-Star | Flicky sounds |
 | Tomatowave | Beta testing |
 

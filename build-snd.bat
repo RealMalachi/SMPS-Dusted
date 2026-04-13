@@ -1,6 +1,5 @@
 @echo off
 if not exist _out mkdir _out
-REM // https://github.com/Clownacy/p2bin
 echo ============================================
 echo Building SMPS blob
 tools\asw\asw.exe -xx -n -q -A -L -U -i . -a -shareout smps-ids.asm -olist _out\snd.lst -E _out\snd.log build-snd.asm
