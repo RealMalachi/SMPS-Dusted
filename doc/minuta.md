@@ -39,6 +39,17 @@ sequence data is organised as follows: flag,note/rest,time
         dc.b        nBb7,nRst                       ; play new note for previous time, then rest for previous time
 ```
 
+time is multiplied by the tempo "divider" then ANDed by $FF
+```
+        smpsChanTempoDiv $02                        ; this sequence results in ($40x$02)&$FF = $80
+		dc.b        nRst,$40
+        smpsChanTempoDiv $04                        ; this sequence results in ($40x$04)&$FF = $00
+		dc.b        nRst,$40
+        smpsChanTempoDiv $00                        ; this sequence results in ($40x$00)&$FF = $00
+		dc.b        nRst,$40
+```
+Debug builds of SMPS-Dusted will throw an error when the multiplication is $00 or exceeds $FF
+
 ### drum mode
 drum mode is a feature that's semi-exclusive to SMPS-Dusted
 
@@ -59,11 +70,34 @@ YM2612 PCM drum mode logic is inverted, in that it defaults to drum mode by defa
 ## automatic sound updaters
 
 ### timeout
-A timer that's independant from the sequence which rests it, the timer doesn't reset on hold notes, not much else to say
+| data | smps-68k | smps-z80 | smps-dusted |
+|:-|:-:|:-:|:-:|
+| channels | FM/PSG | FM/PSG | All |
+| time algorithm | per-tick | tick x tempodiv & FFh | per-tick or tick x tempodiv & FFh |
+
+Note timeouts (or perhaps a better name would be note cuts) are a timer that that rests the note. The timer is reset for every non-held note
+
+So instead of doing this:
+``` 
+	dc.b nC0,$04,nRst,$0C
+	dc.b nC0,$04,nRst,$0C
+	dc.b nC0,$04,nRst,$0C
+	dc.b nC0,$04,nRst,$0C
+```
+You can do this:
+```
+    smpsNoteTimeout $04
+	dc.b nC0,$10
+	dc.b nC0,$10
+	dc.b nC0,$10
+	dc.b nC0,$10
+```
+In smps-dusted with PCM rest logic set to hold standard rests, this also serves as an alternative to add rests
 
 ### volenv
 | data | smps-68k | smps-z80 | smps-dusted |
 |:-|:-:|:-:|:-:|
+| channels | PSG only | FM/PSG | All |
 | volenv range | $00-$7F, $81-$FF | $00-$7F, $84-$FF | $00-$7F |
 | PSG internal volume | $00-$0F | $00-$0F | $00-$7F |
 | volume cap | nope | nope | $00-$7F |
@@ -79,6 +113,7 @@ PSG volume being internally consistent with FM means that they can be more easil
 ### modenv
 | data | smps-68k | smps-z80 | smps-dusted |
 |:-|:-:|:-:|:-:|
+| channels | FM/PSG | FM/PSG | FM/PSG |
 | s8 modenv | yep | yep | yep |
 | s12 modenv | nope | nope | yep |
 | s16 modenv | nope | nope | yep |

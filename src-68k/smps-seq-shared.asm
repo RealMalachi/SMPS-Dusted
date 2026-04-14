@@ -3,23 +3,29 @@
 SetDuration:
 	if __smpsDebug
 		tst.w	d5
-		bne.s	.durationgood
+		bne.s	.durationisntzero
+		SMPS_assert "SetDuration: Time is $00, TODO print extra data"
+.durationisntzero:
 		cmp.w	#$7F,d5
 		bls.s	.durationgood
-.durationbad:
-		SMPS_assert "Invalid base sequence duration, TODO print bad duration"
+		SMPS_assert "SetDuration: Time exceeds $7F, TODO print extra data"
 .durationgood:
 	endif
 		clr.w	d1
 		move.b	TrackTempoDivider(a5),d1			; Get dividing timing
+	if __smpsDebug
+		bne.s	.mulisntzero
+		SMPS_assert "SetDuration: Multiplier is $00, TODO print extra data"
+.mulisntzero:
+	endif
 		mulu.w	d1,d5
 	if __smpsDebug
 		move.w	d5,d1
 		clr.b	d1
 		tst.w	d1
-		beq.s	.noU8overflow
-		SMPS_assert "Duration timer multiplication U8 overflow"
-.noU8overflow:
+		beq.s	.mulgood
+		SMPS_assert "SetDuration: Time x Multiplier exceeds $FF, TODO print extra data"
+.mulgood:
 	endif
 		move.b	d5,TrackSavedDuration(a5)			; Save duration
 		move.b	d5,TrackDurationTimeout(a5)			; Save duration timeout
