@@ -1,3 +1,308 @@
+StopAllSound:
+.startaddr	= v_startofvariables
+.endaddr	= v_endofvariables
+.clrLen		= .endaddr-.startaddr
+		lea	.startaddr(a6),a1
+		moveq	#0,d0
+		move.w	#(.clrLen)/4-1,d1
+.clrLoop:	move.l	d0,(a1)+
+		dbf	d1,.clrLoop
+	if (.clrLen)&2
+		move.w	d0,(a1)+
+	endif
+	if (.clrLen)&1
+		move.b	d0,(a1)+
+	endif
+		moveq_	$FF!(1<<v_driverflags.speedsong|1<<v_driverflags.jingle),d0
+		and.b	v_driverflags(a6),d0
+		move.b	d0,v_driverflags(a6)
+.skipram:
+		moveq	#$27,d0				; Timers, FM3 mode
+		moveq	#0,d1				; FM3 normal mode, disable timers
+		bsr.w	WriteFMI
+
+		bsr.w	DACStopSample
+		bsr.w	FMSilenceAll
+		bra.w	PSGSilenceAll
+; ===========================================================================
+StopBGM:
+		lea	v_music_pcm_tracks(a6),a5
+		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d6
+.dacloop:	tst.b	TrackPlaybackControl(a5)
+		bpl.s	.dacnext
+		and.b	#$FF!(1<<_playing),TrackPlaybackControl(a5)
+		bsr.w	DACStopSample
+		moveq	#0,d3
+		move.b	TrackVoiceControl(a5),d3
+		add.b	d3,d3
+		add.w	#((30/2)-$40)*2,d3
+		lea	RAM_SFXChannel(pc),a3
+	if __smpsBFX=1
+		move.w	(a3,d3.w),d0
+		beq.s	.dacgetptr
+		move.l	a6,a3
+		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
+		tst.b	TrackPlaybackControl(a3)
+		bmi.s	.dacgotptr
+.dacgetptr:
+		lea	RAM_BSFXChannel(pc),a3
+	endif
+		move.w	(a3,d3.w),d0
+		beq.s	.dacnext
+		move.l	a6,a3
+		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
+		tst.b	TrackPlaybackControl(a3)
+		bpl.s	.dacnext
+.dacgotptr:
+		or.b	#1<<_resting,TrackPlaybackControl(a3)
+.dacnext:
+		dbf	d6,.dacloop
+
+
+		lea	v_music_fm_tracks(a6),a5
+		moveq	#((v_music_fm_tracks_end-v_music_fm_tracks)/TrackFmSz)-1,d6
+.fmloop:	tst.b	TrackPlaybackControl(a5)
+		bpl.s	.fmnext
+		and.b	#$FF!(1<<_playing|1<<_noattack),TrackPlaybackControl(a5)
+		bsr.w	FMSilence
+		moveq	#0,d3
+		move.b	TrackVoiceControl(a5),d3
+		add.b	d3,d3
+		lea	RAM_SFXChannel(pc),a3
+	if __smpsBFX=1
+		move.w	(a3,d3.w),d0
+		beq.s	.fmgetptr
+		move.l	a6,a3
+		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
+		tst.b	TrackPlaybackControl(a3)
+		bpl.s	.fmgotptr
+.fmgetptr:
+		lea	RAM_BSFXChannel(pc),a3
+	endif
+		move.w	(a3,d3.w),d0
+		beq.s	.fmnext
+		move.l	a6,a3
+		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
+		tst.b	TrackPlaybackControl(a3)
+		bpl.s	.fmnext
+.fmgotptr:
+		or.b	#1<<_resting,TrackPlaybackControl(a3)
+		exg.l	a3,a5
+		bsr.w	SetVoice
+		move.l	a3,a5
+.fmnext:
+		add.w	#TrackFmSz,a5
+		dbf	d6,.fmloop
+
+
+		lea	v_music_psg_tracks(a6),a5
+		moveq	#((v_music_psg_tracks_end-v_music_psg_tracks)/TrackPsgSz)-1,d6
+.psgloop:	tst.b	TrackPlaybackControl(a5)
+		bpl.s	.psgnext
+		and.b	#$FF!(1<<_playing),TrackPlaybackControl(a5)
+		bsr.w	PSGNoteOff
+		moveq	#0,d3
+		move.b	TrackVoiceControl(a5),d3
+		lsr.b	#3,d3
+		lea	RAM_SFXChannel(pc),a3
+	if __smpsBFX=1
+		move.w	(a3,d3.w),d0
+		beq.s	.psggetptr
+		move.l	a6,a3
+		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
+		tst.b	TrackPlaybackControl(a3)
+		bmi.s	.psggotptr
+.psggetptr:
+		lea	RAM_BSFXChannel(pc),a3
+	endif
+		move.w	(a3,d3.w),d0
+		beq.s	.psgnext
+		move.l	a6,a3
+		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
+		tst.b	TrackPlaybackControl(a3)
+		bpl.s	.psgnext
+.psggotptr:
+		or.b	#1<<_resting,TrackPlaybackControl(a3)
+		move.b	TrackVoiceControl(a3),d0
+		cmpi.b	#$E0,d0
+		blo.s	.psgnext
+		cmpi.b	#$E7,d0
+		bhi.s	.psgnext
+		move.b	d0,(psginput).l				; Set noise tone
+.psgnext:
+		add.w	#TrackPsgSz,a5
+		dbf	d6,.psgloop
+
+		rts
+; ===========================================================================
+StopSFX:
+		clr.b	v_sndprio(a6)
+
+		lea	v_sfx_fm_tracks(a6),a5
+		moveq	#((v_sfx_fm_tracks_end-v_sfx_fm_tracks)/TrackFmSz)-1,d6
+.fmloop:	tst.b	TrackPlaybackControl(a5)
+		bpl.s	.fmnext
+		and.b	#$FF!(1<<_playing),TrackPlaybackControl(a5)
+		bsr.w	FMSilence
+		moveq	#0,d3
+		move.b	TrackVoiceControl(a5),d3
+		add.b	d3,d3
+	if __smpsBFX=1
+		lea	RAM_BSFXChannel(pc),a3
+		move.w	(a3,d3.w),d0
+		beq.s	.fmgetptr
+		move.l	a6,a3
+		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
+		tst.b	TrackPlaybackControl(a3)
+	 	bmi.s	.fmgotptr
+.fmgetptr:
+	endif
+		lea	RAM_BGMChannel(pc),a3
+		move.w	(a3,d3.w),d0
+	 	beq.s	.fmnext
+		move.l	a6,a3
+		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
+		tst.b	TrackPlaybackControl(a3)
+	 	bpl.s	.fmnext
+.fmgotptr:
+		or.b	#1<<_resting,TrackPlaybackControl(a3)
+		exg.l	a3,a5
+		bsr.w	SetVoice
+		move.l	a3,a5
+.fmnext:
+		add.w	#TrackFmSz,a5
+		dbf	d6,.fmloop
+
+
+		lea	v_sfx_psg_tracks(a6),a5
+		moveq	#((v_sfx_psg_tracks_end-v_sfx_psg_tracks)/TrackPsgSz)-1,d6
+.psgloop:	tst.b	TrackPlaybackControl(a5)
+		bpl.s	.psgnext
+		and.b	#$FF!(1<<_playing),TrackPlaybackControl(a5)
+		bsr.w	PSGNoteOff
+		moveq	#0,d3
+		move.b	TrackVoiceControl(a5),d3
+		lsr.b	#3,d3
+	if __smpsBFX=1
+		lea	RAM_BSFXChannel(pc),a3
+		move.w	(a3,d3.w),d0
+		beq.s	.psggetptr
+		move.l	a6,a3
+		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
+		tst.b	TrackPlaybackControl(a3)
+		bmi.s	.psggotptr
+.psggetptr:
+	endif
+		lea	RAM_BGMChannel(pc),a3
+		move.w	(a3,d3.w),d0
+		beq.s	.psgnext
+		move.l	a6,a3
+		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
+		tst.b	TrackPlaybackControl(a3)
+		bpl.s	.psgnext
+.psggotptr:
+		or.b	#1<<_resting,TrackPlaybackControl(a3)
+		move.b	TrackVoiceControl(a3),d0
+		cmpi.b	#$E0,d0
+		blo.s	.psgnext
+		cmpi.b	#$E7,d0
+		bhi.s	.psgnext
+		move.b	d0,(psginput).l				; Set noise tone
+.psgnext:
+		add.w	#TrackPsgSz,a5
+		dbf	d6,.psgloop
+
+		rts
+; ===========================================================================
+		if __smpsBFX=1
+StopBSFX:
+		lea	v_spcsfx_fm_tracks(a6),a5
+		moveq	#((v_spcsfx_fm_tracks_end-v_spcsfx_fm_tracks)/TrackFmSz)-1,d6
+.fmloop:	tst.b	TrackPlaybackControl(a5)
+		bpl.s	.fmnext
+		and.b	#$FF!(1<<_playing),TrackPlaybackControl(a5)
+		bsr.w	FMSilence
+		moveq	#0,d3
+		move.b	TrackVoiceControl(a5),d3
+		add.b	d3,d3
+		lea	RAM_SFXChannel(pc),a3
+		move.w	(a3,d3.w),d0
+		beq.s	.fmgetptr
+		move.l	a6,a3
+		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
+		tst.b	TrackPlaybackControl(a3)
+	 	bmi.s	.fmgotptr
+.fmgetptr:
+		lea	RAM_BGMChannel(pc),a3
+		move.w	(a3,d3.w),d0
+	 	beq.s	.fmnext
+		move.l	a6,a3
+		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
+		tst.b	TrackPlaybackControl(a3)
+	 	bpl.s	.fmnext
+.fmgotptr:
+		or.b	#1<<_resting,TrackPlaybackControl(a3)
+		exg.l	a3,a5
+		bsr.w	SetVoice
+		move.l	a3,a5
+.fmnext:
+		add.w	#TrackFmSz,a5
+		dbf	d6,.fmloop
+
+
+		lea	v_spcsfx_psg_tracks(a6),a5
+		moveq	#((v_spcsfx_psg_tracks_end-v_spcsfx_psg_tracks)/TrackPsgSz)-1,d6
+.psgloop:	tst.b	TrackPlaybackControl(a5)
+		bpl.s	.psgnext
+		and.b	#$FF!(1<<_playing),TrackPlaybackControl(a5)
+		bsr.w	PSGNoteOff
+		moveq	#0,d3
+		move.b	TrackVoiceControl(a5),d3
+		lsr.b	#3,d3
+		lea	RAM_SFXChannel(pc),a3
+		move.w	(a3,d3.w),d0
+		beq.s	.psggetptr
+		move.l	a6,a3
+		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
+		tst.b	TrackPlaybackControl(a3)
+		bmi.s	.psggotptr
+.psggetptr:
+		lea	RAM_BGMChannel(pc),a3
+		move.w	(a3,d3.w),d0
+		beq.s	.psgnext
+		move.l	a6,a3
+		add.w	d0,a3
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
+		tst.b	TrackPlaybackControl(a3)
+		bpl.s	.psgnext
+.psggotptr:
+		or.b	#1<<_resting,TrackPlaybackControl(a3)
+		move.b	TrackVoiceControl(a3),d0
+		cmpi.b	#$E0,d0
+		blo.s	.psgnext
+		cmpi.b	#$E7,d0
+		bhi.s	.psgnext
+		move.b	d0,(psginput).l				; Set noise tone
+.psgnext:
+		add.w	#TrackPsgSz,a5
+		dbf	d6,.psgloop
+
+		rts
+		endif
+; ===========================================================================
 ; INPUT
 ; d5.w = duration (expected to be between $01-$7F)
 SetDuration:
@@ -463,7 +768,7 @@ GetVolume:
 		rts
 ; ===========================================================================
 UpdatePanning:
-		btst	#5,v_driverflags(a6)
+		btst	#v_driverflags.mono,v_driverflags(a6)
 		bne.s	.mono
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	.exit
@@ -480,7 +785,7 @@ UpdatePanning:
 .exit:		rts
 ; ---------------------------------------------------------------------------
 DoPanEnv:
-;		btst	#5,v_driverflags(a6)
+;		btst	#v_driverflags.mono,v_driverflags(a6)
 ;		bne.s	.mono
 .mono:		rts
 ; ===========================================================================
@@ -521,17 +826,20 @@ CoordFlag:
 		bra.w	cfJumpToGosub				; cCall
 		bra.w	cfJumpReturn				; cReturn
 		bra.w	cfStopTrack				; cStop
+		bra.w	cfCommunicate				; cCommunicate
 ;		bra.w	cfExtCmd				; cExtCmd
+.lute:
 ; ===========================================================================
 cfExtCmd:
 		move.b	(a4)+,d5
 		add.w	d5,d5
 	if __smpsDebug
 		cmp.w	#.lute-.lut,d5
-		bhs.w	cfxUnk
+		bhs.s	.unk
 	endif
-		move.w	.lut(pc,d5.w),d5
-		jmp	.lut(pc,d5.w)
+		move.w	.lut(pc,d5.w),d0
+		jmp	.lut(pc,d0.w)
+.unk:		SMPS_assert "cfExtCmd: Invalid control flag, TODO print cfx"
 .lut:
 		dc.w  cfxWriteFMIorII-.lut			; cxWriteReg
 		dc.w  cfxWriteFMI-.lut				; cxWriteFM1
@@ -540,9 +848,8 @@ cfExtCmd:
 		dc.w  cfxPanningAMSFMS-.lut			; cxPanAMSFMS
 		dc.w  cfxSetLFO-.lut				; cxSetLFO
 		dc.w  cfxSetLFOSens-.lut			; cxSetLFOSens
-		dc.w  cfxCommunicate-.lut			; cxCommunicate
 		dc.w  cfxFadeInToPrevious-.lut			; cxSongFadeIn
-		dc.w  cfxUnk-.lut				; cxSpecialFM3
+		dc.w  .unk-.lut					; cxSpecialFM3
 		dc.w  cfxRevUp-.lut				; cxRevUp
 		dc.w  cfxRevAddCur-.lut				; cxRevAddCur
 		dc.w  cfxRevReset-.lut				; cxRevReset
@@ -564,9 +871,6 @@ cfExtCmd:
 		dc.w  cfxCommJump-.lut				; cxCommJump
 .lute:
 ; ===========================================================================
-cfxUnk:
-cfUnk:		SMPS_assert "Invalid sequence control flag, TODO print cf"
-; ===========================================================================
 	if __smpsDrum
 cfxDrumModeOn:
 		or.b	#1<<_drummode,TrackPlaybackControl(a5)
@@ -575,8 +879,8 @@ cfxDrumModeOff:
 		and.b	#(1<<_drummode)!$FF,TrackPlaybackControl(a5)
 		rts
 	else
-cfxDrumModeOn:	SMPS_assert "cfxDrumModeOn: __smpsDrum was disabled"
-cfxDrumModeOff:	SMPS_assert "cfxDrumModeOff: __smpsDrum was disabled"
+cfxDrumModeOn:	SMPS_assert "cfxDrumModeOn: __smpsDrum setting was disabled"
+cfxDrumModeOff:	SMPS_assert "cfxDrumModeOff: __smpsDrum setting was disabled"
 	endif
 ; ===========================================================================
 ; set the global modulation and channels sensitivity
@@ -590,7 +894,7 @@ cfxSetLFO:
 		and.b	TrackAMSFMSPan(a5),d1
 		or.b	(a4)+,d1
 		move.b	d1,TrackAMSFMSPan(a5)
-		btst	#5,v_driverflags(a6)
+		btst	#v_driverflags.mono,v_driverflags(a6)
 		beq.s	.stereo
 		or.b	#%11000000,d1
 .stereo:
@@ -605,7 +909,7 @@ cfxSetLFOSens:
 		and.b	TrackAMSFMSPan(a5),d1
 		or.b	(a4)+,d1
 		move.b	d1,TrackAMSFMSPan(a5)
-		btst	#5,v_driverflags(a6)
+		btst	#v_driverflags.mono,v_driverflags(a6)
 		beq.s	.stereo
 		or.b	#%11000000,d1
 .stereo:
@@ -637,7 +941,7 @@ cfxSetPanAMSFMS:
 		move.b	d1,TrackAMSFMSPan(a5)		; Save pan value
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	.exit
-		btst	#5,v_driverflags(a6)
+		btst	#v_driverflags.mono,v_driverflags(a6)
 		bne.s	.mono
 		add.b	d2,d2
 		bmi.s	.pcm
@@ -1116,7 +1420,7 @@ cfxWriteFMII:
 		move.b	(a4)+,d1
 		bra.w	WriteFMII
 ; ===========================================================================
-cfxCommunicate:
+cfCommunicate:
 		moveq	#0,d1
 		move.b	(a4)+,d1
 		if __smpsDebug=1
@@ -1125,7 +1429,7 @@ cfxCommunicate:
 		endif
 		move.b	(a4)+,v_communication(a6,d1.w)
 		rts
-.index:		SMPS_assert "cfxCommunicate: Index is too large"
+.index:		SMPS_assert "cfCommunicate: Index is too large"
 ; ===========================================================================
 cfxStopFM:
 		cmp.b	#$40,TrackVoiceControl(a5)
@@ -1224,7 +1528,7 @@ cfStopTrack:
 		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
 		move.b	TrackAMSFMSPan(a5),d1
-		btst	#5,v_driverflags(a6)
+		btst	#v_driverflags.mono,v_driverflags(a6)
 		beq.s	.stereo
 		or.b	#$C0,d1
 .stereo:	bsr.w	DACSetPan
@@ -1263,7 +1567,7 @@ cfxFadeInToPrevious:
 	if __smpsJingle=0
 		SMPS_assert "smpsFade: __smpsJingle is disabled"
 	else
-		bclr	#0,v_driverflags(a6)			; clear jingle flag
+		bclr	#v_driverflags.jingle,v_driverflags(a6)
 		bne.s	.valid
 		SMPS_assert "smpsFade: That was not a jingle track."
 .valid:

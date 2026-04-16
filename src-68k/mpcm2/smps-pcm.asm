@@ -496,7 +496,7 @@ DACRestoreFromSFX:
 		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
 		move.b	TrackAMSFMSPan(a5),d1
-		btst	#5,v_driverflags(a6)
+		btst	#v_driverflags.mono,v_driverflags(a6)
 		beq.s	.stereo
 		or.b	#$C0,d1
 .stereo:	bra.w	DACSetPan

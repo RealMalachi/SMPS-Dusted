@@ -11,7 +11,7 @@ SMPS_Start:
 	dc.w SMPS_UVB_FM-.s
 	dc.w SMPS_VolEnvIndex-.s
 	dc.w SMPS_ModEnvIndex-.s
-	dc.l SMPS_SampleTable-.s
+	dc.w SMPS_SampleTable-.s
 	dc.w SMPS_FmDrumTable-.s
 	dc.w SMPS_PsgDrumTable-.s
 	dc.w SMPS_PcmDrumTable-.s

@@ -36,6 +36,9 @@ fmwrite macro ymstatreg,ymareg,ymdreg,ymregnum
 	endif
 	; NOTE: have a 12 cycle delay before the next fm write attempt
 	endm
+updfifo macro
+	SMPS_assert "MegaPCM2 has no FIFO"
+	endm
 ; ------------------------------------------------------------------------------
 ; Definitions for sample table
 ; ------------------------------------------------------------------------------

@@ -27,9 +27,10 @@ InitDriver:
 		move.b	d1,(a2)+
 	endif
 		move.w	#$7AD4,v_random(a1)
-		move.l	d0,-(sp)
-		bsr.w	SetDriverDataPointer
-		move.l	(sp)+,d0
+		move.l	a0,d1
+		move.w	d1,v_dataptr+2(a1)
+		swap	d1
+		move.b	d1,v_dataptr+1(a1)
 		cmp.w	#__smpsDataVer,drvdata.version(a0)
 		beq.s	.okayitsfine
 		SMPS_assert "Driver data version type doesn't match the drivers expected version type, TODO: print both"
@@ -37,17 +38,19 @@ InitDriver:
 
 		bsr.s	Detect_Firecore
 		seq	d1
-		and.w	#%01010000,d1		; set firecore detect on and SSG-EG off
+		and.w	#1<<v_driverflags.firecore|1<<v_driverflags.ssgoff,d1
 		moveq	#1,d2			; 0 = NTSC, 1 = PAL
 		and.w	(vdpctrl).l,d2
-		ror.b	#1,d2			; move to bit 7
+		ror.b	#8-v_driverflags.pal,d2		; move to appropriate bit (should be 7)
 		or.b	d2,d1
 		move.b	d1,v_driverflags(a1)
 
 		move.l	a1,a6
 		bsr.w	DACInitDriver
 		move.l	v_dataptr(a6),a0
-		adda.l	drvdata.uvbdac(a0),a0
+		moveq	#0,d1
+		move.w	drvdata.uvbdac(a0),d1
+		add.l	d1,a0
 		bsr.w	DACLoadBank
 
 		bra.w	StopAllSound

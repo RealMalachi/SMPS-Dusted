@@ -134,7 +134,7 @@ Mus89_Special_Stage_Call01:
 
 ; PSG3 Data
 Mus89_Special_Stage_PSG3:
-	dc.b	$02
+	dc.b	nRst, $02
 
 ; PSG1 Data
 Mus89_Special_Stage_PSG1:

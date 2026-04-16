@@ -64,10 +64,15 @@ FMDoNext:
 	endif
 ; ===========================================================================
 FMSetFreq:
+	if __smpsFMTable=0
 ; Unlike PSGSetFreq, this uses a 1-based index. This is a long standing oddity with SMPS-68K
-; If note nC0 is played and transpose is -1, it can reach the last frequency
+; If note nC0 is played and transpose is -1, it can reach the hidden nB-1
 		subi.b	#$80,d5					; Make it a 1-based index
 		beq.s	.rest
+	else
+		subi.b	#$81,d5
+		bcs.s	.rest
+	endif
 		add.b	TrackTranspose(a5),d5			; Add track transposition
 	if __smpsDebug
 		cmp.w	#12*8,d5
@@ -81,25 +86,19 @@ FMSetFreq:
 		bra.w	FMNoteOff
 .assert:	SMPS_assert "FMSetFreq: invalid frequency, TODO: print freq id"
 ; ===========================================================================
-; FM Note Values: b-0 to a#8
-;
-; Each row is an octave, starting with B and ending with A-sharp/B-flat.
-; Notably, this differs from the PSG frequency table, which starts with C and
-; ends with B. This is caused by 'FMSetFreq' subtracting $80 from the note
-; instead of $81, meaning that the first frequency in the table ironically
-; corresponds to the 'rest' note. The only way to use this frequency in a
-; real note is to transpose the channel to a lower semitone.
+; FM Note Values:
 ;
 ; Rather than use a complete lookup table, other SMPS drivers such as
 ; Sonic 3's compute the octave, and only store a single octave's worth of
 ; notes in the table.
-;
-; Invalid transposition values will cause this table to be overflowed,
-; resulting in garbage data being used as frequency values. In drivers that
-; compute the octave instead, invalid transposition values merely cause the
-; notes to wrap-around (the note below the lowest note will be the highest
-; note). It's important to keep this in mind when porting buggy songs.
+; Said computation caps invalid notes to the highest octave (val%12+octave8),
+; such as the note below the lowest note becoming the highest note, whereas
+; with the table it goes out of bounds
+; This is important to keep this in mind when porting buggy songs.
+; ---------------------------------------------------------------------------
 FMFrequencies:
+	if __smpsFMTable=0
+; b-0 to a#8
 	dc.w $025E,$0284,$02AB,$02D3,$02FE,$032D,$035C,$038F,$03C5,$03FF,$043C,$047C
 	dc.w $0A5E,$0A84,$0AAB,$0AD3,$0AFE,$0B2D,$0B5C,$0B8F,$0BC5,$0BFF,$0C3C,$0C7C
 	dc.w $125E,$1284,$12AB,$12D3,$12FE,$132D,$135C,$138F,$13C5,$13FF,$143C,$147C
@@ -108,6 +107,17 @@ FMFrequencies:
 	dc.w $2A5E,$2A84,$2AAB,$2AD3,$2AFE,$2B2D,$2B5C,$2B8F,$2BC5,$2BFF,$2C3C,$2C7C
 	dc.w $325E,$3284,$32AB,$32D3,$32FE,$332D,$335C,$338F,$33C5,$33FF,$343C,$347C
 	dc.w $3A5E,$3A84,$3AAB,$3AD3,$3AFE,$3B2D,$3B5C,$3B8F,$3BC5,$3BFF,$3C3C,$3C7C
+	else
+; c-0 to a-6
+	dc.w $0284,$02AB,$02D3,$02FE,$032D,$035C,$038F,$03C5,$03FF,$043C,$047C,$04C0
+	dc.w $0A84,$0AAB,$0AD3,$0AFE,$0B2D,$0B5C,$0B8F,$0BC5,$0BFF,$0C3C,$0C7C,$0CC0
+	dc.w $1284,$12AB,$12D3,$12FE,$132D,$135C,$138F,$13C5,$13FF,$143C,$147C,$14C0
+	dc.w $1A84,$1AAB,$1AD3,$1AFE,$1B2D,$1B5C,$1B8F,$1BC5,$1BFF,$1C3C,$1C7C,$1CC0
+	dc.w $2284,$22AB,$22D3,$22FE,$232D,$235C,$238F,$23C5,$23FF,$243C,$247C,$24C0
+	dc.w $2A84,$2AAB,$2AD3,$2AFE,$2B2D,$2B5C,$2B8F,$2BC5,$2BFF,$2C3C,$2C7C,$2CC0
+	dc.w $3284,$32AB,$32D3,$32FE,$332D,$335C,$338F,$33C5,$33FF,$343C,$347C,$34C0
+	dc.w $3A84,$3AAB,$3AD3,$3AFE,$3B2D,$3B5C,$3B8F,$3BC5,$3BFF,$3C3C,$3C7C,$3CC0
+	endif
 FMFrequenciesEnd:
 ; ===========================================================================
 FMUpdateFreq:
@@ -204,7 +214,7 @@ WriteFMchannel_exit:
 SetVoicePan:
 		moveq_	$B4,d0					; Register for AMS/FMS/Panning
 		move.b	TrackAMSFMSPan(a5),d1			; Value to send
-		btst	#5,v_driverflags(a6)
+		btst	#v_driverflags.mono,v_driverflags(a6)
 		beq.s	.stereo
 		or.b	#$C0,d1
 .stereo:	bsr.w	WriteFMIorII
@@ -224,9 +234,9 @@ SetVoice:
 ; inlined WriteFMIorIIMain
 ; TODO: calculating the FM channel once and reusing that would be nice, especially for PCM players with an FM buffer
 		move.b	TrackVoiceControl(a5),d2	; Get voice control bits
-		subq.w	#1<<2,d2			; Is this bound for part I or II? (also clear chip toggle)
+		subq.b	#1<<2,d2			; Is this bound for part I or II? (also clear chip toggle)
 		bcc.s	.fm2				; Branch if for part II
-		addq.w	#1<<2,d2
+		addq.b	#1<<2,d2
 		if __smpsDebug
 		cmp.b	#2,d2
 		bls.s	.ass1
@@ -249,7 +259,7 @@ SetVoice:
 		dbf	d3,.loop
 .loopend:
 		fmstop	a0
-		btst	#4,v_driverflags(a6)		; if SSG-EG is disabled, uhh, disable it.
+		btst	#v_driverflags.ssgoff,v_driverflags(a6)		; if SSG-EG is disabled, uhh, disable it.
 		beq.s	SendVoiceSSG.gotptr
 		rts
 ; volume is handled later by DoVolEnv and UpdateVolume
@@ -269,7 +279,7 @@ SendVoiceSSG:
 		move.b	(a1)+,-(sp)
 		move.w	(sp)+,d4
 		move.b	(a1)+,d4
-		btst	#4,v_driverflags(a6)		; if SSG-EG is disabled, uhh, disable it.
+		btst	#v_driverflags.ssgoff,v_driverflags(a6)		; if SSG-EG is disabled, uhh, disable it.
 		beq.s	.firecunt
 		moveq	#0,d4
 .firecunt:
@@ -365,9 +375,9 @@ WriteFMIorIIMain:
 WriteFMIorII:
 		fmstart	a0
 		move.b	TrackVoiceControl(a5),d2	; Get voice control bits
-		subq.w	#1<<2,d2			; Is this bound for part I or II? (also clear chip toggle)
+		subq.b	#1<<2,d2			; Is this bound for part I or II? (also clear chip toggle)
 		bcc.s	.fm2				; Branch if for part II
-		addq.w	#1<<2,d2
+		addq.b	#1<<2,d2
 		if __smpsDebug
 		cmp.b	#2,d2
 		bls.s	.ass1

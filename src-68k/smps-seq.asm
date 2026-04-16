@@ -18,18 +18,15 @@ HandleRNG:
 		add.w	d0,v_random(a6)
 
 HandlePause:
-		moveq_	%00001100,d0
+		moveq_	1<<v_driverflags.dopause|1<<v_driverflags.paused,d0
 		and.b	v_driverflags(a6),d0
-		jmp	.lut(pc,d0.w)
+		jmp	.lut(pc,d0.w)		; assumed .paused is b2 and .dopause is b3
 .lut:		bra.w	.playmusic
-		bra.w	.pausemusic
-		bra.w	.pausingmusic
-		bra.w	.unpausemusic
-.pausemusic:
-		moveq_	%11110011,d0		; set to paused
-		and.b	v_driverflags(a6),d0
-		or.b	#2<<2,d0
-		move.b	d0,v_driverflags(a6)
+		bra.w	.resumingmusic
+		bra.w	.pausedmusic
+	;	bra.w	.pausingmusic
+.pausingmusic:
+		bclr	#v_driverflags.dopause,v_driverflags(a6)
 
 		moveq_	$B4,d0			; Command to set AMS/FMS/panning
 		moveq	#0,d1			; No panning, AMS or FMS
@@ -61,7 +58,7 @@ HandlePause:
 		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
 		move.b	TrackAMSFMSPan(a5),d1		; Get value from track RAM
-		btst	#5,v_driverflags(a6)
+		btst	#v_driverflags.mono,v_driverflags(a6)
 		beq.s	.unp_pcmstereo
 		or.b	#$C0,d1				; force mono
 .unp_pcmstereo:	bsr.w	DACSetPan
@@ -75,16 +72,16 @@ HandlePause:
 		bne.s	.unp_fmnext
 		moveq_	$B4,d0				; Command to set AMS/FMS/panning
 		move.b	TrackAMSFMSPan(a5),d1		; Get value from track RAM
-		btst	#5,v_driverflags(a6)
+		btst	#v_driverflags.mono,v_driverflags(a6)
 		beq.s	.unp_fmstereo
 		or.b	#$C0,d1				; force mono
 .unp_fmstereo:	bsr.w	WriteFMIorII
 .unp_fmnext:	lea	TrackFmSz(a5),a5
 		dbf	d7,.unp_fmloop
-.pausingmusic:
+.pausedmusic:
 		rts
-.unpausemusic:
-		and.b	#%11110011,v_driverflags(a6)	; set to playing
+.resumingmusic:
+		bclr	#v_driverflags.dopause,v_driverflags(a6)
 
 		lea	v_music_pcm_tracks(a6),a5
 		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d7
@@ -180,7 +177,7 @@ HandleCheapPalFix:
 ; SFXs are not skipped so they don't sound off
 HandleSoundQueueEnd:
 	if __smpsJingle=1
-		btst	#0,v_driverflags(a6)
+		btst	#v_driverflags.jingle,v_driverflags(a6)
 		bne.s	.skipsfxs
 	endif
 		lea	v_sfx_fm_tracks(a6),a5
@@ -225,9 +222,10 @@ TempoWait:
 		and.w	d2,d1
 		add.w	d1,d1
 		add.w	d1,d1
-		moveq	#1<<1|1<<0,d2			; if speedup is on and 1up is off, increase the tempo if possible
+; if speedup is on and 1up is off, increase the tempo if possible
+		moveq	#1<<v_driverflags.speedsong|1<<v_driverflags.jingle,d2
 		and.b	v_driverflags(a6),d2
-		cmp.b	#1<<1|0<<0,d2
+		cmp.b	#1<<v_driverflags.speedsong|0<<v_driverflags.jingle,d2
 		bne.s	.nospeedalgo
 		move.w	d0,d2				; TODO: good math
 		lsr.w	#1,d2
@@ -280,6 +278,84 @@ TempoWait:
 		rts
 .error:
 		SMPS_assert "Improper tempo algorithm type, TODO print the algo"
+; ===========================================================================
+DoFadeOut_Stop:
+		bra.w	StopAllSound
+DoFadeOut:
+		subq.b	#1,v_fadeout_counter(a6)	; Update fade counter
+		beq.s	DoFadeOut_Stop			; Branch if fade is done
+		moveq	#3,d0				; update every 4 frames
+		and.b	v_fadeout_counter(a6),d0
+		bne.s	.skipthisframe
+
+		lea	v_music_pcm_tracks(a6),a5
+		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d7
+.dacloop:	tst.b	TrackPlaybackControl(a5)	; Is track playing?
+		bpl.s	.nextdac			; Branch if not
+		addq.b	#1,TrackVolume(a5)
+		bpl.s	.senddacvol
+		and.b	#$FF!(1<<_playing),TrackPlaybackControl(a5)
+		bsr.w	DACStopSample
+		bra.s	.nextdac
+.senddacvol:	move.b	TrackVolume(a5),d0
+		lsr.b	#3,d0
+		bsr.w	SetVolume
+.nextdac:	add.w	#TrackDacSz,a5
+		dbf	d7,.dacloop
+
+		lea	v_music_fm_tracks(a6),a5
+		moveq	#((v_music_fm_tracks_end-v_music_fm_tracks)/TrackFmSz)-1,d7
+.fmloop:	tst.b	TrackPlaybackControl(a5)	; Is track playing?
+		bpl.s	.nextfm				; Branch if not
+		addq.b	#1,TrackVolume(a5)		; Increase volume attenuation
+		bpl.s	.sendfmtl			; Branch if still positive
+		and.b	#$FF!(1<<_playing),TrackPlaybackControl(a5)
+		bra.s	.nextfm
+.sendfmtl:	bsr.w	SetVolume
+.nextfm:	add.w	#TrackFmSz,a5
+		dbf	d7,.fmloop
+
+		lea	v_music_psg_tracks(a6),a5
+		moveq	#((v_music_psg_tracks_end-v_music_psg_tracks)/TrackPsgSz)-1,d7
+.psgloop:	tst.b	TrackPlaybackControl(a5)	; Is track playing?
+		bpl.s	.nextpsg			; branch if not
+		addq.b	#1,TrackVolume(a5)		; Increase volume attenuation
+		bpl.s	.sendpsgvol
+		and.b	#$FF!(1<<_playing),TrackPlaybackControl(a5)
+		bra.s	.nextpsg
+.sendpsgvol:	bsr.w	SetVolume
+.nextpsg:	add.w	#TrackPsgSz,a5
+		dbf	d7,.psgloop
+
+.skipthisframe:
+		rts
+; ---------------------------------------------------------------------------
+DoFadeIn:
+;		tst.b	v_fadein_counter(a6)		; Is fade done?
+;		beq.s	.fadedone			; Branch if yes
+		subq.b	#1,v_fadein_counter(a6)		; Update fade counter
+
+		lea	v_music_pcm_tracks(a6),a5
+		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d7
+		moveq	#TrackDacSz,d6
+		bsr.s	.fade
+
+		lea	v_music_fm_tracks(a6),a5
+		moveq	#((v_music_fm_tracks_end-v_music_fm_tracks)/TrackFmSz)-1,d7
+		moveq	#TrackFmSz,d6
+		bsr.s	.fade
+
+		lea	v_music_psg_tracks(a6),a5
+		moveq	#((v_music_psg_tracks_end-v_music_psg_tracks)/TrackPsgSz)-1,d7
+		moveq	#TrackPsgSz,d6
+;		bsr.s	.fade
+.fade:
+.loop:		tst.b	TrackPlaybackControl(a5)
+		bpl.s	.next
+		bsr.w	SetVolume
+.next:		add.w	d6,a5
+		dbf	d7,.loop
+		rts
 ; ===========================================================================
 ; Pointers to RAM addresses for cross-referencing data between channels
 ; ---------------------------------------------------------------------------

@@ -180,7 +180,7 @@ drvdata:
 .uvbfm:		ds.w 1
 .uvbvol:	ds.w 1
 .uvbmod:	ds.w 1
-.uvbdac:	ds.l 1
+.uvbdac:	ds.w 1
 .fmdrum:	ds.w 1
 .psgdrum:	ds.w 1
 .pcmdrum:	ds.w 1
@@ -266,20 +266,20 @@ TrackFmSz:			ds.b 0
 	phase 0
 v_startofram:			ds.b 0
 
-v_driverflags:			;ds.b 1	; RFMS PPSU
-; TODO: proper bitfield labels
-; R = Refresh rate flag, 0 = 60hz, 1 = 50hz
-; F = Firecore flag, achieves better sound quality on the AtGames Firecore
-; M = Mono, 0 = Stereo, 1 = Mono
-; S = SSG-EG, 0 enables it, 1 disables it. Disabled by default on AtGames
-; P = pause flag, 0 = play, 1 = pausing, 2 = paused, 3 = resuming
-; S = Speedup
-; U = 1-up playing
+v_driverflags:			;ds.b 1
+.pal				equ 7	; must be 7
+.firecore			equ 6
+.mono				equ 5
+.ssgoff				equ 4
+.paused				equ 3	; must be 3
+.dopause			equ 2	; must be 2
+.speedsong			equ 1
+.jingle				equ 0
+
 v_dataptr:			ds.l 1
 
-v_driverflags2:			ds.b 1	; W... ....
-; TODO: proper bitfield labels
-; W = water muffle, 0 = no muffle, 1 = muffle
+v_driverflags2:			ds.b 1
+.muffle				equ 7	; must be 7
 
 v_communication:		ds.b __smpsCommBytes	; generally used for syncing gameplay with music
 v_communication_end:

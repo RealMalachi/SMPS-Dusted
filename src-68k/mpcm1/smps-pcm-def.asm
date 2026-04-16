@@ -24,6 +24,9 @@ fmwrite macro ymstatreg,ymareg,ymdreg,ymregnum
 	endif
 	; NOTE: have a 12 cycle delay before the next fm write attempt
 	endm
+updfifo macro
+	SMPS_assert "MegaPCM1 has no FIFO"
+	endm
 ; ---------------------------------------------------------------------------
 ; PP.. .TLS
 FLAGS_SFX:		equ 1<<0

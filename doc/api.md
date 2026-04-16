@@ -64,6 +64,8 @@ relative address: +12
 input:
 - a1 = driver ram
 
+trashes: ?
+
 description:
 While relevant for the Pico/32X/arcades, this will cause an assert on the base Mega Drive as a warning that you're wasting performance.
 
@@ -78,13 +80,20 @@ relative address: +16
 
 input:
 - a1 = driver ram
+- d1.b = array index
 
 output:
-- d0.b = communication byte
+- d0.b = communicated byte
+
+trashes: d1
+
+description:
+Reads a byte within an array that both the driver and the game have access to. The size of the array depends on the `__smpsCommBytes` setting
 
 example:
 ```
 	lea	(v_soundram).w,a1
+	moveq	#0,d1
 	jsr	(SMPS_ReadComm).l
 	; do whatever you want with d0.b
 ```
@@ -94,37 +103,54 @@ relative address: +20
 
 input:
 - a1 = driver ram
-- d0.b = communication byte
+- d0.b = communicating byte
+- d1.b = array index
+
+trashes: d1
+
+description:
+Writes a byte within an array that both the driver and the game have access to. The size of the array depends on the `__smpsCommBytes` setting
 
 example:
 ```
 	moveq	#0,d0
 	lea	(v_soundram).w,a1
+	moveq	#0,d1
 	jsr	(SMPS_WriteComm).l
 ```
 
-## PauseDriver
+## GuardDriver
 relative address: +24
 
 input:
 - a1 = driver ram
 
+trashes: ?
+
+description:
+Enables driver hardware protections if applicable.
+
 example:
 ```
 	lea	(v_soundram).w,a1
-	jsr	(SMPS_PauseDriver).l
+	jsr	(SMPS_GuardDriver).l
 ```
 
-## ResumeDriver
+## UnguardDriver
 relative address: +28
 
 input:
 - a1 = driver ram
 
+trashes: ?
+
+description:
+Disables driver hardware protections if applicable.
+
 example:
 ```
 	lea	(v_soundram).w,a1
-	jsr	(SMPS_ResumeDriver).l
+	jsr	(SMPS_UnguardDriver).l
 ```
 
 ## SetupPianoRoll
@@ -137,27 +163,42 @@ input:
 trashes: d0-a6
 
 description:
+Updates a ram buffer with data that can be used to render a sound test screen. The buffer size is defined as `smpspianoramsize` within the generated def files.
 
 example:
 ```
+; ram allocation
+v_pianoram:		rs.b smpspianoramsize
+...
+; api call
 	lea	(v_pianoram).w,a0
 	lea	(v_soundram).w,a1
 	jsr	(SMPS_SetupPianoRoll).l
 ```
 
-## SetDriverDataPointer
+## RunMiscCommand
 relative address: +36
 
 input:
-- a0 = driver data address
 - a1 = driver ram
+- d0.w = command
+- other inputs depend on the command
+
+trashes: ?
 
 description:
-Changes the driver data pointer which is otherwise setup during InitDriver
+Handle smaller and less common commands that didn't deserve their own dedicated API call
+
+| command id | description | parameters |
+| - | - | - |
+| 0 | PauseDriver | N/A |
+| 1 | ResumeDriver | N/A |
+| 2 | SetBgmTempo | d1.w = new tempo |
 
 example:
 ```
-	lea	(SMPS_DriverData).l,a0
 	lea	(v_soundram).w,a1
+	moveq	#2,d0			; SetBgmTempo
+	move.w	#$8000,d1
 	jsr	(SMPS_InitDriver).l
 ```

@@ -128,7 +128,12 @@ cCall			ds.b 1		; cfJumpToGosub
 cReturn			ds.b 1		; cfJumpReturn
 cStop			ds.b 1		; cfStopTrack
 
+cCommunicate		ds.b 1		; cfCommunicate
+
 cExtCmd			ds.b 1		; cfExtendedCommands
+	if (*)<>$100
+	fatal "SMPS standard control flags aren't fully used, make good use of them"
+	endif
 	dephase
 
 	phase 0
@@ -139,7 +144,6 @@ cxPanAuto		ds.b 1		; cfxUnk
 cxPanAMSFMS		ds.b 1		; cfxPanningAMSFMS
 cxSetLFO		ds.b 1		; cfxSetLFO
 cxSetLFOSens		ds.b 1		; cfxSetLFOSens
-cxCommunicate		ds.b 1		; cfxCommunicate
 cxSongFadeIn		ds.b 1		; cfxFadeInToPrevious
 cxSpecialFM3		ds.b 1		; cfxUnk
 cxRevUp			ds.b 1		; cfxRevUp
@@ -163,6 +167,7 @@ cxDrumModeOff		ds.b 1		; cfxDrumModeOff
 cxCommJump		ds.b 1		; cfxCommJump
 ;cxSetFreqMode1		ds.b 1		; cfxSetFreqMode1
 ;cxSetFreqMode2		ds.b 1		; cfxSetFreqMode2
+
 	dephase
 ; ---------------------------------------------------------------------------
 ; Conversion macros and functions
@@ -422,7 +427,7 @@ smpsDetune macro val
 
 ; Set communication byte, using index 0 if it isn't defined
 smpsComm macro val,index
-	dc.b	cExtCmd,cxCommunicate,index+0,val
+	dc.b	cCommunicate,index+0,val
 	endm
 ; Jump if the condition is zero
 smpsCommJump macro loc,index
@@ -652,7 +657,7 @@ smpsConditionalJump macro index,loc
 	elseif (index>3) && (MOMPASS=1)
 	warning "it's not advised to have more then 4 loop indexes"
 	endif
-	dc.b	cxConditionalJump,index
+	dc.b	cExtCmd,cxConditionalJump,index
 	CheckedChannelJump loc
 	endm
 ; If the same sound ID gets queued multiple times, perform a jump
@@ -673,10 +678,6 @@ smpsReturn macro val
 
 ; End of channel
 smpsStop macro
-	dc.b	cStop
-	endm
-; Stops background SFX channel
-smpsStopSpecial macro
 	dc.b	cStop
 	endm
 ; Silences FM channel then stops
@@ -793,6 +794,10 @@ smpsWeirdD1LRR macro
 	endm
 smpsSetvoice macro
 	smpsFMvoice ALLARGS
+	endm
+; Stops background SFX channel
+smpsStopSpecial macro
+	smpsStop
 	endm
 smpsPSGAlterVolS2 macro vol
 	smpsPSGAlterVol vol

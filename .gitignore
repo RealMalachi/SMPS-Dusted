@@ -6,6 +6,8 @@ desktop.ini
 /*.lst
 _out/
 _test/
+smps-def.asm
+smps-def-debug.asm
 smps-drv.bin
 smps-drv-debug.bin
 smps-snd.bin

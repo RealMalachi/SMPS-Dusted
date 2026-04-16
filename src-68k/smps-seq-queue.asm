@@ -136,10 +136,10 @@ Cmd_SetBitFlag:
 .ack:		move.w	(a2)+,d0
 		jmp	.table(pc,d0.w)
 .table:
-		dc.w 1<<13|v_driverflags,Cmd_SetBitFlag_Speed-.table	; 0 ; tempo speedup
-		dc.w 5<<13|v_driverflags,Cmd_SetBitFlag_Mono-.table	; 2 ; stereo/mono
-		dc.w 4<<13|v_driverflags,Cmd_SetBitFlag_SSG-.table	; 4 ; SSG-EG
-		dc.w 7<<13|v_driverflags2,Cmd_SetBitFlag_Muffle-.table	; 6 ; water muffle
+		dc.w (v_driverflags.speedsong)<<13|v_driverflags,Cmd_SetBitFlag_Speed-.table	; 0 ; tempo speedup
+		dc.w (v_driverflags.mono)<<13|v_driverflags,Cmd_SetBitFlag_Mono-.table		; 2 ; stereo/mono
+		dc.w (v_driverflags.ssgoff)<<13|v_driverflags,Cmd_SetBitFlag_SSG-.table		; 4 ; SSG-EG
+		dc.w 7<<13|v_driverflags2,Cmd_SetBitFlag_Muffle-.table				; 6 ; water muffle
 .tend:
 
 Cmd_SetBitFlag_Speed:
@@ -166,7 +166,7 @@ Cmd_SetBitFlag_Mono:
 		bne.s	.fmnext
 		moveq_	fmreg.panamspms,d0
 		move.b	TrackAMSFMSPan(a5),d1
-		btst	#5,v_driverflags(a6)
+		btst	#v_driverflags.mono,v_driverflags(a6)
 		beq.s	.fmstereo
 		or.b	#$C0,d1				; force mono
 .fmstereo:	bsr.w	WriteFMIorIIMain
@@ -181,7 +181,7 @@ Cmd_SetBitFlag_Mono:
 		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
 		move.b	TrackAMSFMSPan(a5),d1
-		btst	#5,v_driverflags(a6)
+		btst	#v_driverflags.mono,v_driverflags(a6)
 		beq.s	.dacstereo
 		or.b	#$C0,d1				; force mono
 .dacstereo:	bsr.w	DACSetPan
@@ -279,7 +279,7 @@ queue_modenvptr	ds.l 1
 	endif
 queue_volenvptr	ds.l 1
 queue_fminstptr	ds.l 1
-queue_stacksize	;ds.l 1
+queue_stacksize	ds.l 0
 	dephase
 	!org -
 ; ---------------------------------------------------------------------------
@@ -304,7 +304,7 @@ Sound_PlayBGM:
 	if __smpsJingle
 		btst	#7,d6				; bit 23 is the "1up" song flag
 		beq.s	.bgmnot1up
-		bset	#0,v_driverflags(a6)		; if 1up is already playing, branch
+		bset	#v_driverflags.jingle,v_driverflags(a6)		; if 1up is already playing, branch
 		bne.s	.bgm_loadJingle
 
 		moveq_	$FF!(1<<_sfxoverride),d1
@@ -334,7 +334,7 @@ Sound_PlayBGM:
 		endif
 		bra.s	.bgm_loadJingle
 .bgmnot1up:
-		bclr	#0,v_driverflags(a6)
+		bclr	#v_driverflags.jingle,v_driverflags(a6)
 		beq.s	.bgm_loadMusic
 		lea	v_1up_ram_copy(a6),a0
 		moveq	#0,d0
@@ -464,6 +464,7 @@ Sound_PlayBGM:
 		bcs.s	.dacallon
 .dacmute:	and.b	#1<<_sfxoverride,TrackPlaybackControl(a5)
 		move.b	(a2)+,TrackVoiceControl(a5)		; Voice control bits
+		addq.w	#1,a2
 		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
 		bsr.w	DACStopSample				; TODO: all this doesn't check for SFX PCM
@@ -530,6 +531,7 @@ Sound_PlayBGM:
 		bcs.s	.fmallon
 .fmmute:	and.b	#1<<_sfxoverride,TrackPlaybackControl(a5)
 		move.b	(a2)+,TrackVoiceControl(a5)		; Voice control bits
+		addq.w	#1,a2
 		bsr.w	FMSilence
 		add.w	#TrackFmSz,a5
 		dbf	d7,.fmmute
@@ -592,6 +594,7 @@ Sound_PlayBGM:
 		bcs.s	.psgallon
 .psgmute:	and.b	#1<<_sfxoverride,TrackPlaybackControl(a5)
 		move.b	(a2)+,TrackVoiceControl(a5)
+		addq.w	#1,a2
 		bsr.w	PSGNoteOff
 		add.w	#TrackPsgSz,a5
 		dbf	d7,.psgmute
@@ -614,7 +617,7 @@ Sound_PlaySFX_SameCSFX:
 		rts
 Sound_PlaySFX:
 	if __smpsJingle
-		btst	#0,v_driverflags(a6)	; Is 1-up playing?
+		btst	#v_driverflags.jingle,v_driverflags(a6)	; Is 1-up playing?
 		bne.s	Sound_PlaySFX_NoInit	; Exit if so
 	endif
 		move.l	v_dataptr(a6),a3

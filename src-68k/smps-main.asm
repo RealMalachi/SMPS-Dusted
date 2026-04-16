@@ -8,13 +8,11 @@ APILUT:
 		bra.w	UpdateFIFO				; 12 ;
 		bra.w	ReadComm				; 16 ; d0.b = comm, d1.b = index
 		bra.w	WriteComm				; 20 ; d0.b = comm, d1.b = index
-		bra.w	PauseDriver				; 24 ;
-		bra.w	ResumeDriver				; 28 ;
+		bra.w	GuardDriver				; 24 ;
+		bra.w	UnguardDriver				; 28 ;
 		bra.w	SetupPianoRoll				; 32 ; a0 = piano ram
-		bra.w	SetDriverDataPointer			; 36 ; a0 = driver data
-		bra.w	DACGuard				; 40 ;
-		bra.w	DACUnguard				; 44 ;
-;		bra.w	PlayCDDA				; 48 ; d0.b = track ID
+		bra.w	RunMiscCommand				; 36 ; d0.w = command, other inputs depend on the command
+;		bra.w	PlayCDDA				; ?? ; d0.b = track ID
 		rept (64-(*))/4
 		bra.w	.error
 		endr
@@ -23,58 +21,10 @@ APILUT:
 		dc.b [32-((*)-.sign)]" "
 .error:		SMPS_assert "Undefined API command"
 ; ---------------------------------------------------------------------------
-QueueSound:
-	set .loc,v_soundqueue_start
-	rept (v_soundqueue_end-v_soundqueue_start)/2-1
-		tst.w	.loc(a1)
-		bne.s	.n
-		move.w	d0,.loc(a1)
-		rts
-.n:
-	set .loc,.loc+2
-	endr
-		tst.w	.loc(a1)
-		bne.s	.n2
-		move.w	d0,.loc(a1)
-.n2:		rts
-; ---------------------------------------------------------------------------
-PauseDriver:
-		moveq_	%11110011,d0
-		and.b	v_driverflags(a1),d0
-		or.b	#1<<2,d0
-		move.b	d0,v_driverflags(a1)
-		rts
-ResumeDriver:
-		or.b	#3<<2,v_driverflags(a1)
-		rts
-; ---------------------------------------------------------------------------
-ReadComm:
-		cmp.b	#__smpsCommBytes,d1
-		bhs.s	.index
-		and.w	#$FF,d1
-		move.b	d0,v_communication(a1,d1.w)
-		rts
-.index:		SMPS_assert "ReadComm: Index is too large"
-WriteComm:
-		cmp.b	#__smpsCommBytes,d1
-		bhs.s	.index
-		and.w	#$FF,d1
-		move.b	v_communication(a1,d1.w),d0
-		rts
-.index:		SMPS_assert "ReadComm: Index is too large"
-; ---------------------------------------------------------------------------
-SetDriverDataPointer:
-		move.l	a0,d0
-		move.w	d0,v_dataptr+2(a1)
-		swap	d0
-		move.b	d0,v_dataptr+1(a1)
-		rts
-; ---------------------------------------------------------------------------
 		include "src-68k/smps-init.asm"
-		include "src-68k/smps-fifo.asm"
+		include "src-68k/smps-misc.asm"
 		include "src-68k/smps-seq.asm"
 		include "src-68k/smps-seq-queue.asm"
-		include "src-68k/smps-seq-fade.asm"
 		include "src-68k/smps-seq-shared.asm"
 		include "src-68k/smps-seq-pcm.asm"
 		include "src-68k/smps-seq-fm.asm"

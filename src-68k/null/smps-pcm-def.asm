@@ -24,6 +24,9 @@ fmwrite macro ymstatreg,ymareg,ymdreg,ymregnum
 	endif
 	; NOTE: have a 12 cycle delay before the next fm write attempt
 	endm
+updfifo macro
+	SMPS_assert "Null PCM player has no FIFO"
+	endm
 ; ------------------------------------------------------------------------------
 ; Macro to generate sample record in a sample table
 ; ------------------------------------------------------------------------------
