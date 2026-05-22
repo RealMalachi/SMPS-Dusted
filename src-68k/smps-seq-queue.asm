@@ -268,7 +268,7 @@ PSGInitBytes:
 	dc.b $80,0	; PSG1
 	dc.b $A0,0	; PSG2
 	dc.b $C0,0	; PSG3
-	dc.b $E0,0	; PSG4
+	dc.b $E0,1<<_drummode	; PSG4
 	even
 ; ===========================================================================
 ; TODO: enums?
@@ -326,7 +326,7 @@ Sound_PlayBGM:
 
 		lea	v_1up_save_ram(a6),a0
 		lea	v_1up_ram_copy(a6),a1
-		moveq	#((v_1up_ram_copy_end-v_1up_ram_copy)/4)-1,d1
+		move.w	#((v_1up_ram_copy_end-v_1up_ram_copy)/4)-1,d1
 .backupramloop:	move.l	(a0)+,(a1)+
 		dbf	d1,.backupramloop
 		if (v_1up_ram_copy_end-v_1up_ram_copy)&2
@@ -338,7 +338,7 @@ Sound_PlayBGM:
 		beq.s	.bgm_loadMusic
 		lea	v_1up_ram_copy(a6),a0
 		moveq	#0,d0
-		moveq	#((v_1up_ram_copy_end-v_1up_ram_copy)/4)-1,d1
+		move.w	#((v_1up_ram_copy_end-v_1up_ram_copy)/4)-1,d1
 .saveclrloop:	move.l	d0,(a0)+
 		dbf	d1,.saveclrloop
 		if (v_1up_ram_copy_end-v_1up_ram_copy)&2

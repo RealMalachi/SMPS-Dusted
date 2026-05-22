@@ -82,9 +82,9 @@ Mus_TestBgm_Voices:
 	smpsVcTotalLevel	$80, $13, $37, $19
 
 Mus_TestBgm_VolEnv:
-	smpsEnvTable START
+	smpsEnvTable START,1
 	smpsEnvTable Mus_TestBgm_VolEnv_m01
-	smpsEnvTable END
+	smpsEnvTable END,$100
 Mus_TestBgm_VolEnv_m01:	smpsEnvVol $00,$08,$10,$18,$20,$28,$30,$38,$40,$48,$50,$58,$60,$68,$70,$78,REST
 
 ;Mus_TestBgm_ModEnv:

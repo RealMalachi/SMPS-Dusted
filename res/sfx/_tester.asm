@@ -77,15 +77,15 @@ TestSfx_Voices:
 	smpsVcTotalLevel	$00, $23, $00, $23
 
 TestSfx_VolEnv:
-	smpsEnvTable START
+	smpsEnvTable START,1
 	smpsEnvTable TestSfx_VolEnv_01
-	smpsEnvTable END
+	smpsEnvTable END,$100
 TestSfx_VolEnv_01:	smpsEnvVol $00,$00,$00,$00,$08,$10,$18,$20,HOLD
 
 TestSfx_ModEnv:
-	smpsEnvTable START
+	smpsEnvTable START,1
 	smpsEnvTable TestSfx_ModEnv_01
 	smpsEnvTable TestSfx_ModEnv_02
-	smpsEnvTable END
+	smpsEnvTable END,$40
 TestSfx_ModEnv_01:	smpsEnvMod 0,1,2,3,4,5,6,7,6,5,4,3,2,1,REPEAT
 TestSfx_ModEnv_02:	smpsEnvMod 0,1,2,3,4,5,6,7,8,9,10,11,12,13,REST

@@ -123,26 +123,49 @@ FMFrequenciesEnd:
 FMUpdateFreq:
 		moveq_	%10111111,d0
 		and.b	TrackModulationCtrl(a5),d0		; is modulation (calculated or envelopes) enabled?
-		beq.s	FMUpdateFreq_exit			; if not, branch
+		beq.s	FMPrepareNote.exit			; if not, branch
 
 FMPrepareNote:
 		moveq	#0,d2
 		bsr.w	GetFrequency
 		bpl.s	.valid
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
+.exit:
 		rts
 .valid:
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
-		bne.s	FMUpdateFreq_exit
+		bne.s	.exit
+
+		fmstart	a0
 		move.w	d6,-(sp)				; d1.b = d6>>8
 		move.b	(sp)+,d1
-		moveq_	$A4,d0					; Register for upper 6 bits of frequency
-		bsr.w	WriteFMIorII
-		move.b	d6,d1
-		moveq_	$A0,d0					; Register for lower 8 bits of frequency
-		bra.w	WriteFMIorII
+		move.b	TrackVoiceControl(a5),d0	; Get voice control bits
+		if __smpsDebug
+		cmp.b	#3,d0
+		beq.s	.ivfm
+		cmp.b	#6,d0
+		bls.s	.vfm
+.ivfm:		SMPS_assert "FMPrepareNote: Invalid FM channel, TODO: print channel"
+.vfm:
+		endif
+		subq.b	#1<<2,d0			; Is this bound for part I or II? (also clear chip toggle)
+		bcc.s	.fm2				; Branch if for part II
+		addq.b	#1<<2,d0
+.fm1:
+		add.b	#$A4,d0
+		fmwrite	a0,d0,d1,0
+		subq.w	#4,d0
+		fmwrite	a0,d0,d6,0
+		fmstop	a0
+		rts
+.fm2:
+		add.b	#$A4,d0
+		fmwrite	a0,d0,d1,1
+		subq.w	#4,d0
+		fmwrite	a0,d0,d6,1
+		fmstop	a0
+		;rts
 ; ---------------------------------------------------------------------------
-FMUpdateFreq_exit:
 FMNoteOn_exit:
 FMNoteOff_exit:
 		rts
@@ -212,13 +235,6 @@ WriteFMchannel_exit:
 		rts
 ; ---------------------------------------------------------------------------
 SetVoicePan:
-		moveq_	$B4,d0					; Register for AMS/FMS/Panning
-		move.b	TrackAMSFMSPan(a5),d1			; Value to send
-		btst	#v_driverflags.mono,v_driverflags(a6)
-		beq.s	.stereo
-		or.b	#$C0,d1
-.stereo:	bsr.w	WriteFMIorII
-		;bra.s	SetVoice
 SetVoice:
 		fmstart	a0
 		move.l	TrackFmVoicePtr(a5),a1		; voice pointer
@@ -229,42 +245,61 @@ SetVoice:
 
 		lea	FMInstrumentOperatorTable(pc),a2
 		moveq	#(FMInstrumentOperatorTable_End-FMInstrumentOperatorTable)-1,d3
-.loop:		move.b	(a2)+,d0
-		move.b	(a1)+,d1
-; inlined WriteFMIorIIMain
-; TODO: calculating the FM channel once and reusing that would be nice, especially for PCM players with an FM buffer
 		move.b	TrackVoiceControl(a5),d2	; Get voice control bits
-		subq.b	#1<<2,d2			; Is this bound for part I or II? (also clear chip toggle)
-		bcc.s	.fm2				; Branch if for part II
-		addq.b	#1<<2,d2
 		if __smpsDebug
-		cmp.b	#2,d2
-		bls.s	.ass1
-		SMPS_assert "SetVoice: Invalid FM-1 channel, TODO: print channel"
-.ass1:
+; 0-2 and 4-6 are valid, everything else isn't
+		cmp.b	#3,d2
+		beq.s	.ivfm
+		cmp.b	#6,d2
+		bls.s	.vfm
+.ivfm:		SMPS_assert "SetVoice: Invalid FM channel, TODO: print channel"
+.vfm:
 		endif
-		add.b	d0,d2				; Add in voice control bits
-		fmwrite	a0,d2,d1,0
-		dbf	d3,.loop
+		subq.b	#1<<2,d2			; Is this bound for part I or II? (also clear chip toggle)
+		bcc.w	.fm2				; Branch if for part II
+		addq.b	#1<<2,d2
+.fm1:
+		moveq_	$C0,d1
+		and.b	TrackAMSFMSPan(a5),d1
+		or.b	(a1)+,d1
+		move.b	d1,TrackAMSFMSPan(a5)
+		btst	#v_driverflags.mono,v_driverflags(a6)
+		beq.s	.stereo1
+		or.b	#$C0,d1
+.stereo1:
+		moveq_	fmreg.panamspms,d0
+		add.b	d2,d0
+		fmwrite	a0,d0,d1,0
+.loop1:		move.b	(a2)+,d0
+		move.b	(a1)+,d1
+		add.b	d2,d0				; Add in voice control bits
+		fmwrite	a0,d0,d1,0
+		dbf	d3,.loop1
 		bra.s	.loopend
 .fm2:
-		if __smpsDebug
-		cmp.b	#2,d2
-		bls.s	.ass2
-		SMPS_assert "SetVoice: Invalid FM-2 channel, TODO: print channel"
-.ass2:
-		endif
-		add.b	d0,d2
-		fmwrite	a0,d2,d1,1
-		dbf	d3,.loop
+		moveq_	$C0,d1
+		and.b	TrackAMSFMSPan(a5),d1
+		or.b	(a1)+,d1
+		move.b	d1,TrackAMSFMSPan(a5)
+		btst	#v_driverflags.mono,v_driverflags(a6)
+		beq.s	.stereo2
+		or.b	#$C0,d1
+.stereo2:
+		moveq_	fmreg.panamspms,d0
+		add.b	d2,d0
+		fmwrite	a0,d0,d1,1
+.loop2:		move.b	(a2)+,d0
+		move.b	(a1)+,d1
+		add.b	d2,d0
+		fmwrite	a0,d0,d1,1
+		dbf	d3,.loop2
 .loopend:
 		fmstop	a0
+; volume is handled later by DoVolEnv and UpdateVolume
+;		bsr.w	SendVoiceTL
 		btst	#v_driverflags.ssgoff,v_driverflags(a6)		; if SSG-EG is disabled, uhh, disable it.
 		beq.s	SendVoiceSSG.gotptr
 		rts
-; volume is handled later by DoVolEnv and UpdateVolume
-;.nossg:
-;		bra.w	SendVoiceTL
 ; ---------------------------------------------------------------------------
 SendVoiceSSG:
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
@@ -274,7 +309,7 @@ SendVoiceSSG:
 		move.b	TrackFmVoiceIndex(a5),d1
 		lsl.w	#5,d1		; x32
 		adda.w	d1,a1		; x32
-		adda.w	#21,a1		; Want SSG
+		adda.w	#22,a1		; Want SSG
 .gotptr:
 		move.b	(a1)+,-(sp)
 		move.w	(sp)+,d4
@@ -309,7 +344,7 @@ SendVoiceTL:
 		move.b	TrackFmVoiceIndex(a5),d1
 		lsl.w	#5,d1		; x32
 		adda.w	d1,a1		; x32
-		adda.w	#23,a1		; Wants TL
+		adda.w	#24,a1		; Wants TL
 
 		tst.b	v_driverflags2(a6)			; is underwater muffle enabled?
 		bpl.s	.nomuffle
@@ -335,7 +370,7 @@ SendVoiceTL:
 		rts
 ; ---------------------------------------------------------------------------
 FMInstrumentOperatorTable:
-		dc.b  fmreg.algofeed;,fmreg.panamspms
+		dc.b  fmreg.algofeed
 		dc.b  fmreg.muldt+$0,fmreg.muldt+$8,fmreg.muldt+$4,fmreg.muldt+$C
 		dc.b  fmreg.arrs+$0,fmreg.arrs+$8,fmreg.arrs+$4,fmreg.arrs+$C
 		dc.b  fmreg.dramen+$0,fmreg.dramen+$8,fmreg.dramen+$4,fmreg.dramen+$C
@@ -375,26 +410,22 @@ WriteFMIorIIMain:
 WriteFMIorII:
 		fmstart	a0
 		move.b	TrackVoiceControl(a5),d2	; Get voice control bits
+		if __smpsDebug
+		cmp.b	#3,d2
+		beq.s	.ivfm
+		cmp.b	#6,d2
+		bls.s	.vfm
+.ivfm:		SMPS_assert "WriteFMIorII: Invalid FM channel, TODO: print channel"
+.vfm:
+		endif
 		subq.b	#1<<2,d2			; Is this bound for part I or II? (also clear chip toggle)
 		bcc.s	.fm2				; Branch if for part II
 		addq.b	#1<<2,d2
-		if __smpsDebug
-		cmp.b	#2,d2
-		bls.s	.ass1
-		SMPS_assert "WriteFMIorII: Invalid FM-1 channel, TODO: print channel"
-.ass1:
-		endif
 		add.b	d0,d2				; Add in voice control bits
 		fmwrite	a0,d2,d1,0
 		fmstop	a0
 .exit:		rts
 .fm2:
-		if __smpsDebug
-		cmp.b	#2,d2
-		bls.s	.ass2
-		SMPS_assert "WriteFMIorII: Invalid FM-2 channel, TODO: print channel"
-.ass2:
-		endif
 		add.b	d0,d2
 		fmwrite	a0,d2,d1,1
 		fmstop	a0

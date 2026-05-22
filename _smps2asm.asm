@@ -142,8 +142,7 @@ cxWriteFM1		ds.b 1		; cfxWriteFMI
 cxWriteFM2		ds.b 1		; cfxWriteFMII
 cxPanAuto		ds.b 1		; cfxUnk
 cxPanAMSFMS		ds.b 1		; cfxPanningAMSFMS
-cxSetLFO		ds.b 1		; cfxSetLFO
-cxSetLFOSens		ds.b 1		; cfxSetLFOSens
+cxSetLFORate		ds.b 1		; cfxSetLFORate
 cxSongFadeIn		ds.b 1		; cfxFadeInToPrevious
 cxSpecialFM3		ds.b 1		; cfxUnk
 cxRevUp			ds.b 1		; cfxRevUp
@@ -413,11 +412,8 @@ smpsPanRight macro
 ;smpsPanAutoOff macro
 ;	dc.b cExtCmd,cxPanAuto,$00
 ;	endm
-smpsSetLFO macro enable,amsfms
-	dc.b	cExtCmd,cxSetLFO,enable,amsfms&$37
-	endm
-smpsSetLFOSens macro amsfms
-	dc.b	cExtCmd,cxSetLFOSens,amsfms&$37
+smpsSetLFORate macro rate
+	dc.b	cExtCmd,cxSetLFORate,rate
 	endm
 
 ; Set channel detune to val
@@ -607,11 +603,11 @@ smpsPSGvoice macro voice
 	endm
 ; Set PSG3/PSG4 waveform
 ; 0 makes it return to PSG3, 0xE0-0xE7 are PSG noise settings, anything else is invalid
-smpsPSGform macro form
+smpsPSGform macro form,type
 	if form=0
 	dc.b	cExtCmd,cxSetPSG3
 	elseif (form>=$E0)&&(form<=$E7)
-	dc.b	cNoisePSG,form
+	dc.b	cNoisePSG,form!((type+0)<<7)
 	else
 	fatal "smpsPSGform only accepts parameter values of 0 or between $E0-$E7"
 	endif
@@ -849,6 +845,9 @@ smpsSSGEG macro op1,op2,op3,op4
 ;	smpsChanFMCommand $94,op3
 ;	smpsChanFMCommand $98,op2
 ;	smpsChanFMCommand $9C,op4
+smpsSetLFO macro enable,amsfms
+	fatal "smpsSetLFO is unsupported. In this variant of SMPS, LFO sensitivity is usually expected to be set via the FM instruments, and the osccilation rate is set via smpsSetLFORate"
+	endm
 smpsAlternateSMPS macro flag
 	fatal "smpsAlternateSMPS is unsupported"
 	endm
@@ -863,30 +862,38 @@ smpsPitchSlide macro enable
 	endm
 ;	dc.b	cExtCmd,0,enable
 ; ---------------------------------------------------------------------------
+; syntax:
+; smpsEnvTable START,$00
+; smpsEnvTable END,$FF
+; smpsEnvTable Label_Uhh,id_Uhh
 envtableoff := -1
-envtableid  := 0
 smpsEnvTable macro off,idcmp
 	if "off"=="START"
-		if envtableid<>0
-		fatal "Volume envelope table was being started while already being started"
+		if envtableoff<>-1
+		fatal "Envelope table tried to start while another already started"
+		elseif "idcmp"==""
+		fatal "Evelope table wasn't given a starting offset for its ID"
 		endif
 envtableoff := (*)
-envtableid  := 1
+envtableinc := 1
+envtableid  := idcmp
 	elseif "off"=="END"
-		if envtableid=0
-		fatal "Volume envelope table was being ended while already being ended"
+		if envtableoff==-1
+		fatal "Envelope table tried to end when it hasn't even started"
+		elseif "idcmp"<>""
+			if envtableid>idcmp
+			fatal "Envelope table exceeds specified ending"
+			endif
 		endif
 envtableoff := -1
-envtableid  := 0
 	else
-		if envtableid=0
-		fatal "Volume envelope table was compromised or ended prior to this command"
-		endif
-		if "idcmp"<>""
+		if envtableoff==-1
+		fatal "Envelope table was compromised or ended prior to this offset"
+		elseif "idcmp"<>""
 idcmp		equ envtableid
 		endif
 	dc.w off-envtableoff
-envtableid := envtableid+1
+envtableid := envtableid+envtableinc
 	endif
 	endm
 
@@ -1004,7 +1011,8 @@ smpsVcAlgorithm macro val
 	set vcTLM2,$FF00
 	set vcTLM3,$FF00
 	set vcTLM4,$FF00
-	set vcPanAmsPms,$C0
+	set vcAMS,0
+	set vcPMS,0
 	endm
 
 smpsVcUnusedBits macro val,d1r1,d1r2,d1r3,d1r4
@@ -1105,6 +1113,13 @@ smpsVcSsgEg macro op1,op2,op3,op4
 	set vcSSG3,op3
 	set vcSSG4,op4
 	endm
+; Voices - AMS and PMS
+; Somehow this is also a new feature of SMPS-Dusted. Like seriously guys, what the fuck?
+smpsAMSPMS macro valams,valpms
+	set vcAMS,valams&3
+	set vcPMS,valpms&7
+	endm
+; Voices - TL for muffle flag
 smpsVcTotalLevelMuffle macro op1,op2,op3,op4
 	if (SourceDriver>>16)==$F0E5
 		set vcTLM1,op1
@@ -1199,16 +1214,15 @@ smpsVcTotalLevel macro op1,op2,op3,op4
 		smpsVcMuffleWrapper vcTLM4,vcTL4,$08
 	endcase
 	endif
-		dc.b	(vcFeedback<<3)+vcAlgorithm
-		dc.b	(vcDT4<<4)+vcCF4       ,(vcDT3<<4)+vcCF3       ,(vcDT2<<4)+vcCF2       ,(vcDT1<<4)+vcCF1
-		dc.b	(vcRS4<<6)+vcAR4       ,(vcRS3<<6)+vcAR3       ,(vcRS2<<6)+vcAR2       ,(vcRS1<<6)+vcAR1
-		dc.b	vcAM4|vcD1R4           ,vcAM3|vcD1R3           ,vcAM2|vcD1R2           ,vcAM1|vcD1R1
-		dc.b	vcD2R4                 ,vcD2R3                 ,vcD2R2                 ,vcD2R1
-		dc.b	(vcDL4<<4)+vcRR4       ,(vcDL3<<4)+vcRR3       ,(vcDL2<<4)+vcRR2       ,(vcDL1<<4)+vcRR1
-		dc.b	(vcSSG4<<4)|vcSSG2     ,(vcSSG3<<4)|vcSSG1
-		dc.b	vcTL4                  ,vcTL2                  ,vcTL3                  ,vcTL1
-		dc.b	vcTLM4                 ,vcTLM2                 ,vcTLM3                 ,vcTLM1
-		dc.b	0	; reserved
+		dc.b	(vcAMS<<4)+vcPMS	,(vcFeedback<<3)+vcAlgorithm
+		dc.b	(vcDT4<<4)+vcCF4	,(vcDT3<<4)+vcCF3	,(vcDT2<<4)+vcCF2	,(vcDT1<<4)+vcCF1
+		dc.b	(vcRS4<<6)+vcAR4	,(vcRS3<<6)+vcAR3	,(vcRS2<<6)+vcAR2	,(vcRS1<<6)+vcAR1
+		dc.b	vcAM4|vcD1R4		,vcAM3|vcD1R3		,vcAM2|vcD1R2		,vcAM1|vcD1R1
+		dc.b	vcD2R4			,vcD2R3			,vcD2R2			,vcD2R1
+		dc.b	(vcDL4<<4)+vcRR4	,(vcDL3<<4)+vcRR3	,(vcDL2<<4)+vcRR2	,(vcDL1<<4)+vcRR1
+		dc.b	(vcSSG4<<4)|vcSSG2	,(vcSSG3<<4)|vcSSG1
+		dc.b	vcTL4			,vcTL2			,vcTL3			,vcTL1
+		dc.b	vcTLM4			,vcTLM2			,vcTLM3			,vcTLM1
 	endm
 
 ; caps muffle volume to a maximum of $7F

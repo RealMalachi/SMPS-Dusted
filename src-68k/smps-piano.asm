@@ -84,7 +84,7 @@ SetupPianoRoll:
 		dc.w v_music_psg1_track
 		dc.w v_music_psg2_track
 		dc.w v_music_psg3_track
-		dc.w 0;v_music_psg4_track
+		dc.w v_music_psg4_track
 		dc.w v_music_pcm1_track
 		dc.w 0;v_music_pcm2_track
 .snde:

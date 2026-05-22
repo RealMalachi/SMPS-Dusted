@@ -56,40 +56,20 @@ yma1		equ $840105
 ymd1		equ $840107
 	elseif __smpsTarget=="pico"
 psginput	equ $C00011
-; [1cct dddd]
-; T = Type (of data), 0 for tone/noise, 1 for volume
-; C = Channel, 0 for channel 1, 1 for channel 2 etc
-; D = Data, 10-bit value for tone, 4-bit value for volume
-; [0.DD DDDD]
-; D = Data, this write isn't necessary for volume (the lower 4 bits overwrite the already provided volume)
-; Data types
-; Tone:   DDDDDDdddd = cccccccccc
-; Noise:  (DDDDDD)dddd = (---trr)-trr
-; Volume: (DDDDDD)dddd = (--vvvv)vvvv
-smps_adpcmdata	equ $800010
-; reads return how much bytes are free in FIFO
-; writes add bytes into the FIFO
-smps_adpcmctrl	equ $800012
-; reads [B... .... .... ....]
-; B = BUSY status, 1 if the chip currently playing a sample
-; write [RI.. ?... FF.. .VVV]
-; R = Write 1 to reset
-; I = Interrupt enable. Level 3 interrupts will trigger based on FIFO fullness when set, or not when clear
-; ? = Sega driver always sets this bit outside of reset, but some games expect ADPCM to work with it clear.
-; F = Low-pass filter selection, 11 = 16 kHz, 10 = 12 kHz, 01 = 6 kHz, 00 = ??
-; V = Volume
+adpcmdata	equ $800010		; reads return how many free bytes their are in the FIFO, writes add to the FIFO
+adpcmctrl	equ $800012		; 
 	elseif __smpsTarget=="copera"
-smps_ymz263B_stat	equ $BFF801	; u8 ; YMZ263B Status read/address write (no Copera games write to this address, but it should work based on the YMZ263B datasheet)
-smps_ymz263B_ch1_data	equ $BFF803	; u8 ; YMZ263B Channel #1 data
-smps_ymz263B_addr	equ $BFF805	; u8 ; YMZ263B Address write
-smps_ymz263B_ch2_data	equ $BFF807	; u8 ; YMZ263B Channel #2 data
+ymz263B_stat	equ $BFF801		; u8 ; YMZ263B Status read/address write (no Copera games write to this address, but it should work based on the YMZ263B datasheet)
+ymz263B_ch1data	equ $BFF803		; u8 ; YMZ263B Channel #1 data
+ymz263B_addr	equ $BFF805		; u8 ; YMZ263B Address write
+ymz263B_ch2data	equ $BFF807		; u8 ; YMZ263B Channel #2 data
 
-smps_ymf262_stat	equ $BFF824
-smps_ymf262_addr1	equ $BFF824	; u  ; YMF262 Address Part #1 write/Status read
-smps_ymf262_data	equ $BFF828	; u  ; YMF262 Data write
-smps_ymf262_addr2	equ $BFF834	; u  ; YMF262 Address Part #2 write
+ymf262_stat	equ $BFF824
+ymf262_addr1	equ $BFF824		; u  ; YMF262 Address Part #1 write/Status read
+ymf262_data	equ $BFF828		; u  ; YMF262 Data write
+ymf262_addr2	equ $BFF834		; u  ; YMF262 Address Part #2 write
 
-smps_ym712B		equ $BFF840	; u8 ; YM712B write
+smps_ym712B	equ $BFF840		; u8 ; YM712B write
 	else
 	fatal "Unknown hardware target"
 	endif
@@ -223,9 +203,6 @@ TrackDataPointer:		ds.l 1			; All
 TrackNoteTimeout:		ds.b 1			; All
 TrackNoteTimeoutMaster:		ds.b 1			; All
 
-	if __smpsDrum
-TrackDrum:			ds.b 1
-	endif
 ; loop indexes start upward, subroutine calls extend downward
 TrackGoSubStackEnd:		ds.b 0			; All
 TrackLoopCounters:		ds.b __smpsSeqStack 	; All
@@ -306,6 +283,7 @@ v_revving_timer:		ds.b 1
 v_contsfx_lastid:		ds.w 1
 v_contsfx_loop:			ds.b 1
 
+v_lastpsg4:			ds.b 1
 	ds.b (*)&1	; word-alignment
 v_1up_save_ram:			ds.b 0
 v_main_tempo_timeout:		ds.w 1
@@ -329,6 +307,7 @@ v_music_psg_tracks:		ds.b 0
 v_music_psg1_track:		ds.b TrackPsgSz
 v_music_psg2_track:		ds.b TrackPsgSz
 v_music_psg3_track:		ds.b TrackPsgSz
+v_music_psg4_track:		ds.b TrackPsgSz
 v_music_psg_tracks_end:		ds.b 0
 v_music_track_ram_end:		ds.b 0
 v_1up_save_ram_end:		ds.b 0

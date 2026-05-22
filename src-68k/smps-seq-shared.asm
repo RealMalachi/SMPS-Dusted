@@ -129,12 +129,6 @@ StopBGM:
 		bpl.s	.psgnext
 .psggotptr:
 		or.b	#1<<_resting,TrackPlaybackControl(a3)
-		move.b	TrackVoiceControl(a3),d0
-		cmpi.b	#$E0,d0
-		blo.s	.psgnext
-		cmpi.b	#$E7,d0
-		bhi.s	.psgnext
-		move.b	d0,(psginput).l				; Set noise tone
 .psgnext:
 		add.w	#TrackPsgSz,a5
 		dbf	d6,.psgloop
@@ -212,12 +206,6 @@ StopSFX:
 		bpl.s	.psgnext
 .psggotptr:
 		or.b	#1<<_resting,TrackPlaybackControl(a3)
-		move.b	TrackVoiceControl(a3),d0
-		cmpi.b	#$E0,d0
-		blo.s	.psgnext
-		cmpi.b	#$E7,d0
-		bhi.s	.psgnext
-		move.b	d0,(psginput).l				; Set noise tone
 .psgnext:
 		add.w	#TrackPsgSz,a5
 		dbf	d6,.psgloop
@@ -290,12 +278,6 @@ StopBSFX:
 		bpl.s	.psgnext
 .psggotptr:
 		or.b	#1<<_resting,TrackPlaybackControl(a3)
-		move.b	TrackVoiceControl(a3),d0
-		cmpi.b	#$E0,d0
-		blo.s	.psgnext
-		cmpi.b	#$E7,d0
-		bhi.s	.psgnext
-		move.b	d0,(psginput).l				; Set noise tone
 .psgnext:
 		add.w	#TrackPsgSz,a5
 		dbf	d6,.psgloop
@@ -702,7 +684,10 @@ SetVolume:
 		lsr.w	#3,d0
 		or.b	#1<<4,d0				; Mark it as a volume command
 		moveq_	$E0,d1
+		btst	#_special,TrackPlaybackControl(a5)
+		bne.s	.psg3noisemode
 		and.b	TrackVoiceControl(a5),d1		; Add in track selector bits
+.psg3noisemode:
 		or.b	d1,d0
 		move.b	d0,(psginput).l
 		rts
@@ -846,8 +831,7 @@ cfExtCmd:
 		dc.w  cfxWriteFMII-.lut				; cxWriteFM2
 		dc.w  cfxPanAuto-.lut				; cPanAuto
 		dc.w  cfxPanningAMSFMS-.lut			; cxPanAMSFMS
-		dc.w  cfxSetLFO-.lut				; cxSetLFO
-		dc.w  cfxSetLFOSens-.lut			; cxSetLFOSens
+		dc.w  cfxSetLFORate-.lut			; cxSetLFORate
 		dc.w  cfxFadeInToPrevious-.lut			; cxSongFadeIn
 		dc.w  .unk-.lut					; cxSpecialFM3
 		dc.w  cfxRevUp-.lut				; cxRevUp
@@ -883,38 +867,14 @@ cfxDrumModeOn:	SMPS_assert "cfxDrumModeOn: __smpsDrum setting was disabled"
 cfxDrumModeOff:	SMPS_assert "cfxDrumModeOff: __smpsDrum setting was disabled"
 	endif
 ; ===========================================================================
-; set the global modulation and channels sensitivity
-cfxSetLFO:
+; set LFOs global modulation rate
+cfxSetLFORate:
 		cmp.b	#$40,TrackVoiceControl(a5)
 		bhs.s	.notfm
 		moveq_	fmreg.lfofreq,d0
 		move.b	(a4)+,d1
-		bsr.w	WriteFMI
-		moveq_	%11000000,d1			; Change AMS/FMS, retain panning
-		and.b	TrackAMSFMSPan(a5),d1
-		or.b	(a4)+,d1
-		move.b	d1,TrackAMSFMSPan(a5)
-		btst	#v_driverflags.mono,v_driverflags(a6)
-		beq.s	.stereo
-		or.b	#%11000000,d1
-.stereo:
-		bra.w	cfxSetPanAMSFMS
-.notfm:		SMPS_assert "cfxSetLFO: Non-FM channel using FM command, TODO: print channel"
-; ---------------------------------------------------------------------------
-; only set the channels sensitivity
-cfxSetLFOSens:
-		cmp.b	#$40,TrackVoiceControl(a5)
-		bhs.s	.notfm
-		moveq_	%11000000,d1			; Change AMS/FMS, retain panning
-		and.b	TrackAMSFMSPan(a5),d1
-		or.b	(a4)+,d1
-		move.b	d1,TrackAMSFMSPan(a5)
-		btst	#v_driverflags.mono,v_driverflags(a6)
-		beq.s	.stereo
-		or.b	#%11000000,d1
-.stereo:
-		bra.w	cfxSetPanAMSFMS
-.notfm:		SMPS_assert "cfxSetLFOSensitivity: Non-FM channel using FM command, TODO: print channel"
+		bra.w	WriteFMI
+.notfm:		SMPS_assert "cfxSetLFORate: Non-FM channel using FM command, TODO: print channel"
 ; ===========================================================================
 cfPanRight:
 		moveq_	$40,d1
@@ -1149,64 +1109,89 @@ cfSetVolEnv:
 		rts
 ; ---------------------------------------------------------------------------
 cfSetPSGNoise:
-		move.b	TrackVoiceControl(a5),d0
 		if __smpsDebug=1
-; ensure that this channel was PSG3 or PSG noise
-		cmp.b	#$C0,d0
+; ensure that only PSG3 or PSG4 channels are trying to use this
+		move.w	RAM_BGMChannel+24(pc),d0
+		beq.s	.nopsg3bgm
+		move.l	a6,a3
+		adda.w	d0,a3
+		cmp.l	a3,a5
 		beq.s	.valid
-		cmp.b	#$E0,d0
-		blo.s	.invalid
-		cmp.b	#$E7,d0
-		bls.s	.valid
-.invalid:	SMPS_assert "cfSetPSGNoise: Non-PSG3 or PSG4 usage, TODO: print channel"
+.nopsg3bgm:
+		move.w	RAM_BGMChannel+28(pc),d0
+		beq.s	.nopsg4bgm
+		move.l	a6,a3
+		adda.w	d0,a3
+		cmp.l	a3,a5
+		beq.s	.valid
+.nopsg4bgm:
+		move.w	RAM_SFXChannel+24(pc),d0
+		beq.s	.nopsg3sfx
+		move.l	a6,a3
+		adda.w	d0,a3
+		cmp.l	a3,a5
+		beq.s	.valid
+.nopsg3sfx:
+		move.w	RAM_SFXChannel+28(pc),d0
+		beq.s	.nopsg4sfx
+		move.l	a6,a3
+		adda.w	d0,a3
+		cmp.l	a3,a5
+		beq.s	.valid
+.nopsg4sfx:
+	if __smpsBFX
+		move.w	RAM_BSFXChannel+24(pc),d0
+		beq.s	.nopsg3bsfx
+		move.l	a6,a3
+		adda.w	d0,a3
+		cmp.l	a3,a5
+		beq.s	.valid
+.nopsg3bsfx:
+		move.w	RAM_BSFXChannel+28(pc),d0
+		beq.s	.nopsg4bsfx
+		move.l	a6,a3
+		adda.w	d0,a3
+		cmp.l	a3,a5
+		beq.s	.valid
+.nopsg4bsfx:
+	endif
+		SMPS_assert "cfxSetPSG3: Non-PSG3 usage, TODO: print channel"
 .valid:
 		endif
-; set PSG noise mode
+; if channel is PSG4, simply save the new noise type
 		move.b	(a4)+,d1
-		move.b	d1,TrackVoiceControl(a5)		; Turn channel into noise, save noise tone
-		moveq	#3,d0					; Figure out if noise mode uses PSG3
-		and.b	d1,d0
-		cmp.b	#3,d0
-		seq.b	d0
-		and.b	#1<<_special,d0				; Turn it into a bitmask for the special flag
-		or.b	d0,TrackPlaybackControl(a5)
-
+		cmp.b	#$E0,TrackVoiceControl(a5)
+		bhs.s	.psg4
+.psg3:
+		and.b	#$C7,d1					; acknowledge it as PSG3, but save the noise type
+		bset	#_special,TrackPlaybackControl(a5)	; enable PSG special mode
+		tas.b	d1					; Test d0 then set bit 7 (yes this works, tas is fine on registers)
+		bpl.s	.exit					; If bit 7 was clear, don't silence psg 3
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
-		bne.s	.locret
-		tst.b	d0
-		beq.s	.notpsg34shared
+		bne.s	.exit
 		move.b	#$DF,(psginput).l			; mute PSG3
-.notpsg34shared:
-		move.b	d1,(psginput).l				; Set noise tone
-.locret:
+.psg4:
+		clr.b	v_lastpsg4(a6)
+.exit:
+		move.b	d1,TrackVoiceControl(a5)
 		rts
 ; ---------------------------------------------------------------------------
 cfxSetPSG3:
-		move.b	TrackVoiceControl(a5),d0
 		if __smpsDebug=1
-; ensure that this channel was PSG3 or PSG noise
-		cmp.b	#$C0,d0
-		beq.s	.valid
-		cmp.b	#$E0,d0
-		blo.s	.invalid
-		cmp.b	#$E7,d0
-		bls.s	.valid
-.invalid:	SMPS_assert "cfxSetPSG3: Non-PSG3 or PSG4 usage, TODO: print channel"
-.valid:
 ; ensure that only PSG3 channels are trying to use this
 		move.w	RAM_BGMChannel+24(pc),d0
 		beq.s	.nopsg3bgm
 		move.l	a6,a3
 		adda.w	d0,a3
 		cmp.l	a3,a5
-		beq.s	.psg3channel
+		beq.s	.valid
 .nopsg3bgm:
 		move.w	RAM_SFXChannel+24(pc),d0
 		beq.s	.nopsg3sfx
 		move.l	a6,a3
 		adda.w	d0,a3
 		cmp.l	a3,a5
-		beq.s	.psg3channel
+		beq.s	.valid
 .nopsg3sfx:
 	if __smpsBFX
 		move.w	RAM_BSFXChannel+24(pc),d0
@@ -1214,13 +1199,13 @@ cfxSetPSG3:
 		move.l	a6,a3
 		adda.w	d0,a3
 		cmp.l	a3,a5
-		beq.s	.psg3channel
+		beq.s	.valid
 .nopsg3bsfx:
 	endif
 		SMPS_assert "cfxSetPSG3: Non-PSG3 usage, TODO: print channel"
-.psg3channel:
+.valid:
 		endif
-		move.b	#$C0,TrackVoiceControl(a5)		; Turn channel into psg3
+		move.b	#$C0,TrackVoiceControl(a5)		; Discard noise
 		bclr	#_special,TrackPlaybackControl(a5)	; clear special flag
 		sne.b	d0					; if it was set then mute PSG noise...
 		btst	#_sfxoverride,TrackPlaybackControl(a5)	; ...if SFXs aren't using it
@@ -1486,7 +1471,14 @@ cfStopTrack:
 		bmi.s	.dac
 		;bpl.s	.fm
 .fm:		bra.w	FMNoteOff
-.psg:		bra.w	PSGNoteOff
+.psg:
+		btst	#_special,TrackPlaybackControl(a5)
+		beq.s	.psgnah
+		cmp.b	#$E0,TrackVoiceControl(a5)
+		blo.s	.psgnah
+		clr.b	v_lastpsg4(a6)
+.psgnah:
+		bra.w	PSGNoteOff
 .dac:
 	if __smpsRestPCM=0
 		rts
@@ -1511,14 +1503,7 @@ cfStopTrack:
 		move.l	a3,a5
 		rts
 .r_psg:
-		bsr.w	PSGNoteOff
-		move.b	TrackVoiceControl(a3),d0			; If PSG4...
-		cmp.b	#$E0,d0
-		bhs.s	.r_psgnoise
-		btst	#_special,TrackPlaybackControl(a3)		; ...or PSG3 using PSG4 for noise...
-		beq.s	.r_psgnah
-		or.b	#$E0,d0						; ...set noise tone
-.r_psgnoise:	move.b	d0,(psginput).l
+		bra.w	PSGNoteOff
 .r_psgnah:	rts
 .r_dac:
 		exg.l	a3,a5
@@ -1576,7 +1561,7 @@ cfxFadeInToPrevious:
 		lea	v_1up_save_ram(a6),a0
 		lea	v_1up_ram_copy(a6),a1
 		moveq	#0,d0
-		moveq	#((v_1up_ram_copy_end-v_1up_ram_copy)/4)-1,d1
+		move.w	#((v_1up_ram_copy_end-v_1up_ram_copy)/4)-1,d1
 .restore:
 		move.l	(a1),(a0)+
 		move.l	d0,(a1)+
@@ -1616,13 +1601,8 @@ cfxFadeInToPrevious:
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
 		and.b	#(1<<_sfxoverride)!$FF,TrackPlaybackControl(a5)
 		bsr.w	PSGNoteOff
-		move.b	TrackVoiceControl(a5),d0
-		cmpi.b	#$E0,d0
-		blo.s	.nextpsg
-		cmpi.b	#$E7,d0
-		bhi.s	.nextpsg
-		move.b	d0,(psginput).l
-.nextpsg:	add.w	#TrackPsgSz,a5
+		add.w	#TrackPsgSz,a5
+.nextpsg:
 		dbf	d7,.psgloop
 
 		move.l	(sp)+,d7

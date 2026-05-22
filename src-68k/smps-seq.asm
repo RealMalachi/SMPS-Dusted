@@ -405,7 +405,7 @@ RAM_BGMChannel:
 		dc.w v_music_psg1_track,0	; 16
 		dc.w v_music_psg2_track,0
 		dc.w v_music_psg3_track,0
-		dc.w v_music_psg3_track
+		dc.w v_music_psg4_track
 		dc.w v_music_pcm1_track		; 30
 RAM_SFXChannel:
 		dc.w 0,0,v_sfx_fm3_track,0

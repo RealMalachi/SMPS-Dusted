@@ -21,166 +21,210 @@ SMPS_Start:
 SourceSMPS2ASM := 1
 SourceDriver := 1
 SMPS_ModEnvIndex:
-	smpsEnvTable START
-	smpsEnvTable SMPS_ModEnvIndex_m01,mEnv_01
-	smpsEnvTable SMPS_ModEnvIndex_m02,mEnv_02
-	smpsEnvTable SMPS_ModEnvIndex_m03,mEnv_03
-	smpsEnvTable SMPS_ModEnvIndex_m04,mEnv_04
-	smpsEnvTable SMPS_ModEnvIndex_m05,mEnv_05
-	smpsEnvTable SMPS_ModEnvIndex_m06,mEnv_06
-	smpsEnvTable SMPS_ModEnvIndex_m07,mEnv_07
-	smpsEnvTable SMPS_ModEnvIndex_m08,mEnv_08
-	smpsEnvTable END
-SMPS_ModEnvIndex_m02:	smpsEnvMod $00
-SMPS_ModEnvIndex_m01:	smpsEnvMod $01,$02,$01,$00,-$01,-$02,-$03,-$04,-$03,-$02,-$01,REST
-SMPS_ModEnvIndex_m03:	smpsEnvMod $00,$00,$00,$00,$13,$26,$39,$4C,$5F,$72,$7F,$72,REST
-SMPS_ModEnvIndex_m04:	smpsEnvMod $01,$02,$03,$02,$01,$00,-$01,-$02,-$03,-$02,-$01,$00,INDEX,0
-SMPS_ModEnvIndex_m05:	smpsEnvMod $00,$00,$01,$03,$01,$00,-$01,-$03,-$01,$00,INDEX,2
-SMPS_ModEnvIndex_m06:	smpsEnvMod $00,$00,$00,$00,  0, 10, 20, 30,  20,  10,   0, -10, -20, -30, -20, -10,INDEX,4
-SMPS_ModEnvIndex_m07:	smpsEnvMod $00,$00,$00,$00, 22, 44, 66, 44,  22,   0, -22, -44, -66, -44, -22,INDEX,3
-SMPS_ModEnvIndex_m08:	smpsEnvMod $01,$02,$03,$04,$03,$02,$01,$00,-$01,-$02,-$03,-$04,-$03,-$02,-$01,$00,INDEX,1
+	smpsEnvTable START,1
+	smpsEnvTable ModEnv_m01,mEnv_01
+	smpsEnvTable ModEnv_m02,mEnv_02
+	smpsEnvTable ModEnv_m03,mEnv_03
+	smpsEnvTable ModEnv_m04,mEnv_04
+	smpsEnvTable ModEnv_m05,mEnv_05
+	smpsEnvTable ModEnv_m06,mEnv_06
+	smpsEnvTable ModEnv_m07,mEnv_07
+	smpsEnvTable ModEnv_m08,mEnv_08
+	smpsEnvTable END,$40
+ModEnv_m02:	smpsEnvMod $00
+ModEnv_m01:	smpsEnvMod $01,$02,$01,$00,-$01,-$02,-$03,-$04,-$03,-$02,-$01,REST
+ModEnv_m03:	smpsEnvMod $00,$00,$00,$00,$13,$26,$39,$4C,$5F,$72,$7F,$72,REST
+ModEnv_m04:	smpsEnvMod $01,$02,$03,$02,$01,$00,-$01,-$02,-$03,-$02,-$01,$00,INDEX,0
+ModEnv_m05:	smpsEnvMod $00,$00,$01,$03,$01,$00,-$01,-$03,-$01,$00,INDEX,2
+ModEnv_m06:	smpsEnvMod $00,$00,$00,$00,  0, 10, 20, 30,  20,  10,   0, -10, -20, -30, -20, -10,INDEX,4
+ModEnv_m07:	smpsEnvMod $00,$00,$00,$00, 22, 44, 66, 44,  22,   0, -22, -44, -66, -44, -22,INDEX,3
+ModEnv_m08:	smpsEnvMod $01,$02,$03,$04,$03,$02,$01,$00,-$01,-$02,-$03,-$04,-$03,-$02,-$01,$00,INDEX,1
 ; ---------------------------------------------------------------------------
 ; Universal Volume Envelopes
 ; ---------------------------------------------------------------------------
 SourceSMPS2ASM := 1
 SourceDriver := 1
 SMPS_VolEnvIndex:
-	smpsEnvTable START
-	smpsEnvTable SMPS_VolEnvIndex_f01,fTone_01
-	smpsEnvTable SMPS_VolEnvIndex_f02,fTone_02
-	smpsEnvTable SMPS_VolEnvIndex_f03,fTone_03
-	smpsEnvTable SMPS_VolEnvIndex_f04,fTone_04
-	smpsEnvTable SMPS_VolEnvIndex_f05,fTone_05
-	smpsEnvTable SMPS_VolEnvIndex_f06,fTone_06
-	smpsEnvTable SMPS_VolEnvIndex_f07,fTone_07
-	smpsEnvTable SMPS_VolEnvIndex_f08,fTone_08
-	smpsEnvTable SMPS_VolEnvIndex_f09,fTone_09
-	smpsEnvTable SMPS_VolEnvIndex_f0A,fTone_0A
-	smpsEnvTable SMPS_VolEnvIndex_f0B,fTone_0B
-	smpsEnvTable SMPS_VolEnvIndex_f0C,fTone_0C
-	smpsEnvTable SMPS_VolEnvIndex_f0D,fTone_0D
-	smpsEnvTable SMPS_VolEnvIndex_s01,sTone_01
-	smpsEnvTable SMPS_VolEnvIndex_s02,sTone_02
-	smpsEnvTable SMPS_VolEnvIndex_s03,sTone_03
-	smpsEnvTable SMPS_VolEnvIndex_s04,sTone_04
-	smpsEnvTable SMPS_VolEnvIndex_s05,sTone_05
-	smpsEnvTable SMPS_VolEnvIndex_s06,sTone_06
-	smpsEnvTable SMPS_VolEnvIndex_s07,sTone_07
-	smpsEnvTable SMPS_VolEnvIndex_s08,sTone_08
-	smpsEnvTable SMPS_VolEnvIndex_s09,sTone_09
-	smpsEnvTable SMPS_VolEnvIndex_s0A,sTone_0A
-	smpsEnvTable SMPS_VolEnvIndex_s0B,sTone_0B
-	smpsEnvTable SMPS_VolEnvIndex_s0C,sTone_0C
-	smpsEnvTable SMPS_VolEnvIndex_s0D,sTone_0D
-	smpsEnvTable SMPS_VolEnvIndex_s0E,sTone_0E
-	smpsEnvTable SMPS_VolEnvIndex_s0F,sTone_0F
-	smpsEnvTable SMPS_VolEnvIndex_s10,sTone_10
-	smpsEnvTable SMPS_VolEnvIndex_s11,sTone_11
-	smpsEnvTable SMPS_VolEnvIndex_s12,sTone_12
-	smpsEnvTable SMPS_VolEnvIndex_s13,sTone_13
-	smpsEnvTable SMPS_VolEnvIndex_s14,sTone_14
-	smpsEnvTable SMPS_VolEnvIndex_s15,sTone_15
-	smpsEnvTable SMPS_VolEnvIndex_s16,sTone_16
-	smpsEnvTable SMPS_VolEnvIndex_s17,sTone_17
-	smpsEnvTable SMPS_VolEnvIndex_s18,sTone_18
-	smpsEnvTable SMPS_VolEnvIndex_s19,sTone_19
-	smpsEnvTable SMPS_VolEnvIndex_s1A,sTone_1A
-	smpsEnvTable SMPS_VolEnvIndex_s1B,sTone_1B
-	smpsEnvTable SMPS_VolEnvIndex_s1C,sTone_1C
-	smpsEnvTable SMPS_VolEnvIndex_s1D,sTone_1D
-	smpsEnvTable SMPS_VolEnvIndex_s1E,sTone_1E
-	smpsEnvTable SMPS_VolEnvIndex_s1F,sTone_1F
-	smpsEnvTable SMPS_VolEnvIndex_s20,sTone_20
-	smpsEnvTable SMPS_VolEnvIndex_s21,sTone_21
-	smpsEnvTable SMPS_VolEnvIndex_s22,sTone_22
-	smpsEnvTable SMPS_VolEnvIndex_s23,sTone_23
-	smpsEnvTable SMPS_VolEnvIndex_s24,sTone_24
-	smpsEnvTable SMPS_VolEnvIndex_s25,sTone_25
-	smpsEnvTable SMPS_VolEnvIndex_s26,sTone_26
-	smpsEnvTable SMPS_VolEnvIndex_s27,sTone_27
-	smpsEnvTable END
-SMPS_VolEnvIndex_f01:	smpsEnvVolPsg $00,$00,$00,$01,$01,$01,$02,$02,$02,$03,$03,$03,$04,$04,$04,$05,$05,$05,$06,$06,$06,$07,HOLD
-SMPS_VolEnvIndex_f02:	smpsEnvVolPsg $00,$02,$04,$06,$08,$10,HOLD
-SMPS_VolEnvIndex_f03:	smpsEnvVolPsg $00,$00,$01,$01,$02,$02,$03,$03,$04,$04,$05,$05,$06,$06,$07,$07,HOLD
-SMPS_VolEnvIndex_f04:	smpsEnvVolPsg $00,$00,$02,$03,$04,$04,$05,$05,$05,$06,HOLD
-SMPS_VolEnvIndex_f05:	smpsEnvVolPsg $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01
-			smpsEnvVolPsg $01,$01,$01,$01,$01,$01,$01,$01,$02,$02,$02,$02,$02,$02,$02,$02
-			smpsEnvVolPsg $03,$03,$03,$03,$03,$03,$03,$03,$04,HOLD
-SMPS_VolEnvIndex_f06:	smpsEnvVolPsg $03,$03,$03,$02,$02,$02,$02,$01,$01,$01,$00,$00,$00,$00,HOLD
-SMPS_VolEnvIndex_f07:	smpsEnvVolPsg $00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$02,$02,$02,$02,$02
-			smpsEnvVolPsg $03,$03,$03,$04,$04,$04,$05,$05,$05,$06,$07,HOLD
-SMPS_VolEnvIndex_f08:	smpsEnvVolPsg $00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$02,$02,$02,$02,$02,$02
-			smpsEnvVolPsg $03,$03,$03,$03,$03,$04,$04,$04,$04,$04,$05,$05,$05,$05,$05,$06
-			smpsEnvVolPsg $06,$06,$06,$06,$07,$07,$07,HOLD
-SMPS_VolEnvIndex_f09:	smpsEnvVolPsg $00,$01,$02,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$0D,$0E,$0F,HOLD
-SMPS_VolEnvIndex_f0A:	smpsEnvVolPsg $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01
-			smpsEnvVolPsg $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
-			smpsEnvVolPsg $01,$01,$01,$01,$01,$01,$01,$01,$02,$02,$02,$02,$02,$02,$02,$02
-			smpsEnvVolPsg $02,$02,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$04,HOLD
-SMPS_VolEnvIndex_f0B:	smpsEnvVolPsg $04,$04,$04,$03,$03,$03,$02,$02,$02,$01,$01,$01,$01,$01,$01,$01
-			smpsEnvVolPsg $02,$02,$02,$02,$02,$03,$03,$03,$03,$03,$04,HOLD
-SMPS_VolEnvIndex_f0C:	smpsEnvVolPsg $04,$04,$03,$03,$02,$02,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
-			smpsEnvVolPsg $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$02,$02,$02,$02,$02,$02
-			smpsEnvVolPsg $02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$03,$03
-			smpsEnvVolPsg $03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03
-			smpsEnvVolPsg $03,$03,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04
-			smpsEnvVolPsg $04,$04,$04,$04,$04,$04,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05
-			smpsEnvVolPsg $05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$06,$06,$06,$06,$06,$06
-			smpsEnvVolPsg $06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$07,HOLD
-SMPS_VolEnvIndex_f0D:	smpsEnvVolPsg $0E,$0D,$0C,$0B,$0A,$09,$08,$07,$06,$05,$04,$03,$02,$01,$00,HOLD
+	smpsEnvTable START,1
+	smpsEnvTable VolEnv_f01,fTone_01
+	smpsEnvTable VolEnv_f02,fTone_02
+	smpsEnvTable VolEnv_f03,fTone_03
+	smpsEnvTable VolEnv_f04,fTone_04
+	smpsEnvTable VolEnv_f05,fTone_05
+	smpsEnvTable VolEnv_f06,fTone_06
+	smpsEnvTable VolEnv_f07,fTone_07
+	smpsEnvTable VolEnv_f08,fTone_08
+	smpsEnvTable VolEnv_f09,fTone_09
+	smpsEnvTable VolEnv_f0A,fTone_0A
+	smpsEnvTable VolEnv_f0B,fTone_0B
+	smpsEnvTable VolEnv_f0C,fTone_0C
+	smpsEnvTable VolEnv_f0D,fTone_0D
+	smpsEnvTable VolEnv_s01,sTone_01
+	smpsEnvTable VolEnv_s02,sTone_02
+	smpsEnvTable VolEnv_s03,sTone_03
+	smpsEnvTable VolEnv_s04,sTone_04
+	smpsEnvTable VolEnv_s05,sTone_05
+	smpsEnvTable VolEnv_s06,sTone_06
+	smpsEnvTable VolEnv_s07,sTone_07
+	smpsEnvTable VolEnv_s08,sTone_08
+	smpsEnvTable VolEnv_s09,sTone_09
+	smpsEnvTable VolEnv_s0A,sTone_0A
+	smpsEnvTable VolEnv_s0B,sTone_0B
+	smpsEnvTable VolEnv_s0C,sTone_0C
+	smpsEnvTable VolEnv_s0D,sTone_0D
+	smpsEnvTable VolEnv_s0E,sTone_0E
+	smpsEnvTable VolEnv_s0F,sTone_0F
+	smpsEnvTable VolEnv_s10,sTone_10
+	smpsEnvTable VolEnv_s11,sTone_11
+	smpsEnvTable VolEnv_s12,sTone_12
+	smpsEnvTable VolEnv_s13,sTone_13
+	smpsEnvTable VolEnv_s14,sTone_14
+	smpsEnvTable VolEnv_s15,sTone_15
+	smpsEnvTable VolEnv_s16,sTone_16
+	smpsEnvTable VolEnv_s17,sTone_17
+	smpsEnvTable VolEnv_s18,sTone_18
+	smpsEnvTable VolEnv_s19,sTone_19
+	smpsEnvTable VolEnv_s1A,sTone_1A
+	smpsEnvTable VolEnv_s1B,sTone_1B
+	smpsEnvTable VolEnv_s1C,sTone_1C
+	smpsEnvTable VolEnv_s1D,sTone_1D
+	smpsEnvTable VolEnv_s1E,sTone_1E
+	smpsEnvTable VolEnv_s1F,sTone_1F
+	smpsEnvTable VolEnv_s20,sTone_20
+	smpsEnvTable VolEnv_s21,sTone_21
+	smpsEnvTable VolEnv_s22,sTone_22
+	smpsEnvTable VolEnv_s23,sTone_23
+	smpsEnvTable VolEnv_s24,sTone_24
+	smpsEnvTable VolEnv_s25,sTone_25
+	smpsEnvTable VolEnv_s26,sTone_26
+	smpsEnvTable VolEnv_s27,sTone_27
+	smpsEnvTable DATA_8A59,fS28bit_01
+	smpsEnvTable DATA_8A5B,fS28bit_02
+	smpsEnvTable DATA_8A62,fS28bit_03
+	smpsEnvTable DATA_8A6B,fS28bit_04
+;	smpsEnvTable DATA_8A78,fS28bit_05
+;	smpsEnvTable DATA_8A83,fS28bit_06
+;	smpsEnvTable DATA_8AA2,fS28bit_07
+;	smpsEnvTable DATA_8AAF,fS28bit_08
+;	smpsEnvTable DATA_8ABE,fS28bit_09
+;	smpsEnvTable DATA_8ACA,fS28bit_0A
+;	smpsEnvTable DATA_8AD0,fS28bit_0B
+;	smpsEnvTable DATA_8ADB,fS28bit_0C
+;	smpsEnvTable DATA_8AE8,fS28bit_0D
+;	smpsEnvTable DATA_8AF3,fS28bit_0E
+;	smpsEnvTable DATA_8B02,fS28bit_0F
+;	smpsEnvTable DATA_8B19,fS28bit_10
+;	smpsEnvTable DATA_8B2D,fS28bit_11
+;	smpsEnvTable DATA_8B44,fS28bit_12
+;	smpsEnvTable DATA_8B5B,fS28bit_13
+;	smpsEnvTable DATA_8B75,fS28bit_14
+;	smpsEnvTable DATA_8B8A,fS28bit_15
+	smpsEnvTable END,$100
+VolEnv_f01:	smpsEnvVolPsg $00,$00,$00,$01,$01,$01,$02,$02,$02,$03,$03,$03,$04,$04,$04,$05,$05,$05,$06,$06,$06,$07,HOLD
+VolEnv_f02:	smpsEnvVolPsg $00,$02,$04,$06,$08,$10,HOLD
+VolEnv_f03:	smpsEnvVolPsg $00,$00,$01,$01,$02,$02,$03,$03,$04,$04,$05,$05,$06,$06,$07,$07,HOLD
+VolEnv_f04:	smpsEnvVolPsg $00,$00,$02,$03,$04,$04,$05,$05,$05,$06,HOLD
+VolEnv_f05:	smpsEnvVolPsg $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01
+		smpsEnvVolPsg $01,$01,$01,$01,$01,$01,$01,$01,$02,$02,$02,$02,$02,$02,$02,$02
+		smpsEnvVolPsg $03,$03,$03,$03,$03,$03,$03,$03,$04,HOLD
+VolEnv_f06:	smpsEnvVolPsg $03,$03,$03,$02,$02,$02,$02,$01,$01,$01,$00,$00,$00,$00,HOLD
+VolEnv_f07:	smpsEnvVolPsg $00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$02,$02,$02,$02,$02
+		smpsEnvVolPsg $03,$03,$03,$04,$04,$04,$05,$05,$05,$06,$07,HOLD
+VolEnv_f08:	smpsEnvVolPsg $00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$02,$02,$02,$02,$02,$02
+		smpsEnvVolPsg $03,$03,$03,$03,$03,$04,$04,$04,$04,$04,$05,$05,$05,$05,$05,$06
+		smpsEnvVolPsg $06,$06,$06,$06,$07,$07,$07,HOLD
+VolEnv_f09:	smpsEnvVolPsg $00,$01,$02,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$0D,$0E,$0F,HOLD
+VolEnv_f0A:	smpsEnvVolPsg $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01
+		smpsEnvVolPsg $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
+		smpsEnvVolPsg $01,$01,$01,$01,$01,$01,$01,$01,$02,$02,$02,$02,$02,$02,$02,$02
+		smpsEnvVolPsg $02,$02,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$04,HOLD
+VolEnv_f0B:	smpsEnvVolPsg $04,$04,$04,$03,$03,$03,$02,$02,$02,$01,$01,$01,$01,$01,$01,$01
+		smpsEnvVolPsg $02,$02,$02,$02,$02,$03,$03,$03,$03,$03,$04,HOLD
+VolEnv_f0C:	smpsEnvVolPsg $04,$04,$03,$03,$02,$02,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
+		smpsEnvVolPsg $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$02,$02,$02,$02,$02,$02
+		smpsEnvVolPsg $02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$03,$03
+		smpsEnvVolPsg $03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03
+		smpsEnvVolPsg $03,$03,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04
+		smpsEnvVolPsg $04,$04,$04,$04,$04,$04,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05
+		smpsEnvVolPsg $05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$06,$06,$06,$06,$06,$06
+		smpsEnvVolPsg $06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$07,HOLD
+VolEnv_f0D:	smpsEnvVolPsg $0E,$0D,$0C,$0B,$0A,$09,$08,$07,$06,$05,$04,$03,$02,$01,$00,HOLD
 
-SMPS_VolEnvIndex_s01:	smpsEnvVolPsg $02,REST
-SMPS_VolEnvIndex_s02:	smpsEnvVolPsg $00,$02,$04,$06,$08,$10,REST
-SMPS_VolEnvIndex_s03:	smpsEnvVolPsg $02,$01,$00,$00,$01,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$03,$03,$03,$04,$04,$04,$05,HOLD
-SMPS_VolEnvIndex_s04:	smpsEnvVolPsg $00,$00,$02,$03,$04,$04,$05,$05,$05,$06,$06,HOLD
-SMPS_VolEnvIndex_s05:	smpsEnvVolPsg $03,$00,$01,$01,$01,$02,$03,$04,$04,$05,HOLD
-SMPS_VolEnvIndex_s06:	smpsEnvVolPsg $00,$00,$01,$01,$02,$03,$04,$05,$05,$06,$08,$07,$07,$06,HOLD
-SMPS_VolEnvIndex_s07:	smpsEnvVolPsg $01,$0C,$03,$0F,$02,$07,$03,$0F,REPEAT
-SMPS_VolEnvIndex_s08:	smpsEnvVolPsg $00,$00,$00,$02,$03,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0E,$0F,HOLD
-SMPS_VolEnvIndex_s09:	smpsEnvVolPsg $03,$02,$01,$01,$00,$00,$01,$02,$03,$04,HOLD
-SMPS_VolEnvIndex_s0A:	smpsEnvVolPsg $01,$00,$00,$00,$00,$01,$01,$01,$02,$02,$02,$03,$03,$03,$03,$04,$04,$04,$05,$05,HOLD
-SMPS_VolEnvIndex_s0B:	smpsEnvVol    $10,$20,$30,$40,$30,$20,$10,$00,$7F,REPEAT	; ...,-$10,REPEAT
-SMPS_VolEnvIndex_s0C:	smpsEnvVolPsg $00,$00,$01,$01,$03,$03,$04,$05,REST
-SMPS_VolEnvIndex_s0D:	smpsEnvVolPsg $00,HOLD
-SMPS_VolEnvIndex_s0E:	smpsEnvVolPsg $02,REST
-SMPS_VolEnvIndex_s0F:	smpsEnvVolPsg $00,$02,$04,$06,$08,$7F,REST
-SMPS_VolEnvIndex_s10:	smpsEnvVolPsg $09,$09,$09,$08,$08,$08,$07,$07,$07,$06,$06,$06,$05,$05,$05,$04
-			smpsEnvVolPsg $04,$04,$03,$03,$03,$02,$02,$02,$01,$01,$01,$00,$00,$00,HOLD
-SMPS_VolEnvIndex_s11:	smpsEnvVolPsg $01,$01,$01,$00,$00,$00,HOLD
-SMPS_VolEnvIndex_s12:	smpsEnvVolPsg $03,$00,$01,$01,$01,$02,$03,$04,$04,$05,HOLD
-SMPS_VolEnvIndex_s13:	smpsEnvVolPsg $00,$00,$01,$01,$02,$03,$04,$05,$05,$06,$08,$07,$07,$06,HOLD
-SMPS_VolEnvIndex_s14:	smpsEnvVolPsg $0A,$05,$00,$04,$08,REST
-SMPS_VolEnvIndex_s15:	smpsEnvVolPsg $00,$00,$00,$02,$03,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0E,$0F,REST
-SMPS_VolEnvIndex_s16:	smpsEnvVolPsg $03,$02,$01,$01,$00,$00,$01,$02,$03,$04,HOLD
-SMPS_VolEnvIndex_s17:	smpsEnvVolPsg $01,$00,$00,$00,$00,$01,$01,$01,$02,$02,$02,$03,$03,$03,$03,$04
-			smpsEnvVolPsg $04,$04,$05,$05,HOLD
-SMPS_VolEnvIndex_s18:	smpsEnvVol    $10,$20,$30,$40,$30,$20,$10,$00,$10,$20,$30,$40,$30,$20,$10,$00
-			smpsEnvVol    $10,$20,$30,$40,$30,$20,$10,$00,REPEAT
-SMPS_VolEnvIndex_s19:	smpsEnvVolPsg $00,$00,$01,$01,$03,$03,$04,$05,REST
-SMPS_VolEnvIndex_s1A:	smpsEnvVol    $00,$02,$04,$06,$08,$16,REST
-SMPS_VolEnvIndex_s1B:	smpsEnvVolPsg $00,$00,$01,$01,$03,$03,$04,$05,REST
-SMPS_VolEnvIndex_s1C:	smpsEnvVolPsg $04,$04,$04,$04,$03,$03,$03,$03,$02,$02,$02,$02,$01,$01,$01,$01,REST
-SMPS_VolEnvIndex_s1D:	smpsEnvVolPsg $00,$00,$00,$00,$01,$01,$01,$01,$02,$02,$02,$02,$03,$03,$03,$03
-			smpsEnvVolPsg $04,$04,$04,$04,$05,$05,$05,$05,$06,$06,$06,$06,$07,$07,$07,$07
-			smpsEnvVolPsg $08,$08,$08,$08,$09,$09,$09,$09,$0A,$0A,$0A,$0A,HOLD
-SMPS_VolEnvIndex_s1E:	smpsEnvVolPsg $00,$0A,REST
-SMPS_VolEnvIndex_s1F:	smpsEnvVolPsg $00,$02,$04,HOLD
-SMPS_VolEnvIndex_s20:	smpsEnvVol    $30,$20,$10,$00,$00,$00,$00,$00,$08,$10,$20,$30, HOLD
-SMPS_VolEnvIndex_s21:	smpsEnvVolPsg $00,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$06,$06,$06,$08,$08
-			smpsEnvVolPsg $0A,REST
-SMPS_VolEnvIndex_s22:	smpsEnvVolPsg $00,$02,$03,$04,$06,$07,HOLD
-SMPS_VolEnvIndex_s23:	smpsEnvVolPsg $02,$01,$00,$00,$00,$02,$04,$07,HOLD
-SMPS_VolEnvIndex_s24:	smpsEnvVolPsg $0F,$01,$05,REST
-SMPS_VolEnvIndex_s25:	smpsEnvVolPsg $08,$06,$02,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$0D,$0E,$0F,$10,REST
-SMPS_VolEnvIndex_s26:	smpsEnvVolPsg $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01
-			smpsEnvVolPsg $01,$01,$01,$01,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$03,$03
-			smpsEnvVolPsg $03,$03,$03,$03,$03,$03,$03,$03,$04,$04,$04,$04,$04,$04,$04,$04
-			smpsEnvVolPsg $04,$04,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$06,$06,$06,$06
-			smpsEnvVolPsg $06,$06,$06,$06,$06,$06,$07,$07,$07,$07,$07,$07,$07,$07,$07,$07
-			smpsEnvVolPsg $08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$09,$09,$09,$09,$09,$09
-;			smpsEnvVolPsg $09,$09		; S3A has these two extra ticks
-			smpsEnvVolPsg $09,$09,REST
-SMPS_VolEnvIndex_s27:	smpsEnvVolPsg $00,$02,$02,$02,$03,$03,$03,$04,$04,$04,$05,$05,REST
+VolEnv_s01:	smpsEnvVolPsg $02,REST
+VolEnv_s02:	smpsEnvVolPsg $00,$02,$04,$06,$08,$10,REST
+VolEnv_s03:	smpsEnvVolPsg $02,$01,$00,$00,$01,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$03,$03,$03,$04,$04,$04,$05,HOLD
+VolEnv_s04:	smpsEnvVolPsg $00,$00,$02,$03,$04,$04,$05,$05,$05,$06,$06,HOLD
+VolEnv_s05:	smpsEnvVolPsg $03,$00,$01,$01,$01,$02,$03,$04,$04,$05,HOLD
+VolEnv_s06:	smpsEnvVolPsg $00,$00,$01,$01,$02,$03,$04,$05,$05,$06,$08,$07,$07,$06,HOLD
+VolEnv_s07:	smpsEnvVolPsg $01,$0C,$03,$0F,$02,$07,$03,$0F,REPEAT
+VolEnv_s08:	smpsEnvVolPsg $00,$00,$00,$02,$03,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0E,$0F,HOLD
+VolEnv_s09:	smpsEnvVolPsg $03,$02,$01,$01,$00,$00,$01,$02,$03,$04,HOLD
+VolEnv_s0A:	smpsEnvVolPsg $01,$00,$00,$00,$00,$01,$01,$01,$02,$02,$02,$03,$03,$03,$03,$04,$04,$04,$05,$05,HOLD
+VolEnv_s0B:	smpsEnvVol    $10,$20,$30,$40,$30,$20,$10,$00,$7F,REPEAT	; ...,-$10,REPEAT
+VolEnv_s0C:	smpsEnvVolPsg $00,$00,$01,$01,$03,$03,$04,$05,REST
+VolEnv_s0D:	smpsEnvVolPsg $00,HOLD
+VolEnv_s0E:	smpsEnvVolPsg $02,REST
+VolEnv_s0F:	smpsEnvVolPsg $00,$02,$04,$06,$08,$7F,REST
+VolEnv_s10:	smpsEnvVolPsg $09,$09,$09,$08,$08,$08,$07,$07,$07,$06,$06,$06,$05,$05,$05,$04
+		smpsEnvVolPsg $04,$04,$03,$03,$03,$02,$02,$02,$01,$01,$01,$00,$00,$00,HOLD
+VolEnv_s11:	smpsEnvVolPsg $01,$01,$01,$00,$00,$00,HOLD
+VolEnv_s12:	smpsEnvVolPsg $03,$00,$01,$01,$01,$02,$03,$04,$04,$05,HOLD
+VolEnv_s13:	smpsEnvVolPsg $00,$00,$01,$01,$02,$03,$04,$05,$05,$06,$08,$07,$07,$06,HOLD
+VolEnv_s14:	smpsEnvVolPsg $0A,$05,$00,$04,$08,REST
+VolEnv_s15:	smpsEnvVolPsg $00,$00,$00,$02,$03,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0E,$0F,REST
+VolEnv_s16:	smpsEnvVolPsg $03,$02,$01,$01,$00,$00,$01,$02,$03,$04,HOLD
+VolEnv_s17:	smpsEnvVolPsg $01,$00,$00,$00,$00,$01,$01,$01,$02,$02,$02,$03,$03,$03,$03,$04
+		smpsEnvVolPsg $04,$04,$05,$05,HOLD
+VolEnv_s18:	smpsEnvVol    $10,$20,$30,$40,$30,$20,$10,$00,$10,$20,$30,$40,$30,$20,$10,$00
+		smpsEnvVol    $10,$20,$30,$40,$30,$20,$10,$00,REPEAT
+VolEnv_s19:	smpsEnvVolPsg $00,$00,$01,$01,$03,$03,$04,$05,REST
+VolEnv_s1A:	smpsEnvVol    $00,$02,$04,$06,$08,$16,REST
+VolEnv_s1B:	smpsEnvVolPsg $00,$00,$01,$01,$03,$03,$04,$05,REST
+VolEnv_s1C:	smpsEnvVolPsg $04,$04,$04,$04,$03,$03,$03,$03,$02,$02,$02,$02,$01,$01,$01,$01,REST
+VolEnv_s1D:	smpsEnvVolPsg $00,$00,$00,$00,$01,$01,$01,$01,$02,$02,$02,$02,$03,$03,$03,$03
+		smpsEnvVolPsg $04,$04,$04,$04,$05,$05,$05,$05,$06,$06,$06,$06,$07,$07,$07,$07
+		smpsEnvVolPsg $08,$08,$08,$08,$09,$09,$09,$09,$0A,$0A,$0A,$0A,HOLD
+VolEnv_s1E:	smpsEnvVolPsg $00,$0A,REST
+VolEnv_s1F:	smpsEnvVolPsg $00,$02,$04,HOLD
+VolEnv_s20:	smpsEnvVol    $30,$20,$10,$00,$00,$00,$00,$00,$08,$10,$20,$30, HOLD
+VolEnv_s21:	smpsEnvVolPsg $00,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$06,$06,$06,$08,$08
+		smpsEnvVolPsg $0A,REST
+VolEnv_s22:	smpsEnvVolPsg $00,$02,$03,$04,$06,$07,HOLD
+VolEnv_s23:	smpsEnvVolPsg $02,$01,$00,$00,$00,$02,$04,$07,HOLD
+VolEnv_s24:	smpsEnvVolPsg $0F,$01,$05,REST
+VolEnv_s25:	smpsEnvVolPsg $08,$06,$02,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$0D,$0E,$0F,$10,REST
+VolEnv_s26:	smpsEnvVolPsg $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01
+		smpsEnvVolPsg $01,$01,$01,$01,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$03,$03
+		smpsEnvVolPsg $03,$03,$03,$03,$03,$03,$03,$03,$04,$04,$04,$04,$04,$04,$04,$04
+		smpsEnvVolPsg $04,$04,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$06,$06,$06,$06
+		smpsEnvVolPsg $06,$06,$06,$06,$06,$06,$07,$07,$07,$07,$07,$07,$07,$07,$07,$07
+		smpsEnvVolPsg $08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$09,$09,$09,$09,$09,$09
+;		smpsEnvVolPsg $09,$09		; S3A has these two extra ticks
+		smpsEnvVolPsg $09,$09,REST
+VolEnv_s27:	smpsEnvVolPsg $00,$02,$02,$02,$03,$03,$03,$04,$04,$04,$05,$05,REST
+; Sonic 2 SMS
+DATA_8A59:	smpsEnvVolPsg $00,$00,REST
+DATA_8A5B:	smpsEnvVolPsg $00,$00,$01,$04,$08,$0B,$0E,REST
+DATA_8A62:	smpsEnvVolPsg $00,$00,$00,$02,$04,$06,$07,$0A,$0C,REST
+DATA_8A6B:	smpsEnvVolPsg $00,$01,$02,$02,$02,$02,$02,$02,$02,$03,$03,$04,$04,REST
+;DATA_8A78:	smpsEnvVolPsg $02,$01,$00,$01,$02,$02,$03,$03,$04,$04,HOLD
+;DATA_8A83:	smpsEnvVolPsg $05,$02,$00,$00,$01,$01,$02,$02,$02,$02,$03,$03,$03,$03,$04,$04,$04,$04,$05,$05,$05,$05,$06,$06,$06,$06,$07,$07,$07,$08,HOLD
+;DATA_8AA2:	smpsEnvVolPsg $00,$00,$00,$00,$00,$00,$00,$00,$06,$07,$08,$09,REST
+;DATA_8AAF:	smpsEnvVolPsg $00,$00,$01,$01,$02,$02,$02,$03,$03,$03,$03,$04,$04,$05,HOLD
+;DATA_8ABE:	smpsEnvVolPsg $00,$00,$01,$01,$01,$02,$04,$03,$02,$02,$83,$04
+;DATA_8ACA:	smpsEnvVolPsg $02,$02,$03,$03,$0F,HOLD
+;DATA_8AD0:	smpsEnvVolPsg $03,$01,$01,$01,$01,$01,$02,$03,$04,$04,HOLD
+;DATA_8ADB:	smpsEnvVolPsg $00,$00,$01,$01,$02,$02,$03,$03,$04,$04,$05,$05,HOLD
+;DATA_8AE8:	smpsEnvVolPsg $00,$00,$00,$00,$08,$08,$08,$05,$05,$05,REST
+;DATA_8AF3:	smpsEnvVolPsg $01,$01,$01,$02,$02,$02,$02,$02,$03,$03,$04,$04,$04,$04,HOLD
+;DATA_8B02:	smpsEnvVolPsg $00,$00,$00,$00,$00,$02,$04,$04,$04,$04,$02,$02,$03,$03,$03,$03,$03,$03,$05,$06,$06,$06,HOLD
+;DATA_8B19:	smpsEnvVolPsg $00,$00,$01,$01,$02,$02,$03,$03,$04,$04,$08,$08,$04,$04,$03,$03,$02,$01,$00,HOLD
+;DATA_8B2D:	smpsEnvVolPsg $00,$00,$02,$03,$03,$04,$06,$06,$03,$03,$04,$04,$05,$05,$06,$06,$07,$07,$08,$08,$09,$09,HOLD
+;DATA_8B44:	smpsEnvVolPsg $04,$03,$03,$02,$01,$01,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$02,$02,$02,$02,$03,$03,HOLD
+;DATA_8B5B:	smpsEnvVolPsg $02,$02,$02,$02,$02,$08,$08,$08,$08,$08,$03,$03,$03,$03,$03,$08,$08,$08,$08,$08,$05,$05,$05,$05,$05,REPEAT
+;DATA_8B75:	smpsEnvVolPsg $00,$00,$01,$02,$03,$04,$04,$05,$05,$05,$06,$06,$06,$06,$07,$08,$08,$08,$08,$08,HOLD
+;DATA_8B8A:	smpsEnvVolPsg $00,$00,$03,$02,$03,$04,$06,$08,$08,$08,HOLD
+
 ; ---------------------------------------------------------------------------
 ; FM Universal Voice Bank
 ; ---------------------------------------------------------------------------
@@ -723,20 +767,33 @@ SMPS_FmDrumTable:
 ; ---------------------------------------------------------------------------
 ; PSG Drums
 ; ---------------------------------------------------------------------------
-; vibr,enve,noisetype
+; noise,volume,volenv
 SMPS_PsgDrumTable:
-	smpsEnvTable START
-	smpsEnvTable SMPS_PsgDrumTable_01
-	smpsEnvTable SMPS_PsgDrumTable_02
-	smpsEnvTable SMPS_PsgDrumTable_03
-	smpsEnvTable SMPS_PsgDrumTable_04
-	smpsEnvTable SMPS_PsgDrumTable_05
-	smpsEnvTable END
-SMPS_PsgDrumTable_01:	dc.b  1<<3,fTone_02,$E5
-SMPS_PsgDrumTable_02:	dc.b  1<<3,fTone_03,$E4
-SMPS_PsgDrumTable_03:	dc.b  1<<3,fTone_02,$E4
-SMPS_PsgDrumTable_04:	dc.b  2<<3,fTone_01,$E4
-SMPS_PsgDrumTable_05:	dc.b  2<<3,fTone_02,$E4
+	smpsEnvTable START,$81
+;	smpsEnvTable PsgDrum_01
+;	smpsEnvTable PsgDrum_02
+;	smpsEnvTable PsgDrum_03
+;	smpsEnvTable PsgDrum_04
+;	smpsEnvTable PsgDrum_05
+	smpsEnvTable PsgDrum_S2Bbit_bit0,pdS28bit_00
+	smpsEnvTable PsgDrum_S2Bbit_bit1,pdS28bit_01
+	smpsEnvTable PsgDrum_S2Bbit_bit2,pdS28bit_02
+	smpsEnvTable PsgDrum_S2Bbit_bit3,pdS28bit_03
+	smpsEnvTable PsgDrum_S2Bbit_bit4,pdS28bit_04
+	smpsEnvTable PsgDrum_S2Bbit_bit5,pdS28bit_05
+	smpsEnvTable END,$E0
+;PsgDrum_01:	dc.b  $E5,1<<3,fTone_02
+;PsgDrum_02:	dc.b  $E4,1<<3,fTone_03
+;PsgDrum_03:	dc.b  $E4,1<<3,fTone_02
+;PsgDrum_04:	dc.b  $E4,2<<3,fTone_01
+;PsgDrum_05:	dc.b  $E4,2<<3,fTone_02
+PsgDrum_S2Bbit_bit0:	dc.b $E4,2<<3,fS28bit_01
+PsgDrum_S2Bbit_bit1:	dc.b $E4,2<<3,fS28bit_03
+PsgDrum_S2Bbit_bit2:	dc.b $E5,2<<3,fS28bit_02
+PsgDrum_S2Bbit_bit3:	dc.b $E4,2<<3,fS28bit_03
+PsgDrum_S2Bbit_bit4:	dc.b $E6,3<<3,fS28bit_03
+PsgDrum_S2Bbit_bit5:	dc.b $E4,4<<3,fS28bit_04
+
 ; ---------------------------------------------------------------------------
 ; Music	index
 ; index start: "START" keyword, first song id
@@ -747,8 +804,10 @@ SMPS_PsgDrumTable_05:	dc.b  2<<3,fTone_02,$E4
 SMPS_MusicIndex:
 	musdef START,bgm__First
 	musdef 0,0,0,BgmTest,bgm_Test
+	musdef 0,0,0,BgmSonicExePiano,bgm_SonicExePiano
 	musdef 0,0,0,BgmSoccer,bgm_Soccer
 	musdef 0,0,0,BgmSCDTimeTravel,bgm_SCDTimeTravel
+	musdef 0,0,0,BgmS28bUnused,bgm_S28bUnused
 
 	musdef 0,0,0,BgmS1Title,bgm_S1Title
 	musdef 0,0,0,BgmS1GHZ,bgm_S1GHZ
@@ -2256,9 +2315,13 @@ CsfxS3DB:	include "res/sfx/sonic3/DB.asm"
 ; ---------------------------------------------------------------------------
 BgmTest:	include "res/bgm/_tester.asm"
 		even
+BgmSonicExePiano:	include "res/bgm/SonicExePiano.asm"
+		even
 BgmSoccer:	include "res/bgm/MDSoccer-Title.asm"
 		even
 BgmSCDTimeTravel:	include "res/bgm/CD Time Travel.asm"
+		even
+BgmS28bUnused:	include "res/bgm/sonic2-8bit/Unknown Theme.asm"
 		even
 
 BgmS1Title:	include "res/bgm/sonic1/S1-Title.asm"

@@ -57,12 +57,35 @@ PSGDoNext:
 	endif
 ; ===========================================================================
 PSGSetFreq:
-	if __smpsDrum
-		btst	#_drummode,TrackPlaybackControl(a5)
-		bne.s	.drummode
-	endif
 		subi.b	#$81,d5					; Convert to 0-based index
 		bcs.s	.rest					; If $80, put track at rest
+	if __smpsDrum
+		btst	#_drummode,TrackPlaybackControl(a5)
+		beq.s	.notemode
+
+		move.l	v_dataptr(a6),a0
+		moveq	#0,d0
+		move.w	drvdata.psgdrum(a0),d0
+		add.l	d0,a0
+		add.b	d5,d5
+		move.b	(a0,d5.w),-(sp)
+		move.w	(sp)+,d0
+		move.b	1(a0,d5.w),d0
+		adda.w	d0,a0
+
+		move.b	(a0)+,d0
+;		beq.s	.noplay
+		clr.w	TrackFreq(a5)
+		move.b	d0,TrackVoiceControl(a5)
+		btst	#_sfxoverride,TrackPlaybackControl(a5)
+		bne.s	.noplay
+		move.b	d0,(psginput).l
+.noplay:
+		move.b	(a0)+,TrackVolume(a5)
+		move.b	(a0)+,TrackVolEnvCtrl(a5)
+		rts
+	endif
+.notemode:
 		add.b	TrackTranspose(a5),d5
 	if __smpsDebug
 		cmp.w	#12*7,d5
@@ -74,13 +97,6 @@ PSGSetFreq:
 .rest:		or.b	#1<<_resting,TrackPlaybackControl(a5)
 		move.w	#-1,TrackFreq(a5)
 		bra.w	PSGNoteOff
-	if __smpsDrum
-.drummode:
-		subi.b	#$80,d5
-		move.b	d5,TrackDrum(a5)
-		beq.s	.rest
-		rts
-	endif
 .assert:	SMPS_assert "PSGSetFreq: invalid frequency, TODO: print freq id"
 ; ===========================================================================
 ; PSG Note Values: c-0 to a-6
@@ -101,57 +117,42 @@ PSGUpdateFreq:
 		beq.s	PSGPrepareNote.exit			; if not, branch
 
 PSGPrepareNote:
-	if __smpsDrum
-		btst	#_drummode,TrackPlaybackControl(a5)
-		bne.s	.drummode
-	endif
 		moveq	#0,d2
 		bsr.w	GetFrequency
 		bpl.s	.valid
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
 .exit:		rts
-	if __smpsDrum
-.drummode:
-		moveq	#0,d1
-		move.b	TrackDrum(a5),d1
-		beq.s	.exit
-
-		move.l	v_dataptr(a6),a0
-		moveq	#0,d0
-		move.w	drvdata.psgdrum(a0),d0
-		add.l	d0,a0
-		add.w	d1,d1
-		move.b	-2(a0,d1.w),-(sp)
-		move.w	(sp)+,d0
-		move.b	1-2(a0,d1.w),d0
-		adda.w	d0,a0
-
-		move.b	(a0)+,TrackVolume(a5)
-		move.b	(a0)+,TrackVolEnvIndex(a5)
-		move.b	(a0)+,d0
-		move.b	d0,TrackVoiceControl(a5)
-		btst	#_sfxoverride,TrackPlaybackControl(a5)
-		bne.s	.exit
-		move.b	d0,(psginput).l
-		rts
-	endif
 .valid:
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	.exit
-; TODO: check for other noise modes
+		lea	(psginput).l,a0
+		move.b	TrackVoiceControl(a5),d2
+		cmp.b	#$E0,d2
+		bhs.s	.noise
 		moveq_	$E0,d0
-		and.b	TrackVoiceControl(a5),d0		; Get channel bits
-		btst	#_special,TrackPlaybackControl(a5)
-		beq.s	.notpsg34shared
-		moveq_	$C0,d0					; Use PSG 3 channel bits
-.notpsg34shared:
+		and.b	d2,d0					; Get channel bits
+		andi.w	#$3FF,d6
 		moveq	#$F,d1
 		and.w	d6,d1					; Low nibble of frequency
-		or.b	d1,d0					; Latch tone data to channel
+		or.b	d0,d1					; Latch tone data to channel
 		lsr.w	#4,d6					; Get upper 6 bits of frequency
-		andi.b	#$3F,d6					; Send to latched channel
-		move.b	d0,(psginput).l
-		move.b	d6,(psginput).l
+		btst	#_special,TrackPlaybackControl(a5)
+		beq.s	.notpsg3noise
+		or.b	#$E0,d2
+		cmp.b	v_lastpsg4(a6),d2
+		beq.s	.notpsg3noise
+		move.b	d2,v_lastpsg4(a6)
+		move.b	d2,(a0)					; 1110.nnn
+.notpsg3noise:
+		move.b	d1,(a0)					; 1cc0ffff
+		move.b	d6,(a0)					; 0.ffffff
+		rts
+.noise:
+		cmp.b	v_lastpsg4(a6),d2
+		beq.s	.nexit
+		move.b	d2,v_lastpsg4(a6)
+		move.b	d2,(a0)					; 1cc0.nnn
+.nexit:
 		rts
 ; ===========================================================================
 PSGSilence:
@@ -161,7 +162,7 @@ PSGNoteOff:
 SendPSGNoteOff:
 		moveq	#$1F,d0					; Maximum volume attenuation
 		or.b	TrackVoiceControl(a5),d0		; PSG channel to change
-		move.b	d0,(psginput).l
+		move.b	d0,(psginput).l				; 1cc1vvvv
 		btst	#_special,TrackPlaybackControl(a5)
 		beq.s	.notpsg34shared
 		move.b	#$FF,(psginput).l			; If so, stop noise channel while we're at it

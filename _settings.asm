@@ -8,7 +8,7 @@ __smpsJingle		equ 1
 __smpsBFX		equ 1
 __smpsModEnv		equ 1
 __smpsPanEnv		equ 0
-__smpsDrum		equ 0
+__smpsDrum		equ 1
 __smpsSeqStack		equ 10
 __smpsCommBytes		equ 8
 ; __smpsTarget values:
