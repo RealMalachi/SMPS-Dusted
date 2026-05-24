@@ -45,7 +45,8 @@ ymd0		equ $A04001
 yma1		equ $A04002
 ymd1		equ $A04003
 psginput	equ $C00011
-smpsZ80RAM	equ $A00000
+z80ram		equ $A00000
+z80busreq	equ $A11100
 	elseif __smpsTarget=="fuckFM"
 psginput	equ $C00011
 	elseif __smpsTarget=="sys14"
@@ -59,6 +60,10 @@ psginput	equ $C00011
 adpcmdata	equ $800010		; reads return how many free bytes their are in the FIFO, writes add to the FIFO
 adpcmctrl	equ $800012		; 
 	elseif __smpsTarget=="copera"
+psginput	equ $C00011
+adpcmdata	equ $800010		; reads return how many free bytes their are in the FIFO, writes add to the FIFO
+adpcmctrl	equ $800012		; 
+
 ymz263B_stat	equ $BFF801		; u8 ; YMZ263B Status read/address write (no Copera games write to this address, but it should work based on the YMZ263B datasheet)
 ymz263B_ch1data	equ $BFF803		; u8 ; YMZ263B Channel #1 data
 ymz263B_addr	equ $BFF805		; u8 ; YMZ263B Address write
@@ -69,23 +74,23 @@ ymf262_addr1	equ $BFF824		; u  ; YMF262 Address Part #1 write/Status read
 ymf262_data	equ $BFF828		; u  ; YMF262 Data write
 ymf262_addr2	equ $BFF834		; u  ; YMF262 Address Part #2 write
 
-smps_ym712B	equ $BFF840		; u8 ; YM712B write
+ym712B		equ $BFF840		; u8 ; YM712B write
 	else
 	fatal "Unknown hardware target"
 	endif
 
 SMPS_stopZ80 macro
-	move.w	#$100,($A11100).l
+	move.w	#$100,(z80busreq).l
 	endm
 SMPS_waitZ80 macro
-.w:	btst	#0,($A11100).l
+.w:	btst	#0,(z80busreq).l
 	bne.s	.w
 	endm
 SMPS_startZ80 macro
-	move.w	#0,($A11100).l
+	move.w	#0,(z80busreq).l
 	endm
 SMPS_kdebugtext macro
-	if __smpsDebug=1
+	if __smpsDebug
 	nop
 	endif
 	endm
@@ -174,7 +179,7 @@ _special	= 2	; FM3 multi/PSG3 Noise
 _holdnotes	= 3
 _noattack	= 4
 _drummode	= 5
-_nouservol	= 6	; TODO: rename to _nomuffle
+_nomuffle	= 6
 _playing	= 7	; bpl/bmi
 
 TrackVoiceControl:		ds.b 1			; All	; expected to be 1
@@ -217,9 +222,9 @@ TrackDacSz:			ds.b 0
 	dephase
 
 	phase TrackUniSz
+			ds.b (*)&1
 ; bit 7 enables calculated mod, bit 6 is reserved for modulation type flag
 ; other bits are the mod envelope index
-			ds.b (*)&1
 TrackModulationCtrl:		;ds.b 1			; FM/PSG
 TrackModulationPtr:		ds.l 1			; FM/PSG
 TrackModulationWait:		ds.b 1			; FM/PSG
@@ -232,10 +237,21 @@ TrackModEnvIndex:		;ds.b 1			; FM/PSG
 TrackModEnvPtr:			ds.l 1			; FM/PSG
 ;TrackModEnvMultiply:		ds.b 1			; FM/PSG
 	endif
+	if __smpsPortamento
+TrackPortamentoFreq:		ds.w 1			; FM/PSG
+TrackPortamentoTime:		ds.b 1			; FM/PSG
+	endif
+	if (*)&1
+TrackFmOperators:		ds.b 1			; FM
+	endif
 TrackPsgSz:			ds.b 0
 
 TrackFmVoiceIndex:		;ds.b 1			; FM
 TrackFmVoicePtr:		ds.l 1			; FM
+	ifndef TrackFmOperators
+TrackFmOperators:		ds.b 1			; FM
+	endif
+			ds.b (*)&1
 TrackFmSz:			ds.b 0
 	dephase
 
@@ -310,9 +326,11 @@ v_music_psg3_track:		ds.b TrackPsgSz
 v_music_psg4_track:		ds.b TrackPsgSz
 v_music_psg_tracks_end:		ds.b 0
 v_music_track_ram_end:		ds.b 0
+
+v_music_fm3_multifreq:		ds.w 3*(__smpsFM3Multi<>0)
 v_1up_save_ram_end:		ds.b 0
 
-	if __smpsJingle=1
+	if __smpsJingle
 v_1up_ram_copy:
 	endif
 v_sfx_track_ram:		ds.b 0
@@ -328,19 +346,21 @@ v_sfx_psg2_track:		ds.b TrackPsgSz
 v_sfx_psg3_track:		ds.b TrackPsgSz
 v_sfx_psg_tracks_end:		ds.b 0
 v_sfx_track_ram_end:		ds.b 0
+v_sfx_fm3_multifreq:		ds.w 3*(__smpsFM3Multi<>0)
 
-	if __smpsBFX=1
-v_spcsfx_track_ram:		ds.b 0
-v_spcsfx_fm_tracks:		ds.b 0
-v_spcsfx_fm4_track:		ds.b TrackFmSz
-v_spcsfx_fm_tracks_end:		ds.b 0
-v_spcsfx_psg_tracks:		ds.b 0
-v_spcsfx_psg3_track:		ds.b TrackPsgSz
-v_spcsfx_psg_tracks_end:	ds.b 0
-v_spcsfx_track_ram_end:		ds.b 0
+	if __smpsBSFX
+v_bsfx_track_ram:		ds.b 0
+v_bsfx_fm_tracks:		ds.b 0
+v_bsfx_fm4_track:		ds.b TrackFmSz
+v_bsfx_fm_tracks_end:		ds.b 0
+v_bsfx_psg_tracks:		ds.b 0
+v_bsfx_psg3_track:		ds.b TrackPsgSz
+v_bsfx_psg_tracks_end:		ds.b 0
+v_bsfx_track_ram_end:		ds.b 0
+;v_bsfx_fm3_multifreq:		ds.w 3*(__smpsFM3Multi<>0)
 	endif
 
-	if __smpsJingle=1
+	if __smpsJingle
 v_1up_ram_copy_overlap:		ds.b (v_1up_save_ram_end-v_1up_save_ram)-(v_1up_ram_copy_overlap-v_1up_ram_copy)
 v_1up_ram_copy_end:		ds.b 0
 	endif

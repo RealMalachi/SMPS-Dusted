@@ -930,12 +930,30 @@ SMPS_MusicIndex:
 	musdef 0,0,1,BgmS3Credits,bgm_S3Credits
 	musdef 0,0,1,BgmSKCredits,bgm_SKCredits
 
+	musdef 0,0,0,BgmS3BAIZ1,bgm_S3BAIZ1
+	musdef 0,0,0,BgmS3BAIZ2,bgm_S3BAIZ2
+	musdef 0,0,0,BgmS3BHCZ1,bgm_S3BHCZ1
+	musdef 0,0,0,BgmS3BHCZ2,bgm_S3BHCZ2
+	musdef 0,0,0,BgmS3BMGZ1,bgm_S3BMGZ1
+	musdef 0,0,0,BgmS3BMGZ2,bgm_S3BMGZ2
 	musdef 0,0,0,BgmS3BCNZ1,bgm_S3BCNZ1
 	musdef 0,0,0,BgmS3BCNZ2,bgm_S3BCNZ2
 	musdef 0,0,0,BgmS3BICZ1,bgm_S3BICZ1
 	musdef 0,0,0,BgmS3BICZ2,bgm_S3BICZ2
 	musdef 0,0,0,BgmS3BLBZ1,bgm_S3BLBZ1
 	musdef 0,0,0,BgmS3BLBZ2,bgm_S3BLBZ2
+	musdef 0,0,0,BgmS3BFBZ1,bgm_S3BFBZ1
+	musdef 0,0,0,BgmS3BFBZ2,bgm_S3BFBZ2
+	musdef 0,0,0,BgmS3BMVZ1,bgm_S3BMVZ1
+	musdef 0,0,0,BgmS3BMVZ2,bgm_S3BMVZ2
+	musdef 0,0,0,BgmS3BSOZ1,bgm_S3BSOZ1
+	musdef 0,0,0,BgmS3BSOZ2,bgm_S3BSOZ2
+	musdef 0,0,0,BgmS3BLRZ1,bgm_S3BLRZ1
+	musdef 0,0,0,BgmS3BLRZ2,bgm_S3BLRZ2
+	musdef 0,0,0,BgmS3BSSZ,bgm_S3BSSZ
+	musdef 0,0,0,BgmS3BDEZ1,bgm_S3BDEZ1
+	musdef 0,0,0,BgmS3BDEZ2,bgm_S3BDEZ2
+	musdef 0,0,0,BgmS3BDDZ,bgm_S3BDDZ
 	musdef 0,0,0,BgmS3BKnuckles,bgm_S3BKnuckles
 	musdef 0,0,1,BgmS3BCompMenu,bgm_S3BCompMenu
 	musdef 0,0,1,BgmS3BCredits,bgm_S3BCredits
@@ -2590,6 +2608,45 @@ BgmS3BCredits:	include "res/bgm/sonic3-1103/Credits.asm"
 		even
 BgmS3BUnused:	include "res/bgm/sonic3-1103/Unused Theme.asm"
 		even
+
+BgmS3BAIZ1:	include "res/bgm/sonic3-1103/AIZ1.asm"
+		even
+BgmS3BAIZ2:	include "res/bgm/sonic3-1103/AIZ2.asm"
+		even
+BgmS3BHCZ1:	include "res/bgm/sonic3-1103/HCZ1.asm"
+		even
+BgmS3BHCZ2:	include "res/bgm/sonic3-1103/HCZ2.asm"
+		even
+BgmS3BMGZ1:	include "res/bgm/sonic3-1103/MGZ1.asm"
+		even
+BgmS3BMGZ2:	include "res/bgm/sonic3-1103/MGZ2.asm"
+		even
+
+BgmS3BFBZ1:	include "res/bgm/sonic3-1103/FBZ1.asm"
+		even
+BgmS3BFBZ2:	include "res/bgm/sonic3-1103/FBZ2.asm"
+		even
+BgmS3BMVZ1:	include "res/bgm/sonic3-1103/MVZ1.asm"
+		even
+BgmS3BMVZ2:	include "res/bgm/sonic3-1103/MVZ2.asm"
+		even
+BgmS3BSOZ1:	include "res/bgm/sonic3-1103/SOZ1.asm"
+		even
+BgmS3BSOZ2:	include "res/bgm/sonic3-1103/SOZ2.asm"
+		even
+BgmS3BLRZ1:	include "res/bgm/sonic3-1103/LRZ1.asm"
+		even
+BgmS3BLRZ2:	include "res/bgm/sonic3-1103/LRZ2.asm"
+		even
+BgmS3BSSZ:	include "res/bgm/sonic3-1103/SSZ.asm"
+		even
+BgmS3BDEZ1:	include "res/bgm/sonic3-1103/DEZ1.asm"
+		even
+BgmS3BDEZ2:	include "res/bgm/sonic3-1103/DEZ2.asm"
+		even
+BgmS3BDDZ:	include "res/bgm/sonic3-1103/DDZ.asm"
+		even
+
 
 BgmS3DIntro:	include "res/bgm/sonic3D/Intro.asm"
 		even

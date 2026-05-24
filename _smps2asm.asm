@@ -164,6 +164,8 @@ cxTempoDivAll		ds.b 1		; cfxSetTempoDividerAll
 cxDrumModeOn		ds.b 1		; cfxDrumModeOn
 cxDrumModeOff		ds.b 1		; cfxDrumModeOff
 cxCommJump		ds.b 1		; cfxCommJump
+cxPortamentoSpeed	ds.b 1		; cfxPortamentoSpeed
+cxFmKeyOnMask		ds.b 1		; cfxFmKeyOnMask
 ;cxSetFreqMode1		ds.b 1		; cfxSetFreqMode1
 ;cxSetFreqMode2		ds.b 1		; cfxSetFreqMode2
 
@@ -588,6 +590,10 @@ smpsFMvoice macro voice,soundID
 	endif
 	dc.b	cVoiceFM,voice
 	endm
+; Set FM operator mask for key on, %1111 is all on
+smpsFmKeyOnMask macro mask
+	dc.b	cExtCmd,cxFmKeyOnMask,mask<<4
+	endm
 ; Set FM volume envelope
 ; smps-z80 includes the ability to mask the effects of the envelope per-operator.
 ; smps-dusted handles it per-channel
@@ -638,7 +644,7 @@ smpsLoop macro index,loops,loc
 	CheckedChannelJump loc
 	endm
 ; set 'index' to 'loop'
-smpsSetLoop macro index,loops
+smpsLoopSet macro index,loops
 	if index>12
 	fatal "can't have more then 12 indexes"
 	elseif (index>3) && (MOMPASS=1)
@@ -647,7 +653,7 @@ smpsSetLoop macro index,loops
 	dc.b	cSetRept,index,loops
 	endm
 ; If loop index is on its last loop (loop counter equals 1), perform a jump
-smpsConditionalJump macro index,loc
+smpsLoopExit macro index,loc
 	if index>12
 	fatal "can't have more then 12 indexes"
 	elseif (index>3) && (MOMPASS=1)
@@ -687,6 +693,11 @@ smpsEnableDrumMode macro
 	endm
 smpsDisableDrumMode macro
 	dc.b	cExtCmd,cxDrumModeOff
+	endm
+
+; sets speed for portamento
+smpsPortamento macro speed
+	dc.b	cExtCmd,cxPortamentoSpeed,speed
 	endm
 ; ---------------------------------------------------------------------------
 ; Sonic game specific features, don't expect these to be commonplace elsewhere
@@ -812,6 +823,9 @@ smpsPSGpulse macro
 	warning "smpsPSGpulse is deprecated, we're using smpsPSGform with a parameter of 0 now"
 	endif
 	smpsPSGform 0
+	endm
+smpsConditionalJump macro
+	smpsLoopExit ALLARGS
 	endm
 smpsConditionalJumpCD macro loc
 	smpsCommJump loc,0
@@ -1115,7 +1129,7 @@ smpsVcSsgEg macro op1,op2,op3,op4
 	endm
 ; Voices - AMS and PMS
 ; Somehow this is also a new feature of SMPS-Dusted. Like seriously guys, what the fuck?
-smpsAMSPMS macro valams,valpms
+smpsVcAmsPms macro valams,valpms
 	set vcAMS,valams&3
 	set vcPMS,valpms&7
 	endm
@@ -1169,8 +1183,7 @@ smpsVcTotalLevel macro op1,op2,op3,op4
 		set vcTL3,op3
 		set vcTL4,op4
 	endif
-	if vcTLM1==$FF00
-; table based on observing Sonic 2 Recreation, semi-thanks to Valleybell
+	if vcTLM1==$FF00	; table based on observing Sonic 2 Recreation, semi-thanks to Valleybell
 	switch vcAlgorithm&7
 	case 0
 		smpsVcMuffleWrapper vcTLM1,vcTL1,$0B

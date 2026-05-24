@@ -53,11 +53,10 @@ FMDoNext:
 .gotonlytime:	bsr.w	FMNoteOff
 		tst.w	TrackFreq(a5)
 		bpl.s	.norest
-	if __smpsDebug
-; note-rest-time-time varies on different versions of SMPS, as noted in Clone Drivers asserts
+; note-rest-time-time
+	if __smpsRestTimeTime=0
 		SMPS_assert "FM note-rest-time-time"
 	else
-; note-rest-time-time
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
 		pea	FMFinishTrackUpdate(pc)
 		bra.w	SetDuration
@@ -121,6 +120,10 @@ FMFrequencies:
 FMFrequenciesEnd:
 ; ===========================================================================
 FMUpdateFreq:
+	if __smpsPortamento
+		tst.b	TrackPortamentoTime(a5)
+		bne.s	FMPrepareNote
+	endif
 		moveq_	%10111111,d0
 		and.b	TrackModulationCtrl(a5),d0		; is modulation (calculated or envelopes) enabled?
 		beq.s	FMPrepareNote.exit			; if not, branch
@@ -176,6 +179,7 @@ FMNoteOn:
 		bne.s	FMNoteOn_exit
 		moveq_	$28,d0				; Note on/off register
 		moveq_	$F0,d1				; Note on for all operators
+		and.b	TrackFmOperators(a5),d1		; Mask for channels that we want on
 		or.b	TrackVoiceControl(a5),d1	; Get channel bits
 		bra.w	WriteFMI
 ; ===========================================================================
@@ -348,7 +352,7 @@ SendVoiceTL:
 
 		tst.b	v_driverflags2(a6)			; is underwater muffle enabled?
 		bpl.s	.nomuffle
-		btst	#_nouservol,TrackPlaybackControl(a5)	; is song going "nuh uh"?
+		btst	#_nomuffle,TrackPlaybackControl(a5)	; is song going "nuh uh"?
 		bne.s	.nomuffle
 		addq.w	#4,a1		; Wants TL muffle
 .nomuffle:

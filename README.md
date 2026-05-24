@@ -3,14 +3,16 @@ Enhanced SMPS driver with a focus on convenience and scalability
 
 Features:
 - Driver code and sound data are address-independant binary blobs by default
-- Driver code can have multiple sets of sound data
 - Clean(ish) code design emphasising a lack of hard-coding where possible
 - Native AtGames Firecore support
 - Massive reduction in stack pointer fuckery
 - Greater control over sample playback
 - Support for both universal and per-sequence FM patches/instruments, volume envelopes and modulation envelopes
 - Support for various BGM tempo algorithms
-- SSG-EG provided by FM patches/instruments
+- SSG-EG and LFO provided by FM patches/instruments
+- Portamento support
+- Independant PSG4 channels
+- Drum modes for PSG
 - Extensive error handling in debug driver builds
 
 Excludes:
@@ -22,16 +24,14 @@ Excludes:
 Todo:
 - Sonic 1 (ASM68K and AS) installs
 - Built-in support for DualPCM, DualClown and other custom players
-- More communication bytes
 - Expose relative ram locations on the user side (communication bytes, queue ids, etc)
 - MCD support, PCM and CDDA
 - MD+ support
 - Negative volume envelopes
-- Independant PSG4
-- FM drum layout
+- FM drum mode
+- YMPCM note mode
 - Panning animations/envelopes
 - FM3 multi-channel and CSM mode
-- LFO
 
 ## Tools
 - [flamewings asl macro assembler fork](https://github.com/flamewing/asl-releases), labelled as asw for... some reason

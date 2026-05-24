@@ -46,11 +46,10 @@ PSGDoNext:
 ; ---------------------------------------------------------------------------
 .gotonlytime:	tst.w	TrackFreq(a5)
 		bpl.s	.norest
-	if __smpsDebug
-; note-rest-time-time varies on different versions of SMPS, as noted in Clone Drivers asserts
+; note-rest-time-time
+	if __smpsRestTimeTime=0
 		SMPS_assert "PSG note-rest-time-time"
 	else
-; note-rest-time-time
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
 		pea	PSGFinishTrackUpdate(pc)
 		bra.w	SetDuration
@@ -92,7 +91,7 @@ PSGSetFreq:
 		bhi.s	.assert
 	endif
 		add.b	d5,d5					; Also clear sign bit
-		move.w	PSGFrequencies(pc,d5.w),TrackFreq(a5)	; Set new frequency
+		move.w	PSGFrequencies(pc,d5.w),TrackFreq(a5)
 		rts
 .rest:		or.b	#1<<_resting,TrackPlaybackControl(a5)
 		move.w	#-1,TrackFreq(a5)
@@ -112,6 +111,10 @@ PSGFrequencies:
 PSGFrequenciesEnd:
 ; ===========================================================================
 PSGUpdateFreq:
+	if __smpsPortamento
+		tst.b	TrackPortamentoTime(a5)
+		bne.s	PSGPrepareNote
+	endif
 		moveq_	%10111111,d0
 		and.b	TrackModulationCtrl(a5),d0		; is modulation (calculated or envelopes) enabled?
 		beq.s	PSGPrepareNote.exit			; if not, branch

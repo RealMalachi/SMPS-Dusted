@@ -92,9 +92,9 @@ HandlePause:
 		lea	v_sfx_fm_tracks(a6),a5
 		moveq	#((v_sfx_fm_tracks_end-v_sfx_fm_tracks)/TrackFmSz)-1,d7
 		bsr.s	.unp_fmloop
-		if __smpsBFX=1
-		lea	v_spcsfx_fm_tracks(a6),a5
-		moveq	#((v_spcsfx_fm_tracks_end-v_spcsfx_fm_tracks)/TrackFmSz)-1,d7
+		if __smpsBSFX=1
+		lea	v_bsfx_fm_tracks(a6),a5
+		moveq	#((v_bsfx_fm_tracks_end-v_bsfx_fm_tracks)/TrackFmSz)-1,d7
 		bsr.s	.unp_fmloop
 		endif
 		bsr.w	DACResumeSample
@@ -380,7 +380,7 @@ smpsGetChannelFromRamIndex macro ramreg,indexreg,addreg,tempchanreg,chanreg
 		move.l	ramreg,tempchanreg
 		add.w	addreg,tempchanreg
 		tst.b	TrackPlaybackControl(tempchanreg)
-	if __smpsBFX<>1
+	if __smpsBSFX<>1
 		bpl.s	.notsfx
 		move.l	tempchanreg,chanreg
 .notsfx:
@@ -400,7 +400,7 @@ smpsGetChannelFromRamIndex macro ramreg,indexreg,addreg,tempchanreg,chanreg
 	endm
 
 RAM_BGMChannel:
-		dc.w v_music_fm1_track,v_music_fm2_track,v_music_fm3_track,0
+		dc.w v_music_fm1_track,v_music_fm2_track,v_music_fm3_track,v_music_fm3_multifreq
 		dc.w v_music_fm4_track,v_music_fm5_track,v_music_fm6_track,0
 		dc.w v_music_psg1_track,0	; 16
 		dc.w v_music_psg2_track,0
@@ -408,20 +408,20 @@ RAM_BGMChannel:
 		dc.w v_music_psg4_track
 		dc.w v_music_pcm1_track		; 30
 RAM_SFXChannel:
-		dc.w 0,0,v_sfx_fm3_track,0
+		dc.w 0,0,v_sfx_fm3_track,v_sfx_fm3_multifreq
 		dc.w v_sfx_fm4_track,v_sfx_fm5_track,0,0
 		dc.w v_sfx_psg1_track,0
 		dc.w v_sfx_psg2_track,0
 		dc.w v_sfx_psg3_track,0
 		dc.w v_sfx_psg3_track
 		dc.w 0
-	if __smpsBFX=1
+	if __smpsBSFX=1
 RAM_BSFXChannel:
 		dc.w 0,0,0,0
-		dc.w v_spcsfx_fm4_track,0,0,0
+		dc.w v_bsfx_fm4_track,0,0,0
 		dc.w 0,0
 		dc.w 0,0
-		dc.w v_spcsfx_psg3_track,0
-		dc.w v_spcsfx_psg3_track
+		dc.w v_bsfx_psg3_track,0
+		dc.w v_bsfx_psg3_track
 		dc.w 0
 	endif

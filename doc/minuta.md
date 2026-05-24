@@ -48,6 +48,8 @@ time is multiplied by the tempo "divider" then ANDed by $FF
         smpsChanTempoDiv $00                        ; this sequence results in ($40x$00)&$FF = $00
 		dc.b        nRst,$40
 ```
+A time of $00, be it from $00 directly or via multiplication, will result in waiting for 256 ticks, unless it's a bgm and the bgm tempo updates when it's $00, where it will increment to $01 updating immediately. To my knowledge, no SMPS sequences rely on a time of $00 or the bgm tempo logic
+
 Debug builds of SMPS-Dusted will throw an error when the multiplication is $00 or exceeds $FF
 
 ### drum mode
@@ -77,7 +79,7 @@ YM2612 PCM drum mode logic is inverted, in that it defaults to drum mode by defa
 
 Note timeouts (or perhaps a better name would be note cuts) are a timer that that rests the note. The timer is reset for every non-held note
 
-So instead of doing this:
+Instead of doing this:
 ``` 
 	dc.b nC0,$04,nRst,$0C
 	dc.b nC0,$04,nRst,$0C
@@ -102,9 +104,9 @@ In smps-dusted with PCM rest logic set to hold standard rests, this also serves 
 | PSG internal volume | $00-$0F | $00-$0F | $00-$7F |
 | volume cap | nope | nope | $00-$7F |
 | HOLD | yep($80) | yep($81) | yep |
-| REPEAT/REST | nope | yep($80) | yep |
+| REPEAT | nope | yep($80) | yep |
 | INDEX | nope | yep($82) | yep |
-| RESET | nope | yep($83) | yep |
+| REST | nope | yep($83) | yep |
 
 SMPS-Dusted currently lacks support for negative volume envelopes. If they were to be added, it should cap to the maximum volume on overflow.
 
@@ -117,11 +119,11 @@ PSG volume being internally consistent with FM means that they can be more easil
 | s8 modenv | yep | yep | yep |
 | s12 modenv | nope | nope | yep |
 | s16 modenv | nope | nope | yep |
-| REPEAT/REST | nop | yep | yep |
+| REPEAT | nop | yep | yep |
 | HOLD | yep | yep | yep |
 | INDEX | yep | yep | yep |
-| RESET | yep | yep | yep |
-| MUL | yep($86); mod x mul | yep($86); mod x ((mul+1)&FFh) | nope |
+| REST | yep | yep | yep |
+| MUL | yep($86); mod x(signed) mul | yep($86); mod x(unsigned) ((mul+1)&FFh) | nope |
 
 SMPS-Dusted lacks support for s8 modenv multipliers, but adds support for s12 and s16 to make up for it. Realistically speaking you'll only need s12.
 
@@ -151,34 +153,39 @@ smpsCall uses either 4(68K), 2(Z80,S2) or 3(dusted) bytes of stack, for a pointe
 
 ### PSG3 switching
 smps-z80 and smps-dusted can switch between psg3 and psg noise on the fly via giving the smpsPSGform paremeter a 0
-smps-z80 mutes psgnoise when switching to psg3
-smps-dusted mutes psg3 when switching to psgnoise, then mutes psgnoise when switching to psg3
+- smps-z80 mutes psgnoise when switching to psg3
+- smps-dusted mutes the previous channel by default, providing a flag to not mute psg3 when switching to psgnoise
 
 ### inaccessible notes
 notes nB7 (0xE0) and nBs7 (0xE1) cannot be played without detuning, due to commands starting at 0xE0, thus overriding them... aside for on Clone Driver, where commands start at 0xFE.
 
 ### default channel frequency/sample
 When initialized channels have default value for their frequency/sample, which is exposed by not setting the note
-- smps-68K and smps-z80 defaults frequencies to 0 (mute for FM, max for PSG)
-- smps-dusted defaults all frequencies to muted
+- smps-68k and smps-z80 defaults frequencies to 0 (mute for FM, max for PSG)
+- smps-dusted depends on the `__smpsDefaultFreq` setting, usually set to act like smps-68k
+
+```
+; if PSG starts its sequence with this, both notes will be identical
+        dc.b $7F,nMaxPSG,$7F
+```
 
 ### rest-time-time
 - on smps-68k, the first rest and time rests, next time also rests.
-- on smps-z80, the first rest and time rests, next time plays the last frequency/sample
-- smps-dusted follows smps-68k logic
+- on smps-z80, the first rest and time rests, next time plays the last frequency... unless it's PCM which will rest
+- smps-dusted depends on the `__smpsRestTimeTime` setting, usually set to act like smps-68k
 ```
 ; sequences like this:
         dc.b nG2, $08, nRst, $04, $24
-; need to be changed to this (from Z80):
+; need to be changed to this (if from Z80):
         dc.b nG2, $08, nRst, $04, nG2, $24
-; or this (from 68K):
+; or this (if from 68K):
         dc.b nG2, $08, nRst, $04, nRst, $24
 ```
 
 ### rest on PCM
 - on smps-68k, rests hold the dac, but it's common for driver variants to make them rest the dac
 - on smps-z80, rests hold the dac
-- on smps-dusted, rest logic depends on a driver flag
+- smps-dusted depends on the `__smpsRestPCM` setting, usually set to rest
 
 there's two main ways to emulate holds for rests when rests are enabled:
 1. don't use rests, simply increase the time the pcm is played

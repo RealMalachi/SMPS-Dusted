@@ -294,7 +294,7 @@ BGM_SonicExe_Piano_Voices:
 ;	FM Voice 01 -> 01: Piano
 	smpsVcAlgorithm		$02
 	smpsVcFeedback		$07
-	smpsAMSPMS		$00, $02
+	smpsVcAmsPms		$00, $02
 	smpsVcDetune		$01, $02, $03, $03
 	smpsVcCoarseFreq	$04, $0C, $0C, $0C
 	smpsVcRateScale		$00, $01, $02, $01
@@ -309,7 +309,7 @@ BGM_SonicExe_Piano_Voices:
 ;	FM Voice 02 -> 02: Piano
 	smpsVcAlgorithm		$02
 	smpsVcFeedback		$07
-	smpsAMSPMS		$00, $02
+	smpsVcAmsPms		$00, $02
 	smpsVcDetune		$01, $02, $03, $03
 	smpsVcCoarseFreq	$02, $06, $06, $06
 	smpsVcRateScale		$00, $01, $02, $01

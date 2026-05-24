@@ -16,24 +16,8 @@ moveq_ macro val,reg
 	endm
 ; ---------------------------------------------------------------------------
 	include "_settings.asm"
+	include "src-68k/smps-def-pcm.asm"
 	include "src-68k/smps-def.asm"
-	if (__smpsPCM=="null") || (__smpsTarget=="fuckFM")
-	include "src-68k/null/smps-pcm-def.asm"
-;	elseif __smpsPCM=="DirtyPCM"
-;	include "src-68k/dirtypcm/smps-pcm-def.asm"
-	elseif __smpsPCM=="MegaPCM1"
-	include "src-68k/mpcm1/smps-pcm-def.asm"
-	elseif __smpsPCM=="MegaPCM2"
-	include "src-68k/mpcm2/smps-pcm-def.asm"
-;	elseif __smpsPCM=="DualPCM"
-;	include "src-68k/dualpcm/smps-pcm-def.asm"
-;	elseif __smpsPCM=="DualPCM-FlexEd"
-;	include "src-68k/dualpcm-flexed/smps-pcm-def.asm"
-;	elseif __smpsPCM=="DualClown"
-;	include "src-68k/dualclown/smps-pcm-def.asm"
-	else
-	fatal "Unknown PCM type"
-	endif
 	org 0
 	include "src-68k/smps-main.asm"
 ; ---------------------------------------------------------------------------

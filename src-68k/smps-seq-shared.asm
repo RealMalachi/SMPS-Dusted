@@ -37,7 +37,7 @@ StopBGM:
 		add.b	d3,d3
 		add.w	#((30/2)-$40)*2,d3
 		lea	RAM_SFXChannel(pc),a3
-	if __smpsBFX=1
+	if __smpsBSFX=1
 		move.w	(a3,d3.w),d0
 		beq.s	.dacgetptr
 		move.l	a6,a3
@@ -71,7 +71,7 @@ StopBGM:
 		move.b	TrackVoiceControl(a5),d3
 		add.b	d3,d3
 		lea	RAM_SFXChannel(pc),a3
-	if __smpsBFX=1
+	if __smpsBSFX=1
 		move.w	(a3,d3.w),d0
 		beq.s	.fmgetptr
 		move.l	a6,a3
@@ -109,7 +109,7 @@ StopBGM:
 		move.b	TrackVoiceControl(a5),d3
 		lsr.b	#3,d3
 		lea	RAM_SFXChannel(pc),a3
-	if __smpsBFX=1
+	if __smpsBSFX=1
 		move.w	(a3,d3.w),d0
 		beq.s	.psggetptr
 		move.l	a6,a3
@@ -147,7 +147,7 @@ StopSFX:
 		moveq	#0,d3
 		move.b	TrackVoiceControl(a5),d3
 		add.b	d3,d3
-	if __smpsBFX=1
+	if __smpsBSFX=1
 		lea	RAM_BSFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.fmgetptr
@@ -185,7 +185,7 @@ StopSFX:
 		moveq	#0,d3
 		move.b	TrackVoiceControl(a5),d3
 		lsr.b	#3,d3
-	if __smpsBFX=1
+	if __smpsBSFX=1
 		lea	RAM_BSFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.psggetptr
@@ -212,10 +212,10 @@ StopSFX:
 
 		rts
 ; ===========================================================================
-		if __smpsBFX=1
+		if __smpsBSFX=1
 StopBSFX:
-		lea	v_spcsfx_fm_tracks(a6),a5
-		moveq	#((v_spcsfx_fm_tracks_end-v_spcsfx_fm_tracks)/TrackFmSz)-1,d6
+		lea	v_bsfx_fm_tracks(a6),a5
+		moveq	#((v_bsfx_fm_tracks_end-v_bsfx_fm_tracks)/TrackFmSz)-1,d6
 .fmloop:	tst.b	TrackPlaybackControl(a5)
 		bpl.s	.fmnext
 		and.b	#$FF!(1<<_playing),TrackPlaybackControl(a5)
@@ -250,8 +250,8 @@ StopBSFX:
 		dbf	d6,.fmloop
 
 
-		lea	v_spcsfx_psg_tracks(a6),a5
-		moveq	#((v_spcsfx_psg_tracks_end-v_spcsfx_psg_tracks)/TrackPsgSz)-1,d6
+		lea	v_bsfx_psg_tracks(a6),a5
+		moveq	#((v_bsfx_psg_tracks_end-v_bsfx_psg_tracks)/TrackPsgSz)-1,d6
 .psgloop:	tst.b	TrackPlaybackControl(a5)
 		bpl.s	.psgnext
 		and.b	#$FF!(1<<_playing),TrackPlaybackControl(a5)
@@ -443,6 +443,34 @@ GetFrequency:
 ; base frequency
 		move.w	TrackFreq(a5),d6			; Get current note frequency
 		bmi.s	GetFrequency_Rest
+	if __smpsPortamento
+		moveq	#0,d1
+		move.b	TrackPortamentoTime(a5),d1
+		beq.s	.doneportin
+		move.w	d6,d0
+		move.w	TrackPortamentoFreq(a5),d6
+		cmp.w	d0,d6
+		beq.s	.doneportin
+		blt.s	.portlow	; note < newnote
+		;bgt.s	.porthigh	; note > newnote
+.porthigh:		
+		sub.w	d1,d6
+		cmp.w	d0,d6
+		bgt.s	.doneportin
+		bra.s	.portset
+.portlow:
+		add.w	d1,d6
+		cmp.w	d0,d6
+		blt.s	.doneportin
+.portset:
+		move.w	d0,d6
+		;bra.s	.doneportin
+.doneportin:
+		tst.b	d2
+		bne.s	.noporta
+		move.w	d6,TrackPortamentoFreq(a5)
+.noporta:
+	endif
 ; detune
 		move.b	TrackDetune(a5),d0 			; Get detune value
 		ext.w	d0
@@ -722,7 +750,7 @@ GetVolume:
 		move.b	TrackVoiceControl(a5),d3
 		tst.b	v_driverflags2(a6)			; is underwater muffle enabled?
 		bpl.s	.nouservol
-		btst	#_nouservol,TrackPlaybackControl(a5)
+		btst	#_nomuffle,TrackPlaybackControl(a5)
 		bne.s	.nouservol
 		cmp.b	#$40,d3					; SendVoiceTL handles it for FM
 		blo.s	.nouservol
@@ -853,6 +881,8 @@ cfExtCmd:
 		dc.w  cfxDrumModeOn-.lut			; cxDrumModeOn
 		dc.w  cfxDrumModeOff-.lut			; cxDrumModeOff
 		dc.w  cfxCommJump-.lut				; cxCommJump
+		dc.w  cfxPortamentoSpeed-.lut			; cxPortamentoSpeed
+		dc.w  cfxFmKeyOnMask-.lut			; cxFmKeyOnMask
 .lute:
 ; ===========================================================================
 	if __smpsDrum
@@ -939,6 +969,22 @@ cfxPanAuto:
 cfDetune:
 		move.b	(a4)+,TrackDetune(a5)		; Set detune value
 		rts
+; ===========================================================================
+cfxPortamentoSpeed:
+	if __smpsPortamento
+		if __smpsDebug
+		move.b	TrackVoiceControl(a5),d0
+		bmi.s	.valid
+		cmp.b	#$40,d0
+		blo.s	.valid
+		SMPS_assert "cfxPortamentoSpeed: PCM attempted use"
+.valid:
+		endif
+		move.b	(a4)+,TrackPortamentoTime(a5)
+		rts
+	else
+		SMPS_assert "cfxPortamentoSpeed: __smpsPortamento is disabled"
+	endif
 ; ===========================================================================
 cfAddVolume:
 		move.b	(a4)+,d0
@@ -1078,8 +1124,7 @@ cfxSetTempoMod:
 		move.w	(sp)+,d0
 		move.b	(a4)+,d0
 		move.w	d0,v_main_tempo(a6)			; Set main tempo
-		and.w	#$FFF0,d0
-		move.w	d0,v_main_tempo_timeout(a6)		; And reset timeout (!)
+		clr.w	v_main_tempo_timeout(a6)		; And reset timeout
 		rts
 ; ===========================================================================
 cfxSample:
@@ -1139,7 +1184,7 @@ cfSetPSGNoise:
 		cmp.l	a3,a5
 		beq.s	.valid
 .nopsg4sfx:
-	if __smpsBFX
+	if __smpsBSFX
 		move.w	RAM_BSFXChannel+24(pc),d0
 		beq.s	.nopsg3bsfx
 		move.l	a6,a3
@@ -1193,7 +1238,7 @@ cfxSetPSG3:
 		cmp.l	a3,a5
 		beq.s	.valid
 .nopsg3sfx:
-	if __smpsBFX
+	if __smpsBSFX
 		move.w	RAM_BSFXChannel+24(pc),d0
 		beq.s	.nopsg3bsfx
 		move.l	a6,a3
@@ -1215,6 +1260,18 @@ cfxSetPSG3:
 		move.b	#$FF,(psginput).l			; mute PSG noise
 .notpsg34shared:
 .locret:	rts
+; ---------------------------------------------------------------------------
+cfxFmKeyOnMask:
+	if __smpsDebug
+		cmp.b	#$40,TrackVoiceControl(a5)
+		blo.s	.valid
+		SMPS_assert "cfxFmKeyOnMask: Attemped use outside of FM"
+.valid:
+	endif
+		move.b	(a4)+,d0
+		and.b	#$F,TrackFmOperators(a5)
+		or.b	d0,TrackFmOperators(a5)
+		rts
 ; ===========================================================================
 cfModulation68K:
 		move.b	#1<<7,TrackModulationCtrl(a5)
@@ -1440,7 +1497,7 @@ cfStopTrack:
 		tst.b	TrackPlaybackControl(a3)			; restore SFX if track is playing
 		bmi.s	.restore
 .nosfx:
-	if __smpsBFX=1
+	if __smpsBSFX=1
 		lea	RAM_BSFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.nobsfx

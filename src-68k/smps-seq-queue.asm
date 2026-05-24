@@ -43,7 +43,7 @@ CycleSoundQueue:
 Cmd_FadeOutMusicStopSFX:
 		move.w	d7,-(sp)
 		bsr.w	StopSFX
-	if __smpsBFX
+	if __smpsBSFX
 		bsr.w	StopBSFX
 	endif
 		move.w	(sp)+,d7
@@ -80,7 +80,7 @@ Cmd_FadeIn:
 ; bit 2 set stops Background SFX (BSFX)
 ; bit 3 set stops PCM SFX (PSFX)
 Cmd_StopSound:
-	if __smpsBFX
+	if __smpsBSFX
 		moveq_	~%00001111,d0
 	else
 		moveq_	~%00001011,d0
@@ -100,7 +100,7 @@ Cmd_StopSound:
 		beq.s	.notsfx
 		bsr.w	StopSFX
 .notsfx:
-	if __smpsBFX
+	if __smpsBSFX
 		btst	#2,d7
 		beq.s	.notbsfx
 		bsr.w	StopBSFX
@@ -154,10 +154,10 @@ Cmd_SetBitFlag_Mono:
 		bsr.s	.fmloop
 		lea	v_sfx_fm_tracks(a6),a5
 		moveq	#((v_sfx_fm_tracks_end-v_sfx_fm_tracks)/TrackFmSz)-1,d7
-		if __smpsBFX
+		if __smpsBSFX
 		bsr.s	.fmloop
-		lea	v_spcsfx_fm_tracks(a6),a5
-		moveq	#((v_spcsfx_fm_tracks_end-v_spcsfx_fm_tracks)/TrackFmSz)-1,d7
+		lea	v_bsfx_fm_tracks(a6),a5
+		moveq	#((v_bsfx_fm_tracks_end-v_bsfx_fm_tracks)/TrackFmSz)-1,d7
 		endif
 .fmloop:
 		moveq_	1<<_playing|1<<_sfxoverride,d0
@@ -195,10 +195,10 @@ Cmd_SetBitFlag_SSG:
 		bsr.s	.loop
 		lea	v_sfx_fm_tracks(a6),a5
 		moveq	#((v_sfx_fm_tracks_end-v_sfx_fm_tracks)/TrackFmSz)-1,d7
-		if __smpsBFX
+		if __smpsBSFX
 		bsr.s	.loop
-		lea	v_spcsfx_fm_tracks(a6),a5
-		moveq	#((v_spcsfx_fm_tracks_end-v_spcsfx_fm_tracks)/TrackFmSz)-1,d7
+		lea	v_bsfx_fm_tracks(a6),a5
+		moveq	#((v_bsfx_fm_tracks_end-v_bsfx_fm_tracks)/TrackFmSz)-1,d7
 		endif
 .loop:
 		moveq_	1<<_playing|1<<_sfxoverride,d0
@@ -219,13 +219,13 @@ Cmd_SetBitFlag_Muffle:
 		moveq	#((v_sfx_psg_tracks_end-v_sfx_psg_tracks)/TrackPsgSz)-1,d7
 		moveq	#TrackPsgSz,d6
 		bsr.s	.fade
-	if __smpsBFX
-		lea	v_spcsfx_fm_tracks(a6),a5
-		moveq	#((v_spcsfx_fm_tracks_end-v_spcsfx_fm_tracks)/TrackFmSz)-1,d7
+	if __smpsBSFX
+		lea	v_bsfx_fm_tracks(a6),a5
+		moveq	#((v_bsfx_fm_tracks_end-v_bsfx_fm_tracks)/TrackFmSz)-1,d7
 		moveq	#TrackFmSz,d6
 		bsr.s	.fade
-		lea	v_spcsfx_psg_tracks(a6),a5
-		moveq	#((v_spcsfx_psg_tracks_end-v_spcsfx_psg_tracks)/TrackPsgSz)-1,d7
+		lea	v_bsfx_psg_tracks(a6),a5
+		moveq	#((v_bsfx_psg_tracks_end-v_bsfx_psg_tracks)/TrackPsgSz)-1,d7
 		moveq	#TrackPsgSz,d6
 		bsr.s	.fade
 	endif
@@ -385,15 +385,13 @@ Sound_PlayBGM:
 	endif
 		move.l	sp,a1
 
-		move.w	(a3)+,d0
-		move.w	d0,v_main_tempo(a6)
-		and.w	#$FFF0,d0
-		move.w	d0,v_main_tempo_timeout(a6)
+		move.w	(a3)+,v_main_tempo(a6)
+		clr.w	v_main_tempo_timeout(a6)
 
 		move.b	(a3)+,d5				; load tempo divider
 		btst	#5,d6
 		sne.b	d6
-		and.b	#1<<_nouservol,d6			; enable muffle disable if bit 5 is set
+		and.b	#1<<_nomuffle,d6			; enable muffle disable if bit 5 is set
 		or.b	#1<<_playing,d6				; set playing regardless
 		lea	3(a3),a4
 ; init allocated dac channels
@@ -520,6 +518,7 @@ Sound_PlayBGM:
 	endif
 		move.b	queue_fminstptr+1(a1),TrackFmVoicePtr+1(a5)
 		move.w	queue_fminstptr+2(a1),TrackFmVoicePtr+2(a5)
+		move.b	#$F0,TrackFmOperators(a5)
 		move.b	#$C0,TrackAMSFMSPan(a5)			; Set AMS/FMS/Panning
 		bsr.w	FMSilence
 		add.w	#TrackFmSz,a5
@@ -567,7 +566,11 @@ Sound_PlayBGM:
 		move.b	d5,TrackTempoDivider(a5)
 		move.b	#1,TrackDurationTimeout(a5)		; Set duration of first "note"
 		move.b	#TrackGoSubStack,TrackStackPointer(a5)
+	if __smpsDefaultFreq=0
+		move.w	#0,TrackFreq(a5)	; max
+	else
 		move.w	#-1,TrackFreq(a5)
+	endif
 		moveq	#0,d0
 		move.w	(a4)+,d0
 		add.l	a4,d0
@@ -682,7 +685,7 @@ Sound_PlaySFX:
 
 		btst	#5,d1
 		sne.b	d6
-		and.b	#1<<_nouservol,d6			; enable muffle disable if bit 5 is set
+		and.b	#1<<_nomuffle,d6			; enable muffle disable if bit 5 is set
 		or.b	#1<<_playing,d6				; set playing regardless
 ;		btst	#4,d1
 
@@ -690,7 +693,7 @@ Sound_PlaySFX:
 		moveq	#0,d7
 		move.b	(a3)+,d7		; Number of tracks (FM + PSG)
 		subq.b	#1,d7
-	if __smpsBFX
+	if __smpsBSFX
 		btst	#7,d1
 		beq.w	Sound_PlaySFX_SFX
 ; ---------------------------------------------------------------------------
@@ -745,7 +748,7 @@ Sound_PlaySFX_SFX:
 		add.w	d0,a2
 		or.b	#1<<_sfxoverride,TrackPlaybackControl(a2)
 .nobgmequ:
-	if __smpsBFX
+	if __smpsBSFX
 		lea	RAM_BSFXChannel(pc),a2
 		move.w	(a2,d1.w),d0
 		beq.s	.nossfxequ
@@ -770,6 +773,7 @@ Sound_PlaySFX_Setup:
 		move.b	#$C0,TrackAMSFMSPan(a5)
 		move.b	queue_fminstptr+1(a1),TrackFmVoicePtr+1(a5)
 		move.w	queue_fminstptr+2(a1),TrackFmVoicePtr+2(a5)
+		move.b	#$F0,TrackFmOperators(a5)
 ;		bra.w	FMSilence
 		rts
 .dodac:
@@ -782,6 +786,9 @@ Sound_PlaySFX_Setup:
 .dopsg:
 		moveq	#(TrackPsgSz/2)-1,d1
 		bsr.s	.do
+	if __smpsDefaultFreq=0
+		move.w	#0,TrackFreq(a5)	; max
+	endif
 ;		bra.w	PSGSilence
 		cmp.b	#$C0,d2
 		blo.s	.psg34

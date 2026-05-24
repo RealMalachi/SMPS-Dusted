@@ -50,11 +50,10 @@ PCMDoNext:
 ; ---------------------------------------------------------------------------
 .gotonlytime:	tst.w	TrackFreq(a5)
 		bpl.s	.norest
-	if __smpsDebug
-; note-rest-time-time varies on different versions of SMPS, as noted in Clone Drivers asserts
+; note-rest-time-time
+	if __smpsRestTimeTime=0
 		SMPS_assert "PCM note-rest-time-time"
 	else
-; note-rest-time-time
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
 		pea	PCMFinishTrackUpdate(pc)
 		bra.w	SetDuration
