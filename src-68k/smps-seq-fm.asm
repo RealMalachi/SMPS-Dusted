@@ -247,6 +247,14 @@ SetVoice:
 		lsl.w	#5,d1		; x32
 		adda.w	d1,a1		; x32
 
+		moveq_	$C0,d1
+		and.b	TrackAMSFMSPan(a5),d1
+		or.b	(a1)+,d1
+		move.b	d1,TrackAMSFMSPan(a5)
+		btst	#v_driverflags.mono,v_driverflags(a6)
+		beq.s	.stereo
+		or.b	#$C0,d1
+.stereo:
 		lea	FMInstrumentOperatorTable(pc),a2
 		moveq	#(FMInstrumentOperatorTable_End-FMInstrumentOperatorTable)-1,d3
 		move.b	TrackVoiceControl(a5),d2	; Get voice control bits
@@ -263,14 +271,6 @@ SetVoice:
 		bcc.w	.fm2				; Branch if for part II
 		addq.b	#1<<2,d2
 .fm1:
-		moveq_	$C0,d1
-		and.b	TrackAMSFMSPan(a5),d1
-		or.b	(a1)+,d1
-		move.b	d1,TrackAMSFMSPan(a5)
-		btst	#v_driverflags.mono,v_driverflags(a6)
-		beq.s	.stereo1
-		or.b	#$C0,d1
-.stereo1:
 		moveq_	fmreg.panamspms,d0
 		add.b	d2,d0
 		fmwrite	a0,d0,d1,0
@@ -281,14 +281,6 @@ SetVoice:
 		dbf	d3,.loop1
 		bra.s	.loopend
 .fm2:
-		moveq_	$C0,d1
-		and.b	TrackAMSFMSPan(a5),d1
-		or.b	(a1)+,d1
-		move.b	d1,TrackAMSFMSPan(a5)
-		btst	#v_driverflags.mono,v_driverflags(a6)
-		beq.s	.stereo2
-		or.b	#$C0,d1
-.stereo2:
 		moveq_	fmreg.panamspms,d0
 		add.b	d2,d0
 		fmwrite	a0,d0,d1,1

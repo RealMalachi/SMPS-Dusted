@@ -1,11 +1,42 @@
+; ---------------------------------------------------------------------------
 ; Assert screen render handler, renders an error screen and stays there
+; ---------------------------------------------------------------------------
+smpsren_vram_null	equ $000
+smpsren_vram_plane	equ $100
+smpsren_vram_length	equ $200
+
+; function to calculate the location of a tile in plane mappings
+planeLoc function width,col,line,(((width*line)+col)*2)
+
+; makes a VDP command
+vdpComm function addr,type,(((type)&3)<<30)|((addr&$3FFF)<<16)|(((type)&$FC)<<2)|((addr&$C000)>>14)
+
+; makes a VDP address difference
+vdpCommDelta function addr,((addr&$3FFF)<<16)|((addr&$C000)>>14)
+
+; simplication of the VDP memory access flags
+VRAM_READ	equ %000000
+VRAM_WRITE	equ %000001
+VRAM_DMA	equ %100001
+VRAM_COPYDMA	equ %110001
+VRAM_READ8	equ %001100	; 8bit half reads, useful for reading with 128kb vram
+
+CRAM_READ	equ %001000
+CRAM_WRITE	equ %000011
+CRAM_DMA	equ %100011
+CRAM_COPYDMA	equ %110011
+
+VSRAM_READ	equ %000100
+VSRAM_WRITE	equ %000101
+VSRAM_DMA	equ %100101
+VSRAM_COPYDMA	equ %110101
 ; ---------------------------------------------------------------------------
 ; Called via bra/jmp
 ; STACK:
 ; +0 | Assert text (modified ASCII, see below)
 ; ---------------------------------------------------------------------------
 RenderAssert:
-.ass	= 2+((8+7)*4)	; start of assert data
+.ass	equ 2+((8+7)*4)			; start of assert data
 	move.w	sr,-(sp)
 	move	#$2700,sr
 	movem.l	d0-a6,-(sp)
@@ -41,8 +72,6 @@ RenderAssert:
 ; load font
 ; modified 1bpp converter by vladikcomper:
 ; https://github.com/vladikcomper/md-modules/blob/master/modules/core/1bpp_Decompress.asm
-; used to use a slower converter which used more registers, but was probably smaller
-; just thought I'd give some history
 	lea	ErrorFont(pc),a6
 	move.l	#vdpComm((" ")*32,VRAM_WRITE),(a5)
 	lea	ErrorFontTable(pc),a5
@@ -50,14 +79,14 @@ RenderAssert:
 	swap	d4
 	move.w	#(ErrorFont.end-ErrorFont)-1,d4
 .bpploop:
-	move.b	(a6)+,d0			; d0 = %aaaa bbbb
+	move.b	(a6)+,d0					; d0 = %aaaa bbbb
 	move.b	d0,d1
-	lsr.b	#3,d1				; d1 = %000a aaab
-	and.w	d2,d1				; d1 = %000a aaa0
-	move.w	(a5,d1.w),(a4)			; decompress first nibble
-	add.b	d0,d0				; d0 = %aaab bbb0
-	and.w	d2,d0				; d0 = %000b bbb0
-	move.w	(a5,d0.w),(a4)			; decompress second nibble
+	lsr.b	#3,d1						; d1 = %000a aaab
+	and.w	d2,d1						; d1 = %000a aaa0
+	move.w	(a5,d1.w),(a4)					; decompress first nibble
+	add.b	d0,d0						; d0 = %aaab bbb0
+	and.w	d2,d0						; d0 = %000b bbb0
+	move.w	(a5,d0.w),(a4)					; decompress second nibble
 	dbf	d4,.bpploop
 	lea	vdpctrl-vdpdata(a4),a5
 ; load text plane
@@ -68,7 +97,7 @@ RenderAssert:
 .lineloop:
 	move.l	d3,(a5)
 .loop:	move.b	(a0)+,d4
-	ext.w	d4				; move bit 7 to bit 15 (priority), clear other bits
+	ext.w	d4						; move bit 7 to bit 15 (priority), clear other bits
 	and.w	#$807F,d4
 	cmp.b	#$20,d4
 	blo.s	.commands
@@ -91,7 +120,7 @@ RenderAssert:
 	bra.w	.cmd_nextprint					; $02 ; new assert
 	bra.w	.cmd_nextprintline				; $03 ; new assert and line
 	bra.w	.cmd_regprint					; $04 ; Print register
-	bra.w	.cmd_regdataprint				; $04 ; Print data relative to address from register
+	bra.w	.cmd_regdataprint				; $05 ; Print data relative to address from register
 .cmdlute:
 ; okay we're done here, show's over
 .cmd_exit:
@@ -154,25 +183,25 @@ ErrorFontTable:
 	dc.w $1000, $1001, $1010, $1011
 	dc.w $1100, $1101, $1110, $1111
 ErrorVDP:
-	dc.b %00000100				; $80, 8-colour mode
-	dc.b %00000100				; $81, MD mode, screen disabled, DMA disabled, VInt disabled
-	dc.b (smpsren_vram_plane)>>5		; $82, foreground nametable address
-	dc.b (smpsren_vram_plane)>>5		; $83, window nametable address
-	dc.b (smpsren_vram_plane)>>8		; $84, background nametable address
-	dc.b (smpsren_vram_null)>>4		; $85, sprite table address
-	dc.b 0					; $86
-	dc.b 0					; $87, overscan colour
-	dc.b 0					; $88
-	dc.b 0					; $89
-	dc.b 255				; $8A, HBlank register
-	dc.b %00000000				; $8B, full screen scroll
-	dc.b %10000001				; $8C, Slow H40, progressive scan, s/h disabled, standard colour output
-	dc.b (smpsren_vram_null)>>5		; $8D, hscroll table address
-	dc.b 0					; $8E
-	dc.b 2					; $8F, VDP auto-inc 2
-	dc.b 1					; $90, 64x32 plane size
-	dc.b 0					; $91, window h position
-	dc.b 0					; $92, window v position
+	dc.b %00000100						; $80, 8-colour mode
+	dc.b %00000100						; $81, MD mode, screen disabled, DMA disabled, VInt disabled
+	dc.b (smpsren_vram_plane)>>5				; $82, foreground nametable address
+	dc.b (smpsren_vram_plane)>>5				; $83, window nametable address
+	dc.b (smpsren_vram_plane)>>8				; $84, background nametable address
+	dc.b (smpsren_vram_null)>>4				; $85, sprite table address
+	dc.b 0							; $86
+	dc.b 0							; $87, overscan colour
+	dc.b 0							; $88
+	dc.b 0							; $89
+	dc.b 255						; $8A, HBlank register
+	dc.b %00000000						; $8B, full screen scroll
+	dc.b %10000001						; $8C, Slow H40, progressive scan, s/h disabled
+	dc.b (smpsren_vram_null)>>5				; $8D, hscroll table address
+	dc.b 0							; $8E
+	dc.b 2							; $8F, VDP auto-inc 2
+	dc.b 1							; $90, 64x32 plane size
+	dc.b 0							; $91, window h position
+	dc.b 0							; $92, window v position
 .end:
 ErrorFont:	binclude "src-68k/smps-renassert-font.1bpp"
 .end:

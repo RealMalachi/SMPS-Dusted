@@ -22,7 +22,7 @@ moveq_ macro val,reg
 	include "src-68k/smps-main.asm"
 ; ---------------------------------------------------------------------------
 cmddef macro command,cmpid
-	if cmpid<>""
+	if "cmpid"<>""
 command equ cmpid
 	endif
 	shared command
@@ -44,9 +44,13 @@ command equ cmpid
 	cmddef cmd_PanMono,		$F403
 	cmddef cmd_SsgOn,		$F404
 	cmddef cmd_SsgOff,		$F405
-	cmddef cmd_MuffleOn,		$F406
-	cmddef cmd_MuffleOff,		$F407
+	cmddef cmd_MuffleOff,		$F406
+	cmddef cmd_MuffleOn,		$F407
 	cmddef cmd__Last,		$F500
+
+	cmddef smpsmisc_Pause,		$0000
+	cmddef smpsmisc_Resume,		$0001
+	cmddef smpsmisc_SetTempo,	$0002
 ; ---------------------------------------------------------------------------
 	if MOMPASS=1
 	message "Driver requires $\{v_endofram} bytes of ram"

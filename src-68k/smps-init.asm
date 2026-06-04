@@ -35,6 +35,7 @@ InitDriver:
 		beq.s	.okayitsfine
 		SMPS_assert "Driver data version type doesn't match the drivers expected version type, TODO: print both"
 .okayitsfine:
+		bsr.w	DetectCDDA
 
 		bsr.s	Detect_Firecore
 		seq	d1

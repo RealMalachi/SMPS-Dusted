@@ -12,7 +12,7 @@ APILUT:
 		bra.w	UnguardDriver				; 28 ;
 		bra.w	SetupPianoRoll				; 32 ; a0 = piano ram
 		bra.w	RunMiscCommand				; 36 ; d0.w = command, other inputs depend on the command
-;		bra.w	PlayCDDA				; ?? ; d0.b = track ID
+		bra.w	PlayCDDA				; 40 ; d0.b = track ID
 		rept (64-(*))/4
 		bra.w	.error
 		endr
@@ -23,6 +23,7 @@ APILUT:
 ; ---------------------------------------------------------------------------
 		include "src-68k/smps-init.asm"
 		include "src-68k/smps-misc.asm"
+		include "src-68k/smps-cdda.asm"
 		include "src-68k/smps-seq.asm"
 		include "src-68k/smps-seq-queue.asm"
 		include "src-68k/smps-seq-shared.asm"

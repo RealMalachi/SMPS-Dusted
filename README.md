@@ -1,5 +1,5 @@
 # SMPS-Dusted
-Enhanced SMPS driver with a focus on convenience and scalability
+Enhanced [SMPS sound driver](https://hiddenpalace.org/News/Sega_of_Japan_Sound_Documents_and_Source_Code) with a focus on convenience and scalability
 
 Features:
 - Driver code and sound data are address-independant binary blobs by default
@@ -20,18 +20,6 @@ Excludes:
 - Sonic 1 hard-coded block pushing sound flag
 - Sonic 2 hard-coded CPZ chemical balls play/not-play flag
 - Sonic 2 hard-coded spindash pitch increase (a non hard-coded method from Sonic 3 is provided)
-
-Todo:
-- Sonic 1 (ASM68K and AS) installs
-- Built-in support for DualPCM, DualClown and other custom players
-- Expose relative ram locations on the user side (communication bytes, queue ids, etc)
-- MCD support, PCM and CDDA
-- MD+ support
-- Negative volume envelopes
-- FM drum mode
-- YMPCM note mode
-- Panning animations/envelopes
-- FM3 multi-channel and CSM mode
 
 ## Tools
 - [flamewings asl macro assembler fork](https://github.com/flamewing/asl-releases), labelled as asw for... some reason

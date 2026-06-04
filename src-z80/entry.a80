@@ -1,0 +1,52 @@
+; Z80 init. The purpose of this is to do the following in parrallel to GameProgram:
+; Clear Z80 RAM, including the 16kb from the teradrive
+; Disable interrupts, set interrupt type default to 1
+; - 0 (the default) acts like 1 on most hardware, but is unreliable on early models
+; - 2 lacks the necessary hardware
+; Reset PSGs, also fix an obscure bug with real hardware.
+; - Quote from Siks documentation for Minimusic v1.11:
+;   "There's a bug in real hardware where if the Reset button is pressed after the 68000 sets up
+;   the DMA registers but before it issues the DMA command, an internal flag in the VDP is not
+;   cleared and will lock up on the next video memory access unless the Z80 gets on the 68000
+;   bus first (which clears the internal flag). [Z80 program] will try to get on the 68000 bus as
+;   early as it can (by poking the PSG) [...] make sure to spend some time before accessing video
+;   memory (accessing the VDP registers is fine)."
+; -----------------------------------------------------------------------------
+Init:
+.end = Init+04h	; location to start padding
+.pad = 000h	; data to pad the ram with
+	di
+	im	1			; im 1 is the only one that reliably works
+; mute PSGs
+; Doing this early on the Z80 side fixes a DMA bug on the VDP, when queuing a DMA 
+	ld	hl,7F11h		
+	ld	(hl),09Fh
+	ld	(hl),0BFh
+	ld	(hl),0DFh
+	ld	(hl),0FFh
+; clear Z80 ram
+	ld	hl,Init			; load smaller routine at the start of Z80 RAM
+	ld	(hl),0EDh		; this is so it clears as much RAM as it can
+	inc	l			; actually did something similar for my old TMSS clone
+	ld	(hl),0B0h
+	inc	l
+	ld	(hl),018h
+	inc	l
+	ld	(hl),0FEh
+
+	ld	bc,1FFFh-.end		; clear 8kb ram
+	ld	a,(2000h)		; check first byte from 16kb ram, or 8kb ram mirror
+	or	a			; 68000 sets this to 00h before loading the Z80 routine
+	jr	nz,.kb8			; since DI isn't 00h, if this is 00h then 16kb ram is present
+	ld	b,(3FFFh-.end)>>8	; clear 16kb ram
+.kb8:
+	ld	de,.end+1		; initial destination address
+	ld	hl,.end			; initial source address
+	ld	sp,hl			; set the address the stack starts at
+	ld	(hl),.pad		; set first byte of the stack to 0
+	jr	Init
+;	ldir				; ED B0 ; loop to fill the stack (entire remaining available Z80 RAM) with 0
+;.inf:	jr	.inf			; 18 FE ; loop indefinitely
+	if ($)&1
+	db	0
+	endif

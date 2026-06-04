@@ -23,19 +23,23 @@ D = Data, 10-bit value for tone, 4-bit value for volume
 [0.DD DDDD]
 D = Data, this write isn't necessary for volume (the lower 4 bits overwrite the already provided volume)
 Data types
-Tone:   DDDDDDdddd = cccccccccc
+Tone:   DDDDDDdddd   = cccccccccc
 Noise:  (DDDDDD)dddd = (---trr)-trr
 Volume: (DDDDDD)dddd = (--vvvv)vvvv
 
+# MDPlus
+the manual is here
+https://drive.google.com/file/d/1RY5O5MIPMFo4luMQ6T-_gpQwKhciLSuh/view
 
+# PicoADPCM
 
-# adpcm
+adpcmdata
+range = $800010
+reads return how much bytes are free in FIFO, SMPS-Pico ANDs it with $3F making the max value 63
+writes add bytes into the FIFO, seemingly only word writes are valid... despite the max value being odd.
 
-# adpcmdata
-reads return how much bytes are free in FIFO
-writes add bytes into the FIFO
-
-# adpcmctrl
+adpcmctrl
+range = $800012
 reads [B... .... .... ....]
 B = BUSY status, 1 if the chip currently playing a sample
 write [RI.. ?... FF.. .VVV]
@@ -45,9 +49,8 @@ I = Interrupt enable. Level 3 interrupts will trigger based on FIFO fullness whe
 F = Low-pass filter selection, 11 = 16 kHz, 10 = 12 kHz, 01 = 6 kHz, 00 = ??
 V = Volume
 
+# YMZ263B
 
+# YMF262
 
-
-ymz263B
-
-ymf262
+# YM712B

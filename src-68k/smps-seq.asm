@@ -1,8 +1,4 @@
 ; ---------------------------------------------------------------------------
-; Modified SMPS 68k Type 1b sound driver
-; The source code to a similar version of the driver can be found here:
-; https://hiddenpalace.org/News/Sega_of_Japan_Sound_Documents_and_Source_Code
-; ---------------------------------------------------------------------------
 ; Subroutine to update music
 ; (Called by vertical interrupts, built to survive horizontal interrupts)
 ; INPUT:
@@ -27,6 +23,7 @@ HandlePause:
 	;	bra.w	.pausingmusic
 .pausingmusic:
 		bclr	#v_driverflags.dopause,v_driverflags(a6)
+		bsr.w	PauseCDDA
 
 		moveq_	$B4,d0			; Command to set AMS/FMS/panning
 		moveq	#0,d1			; No panning, AMS or FMS
@@ -82,6 +79,7 @@ HandlePause:
 		rts
 .resumingmusic:
 		bclr	#v_driverflags.dopause,v_driverflags(a6)
+		bsr.w	ResumeCDDA
 
 		lea	v_music_pcm_tracks(a6),a5
 		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d7

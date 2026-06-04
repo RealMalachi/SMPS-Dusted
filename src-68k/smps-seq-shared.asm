@@ -17,11 +17,8 @@ StopAllSound:
 		and.b	v_driverflags(a6),d0
 		move.b	d0,v_driverflags(a6)
 .skipram:
-		moveq	#$27,d0				; Timers, FM3 mode
-		moveq	#0,d1				; FM3 normal mode, disable timers
-		bsr.w	WriteFMI
-
-		bsr.w	DACStopSample
+		bsr.w	StopCDDA
+		bsr.w	DACStopSample			; TODO: DACStopAll
 		bsr.w	FMSilenceAll
 		bra.w	PSGSilenceAll
 ; ===========================================================================
@@ -31,6 +28,8 @@ StopBGM:
 .dacloop:	tst.b	TrackPlaybackControl(a5)
 		bpl.s	.dacnext
 		and.b	#$FF!(1<<_playing),TrackPlaybackControl(a5)
+		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
 		bsr.w	DACStopSample
 		moveq	#0,d3
 		move.b	TrackVoiceControl(a5),d3

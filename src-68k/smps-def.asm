@@ -38,17 +38,31 @@ fmreg:
 ; ---------------------------------------------------------------------------
 vdpdata		equ $C00000
 vdpctrl		equ $C00004
-	if (__smpsTarget=="md68k")||(__smpsTarget=="mdz80")
+	if (__smpsTarget=="md68k")||(__smpsTarget=="mdz80")||(__smpsTarget=="fuckFM")
+psginput	equ $C00011
+	if __smpsTarget<>"fuckFM"
 ymstat		equ $A04000
 yma0		equ $A04000
 ymd0		equ $A04001
 yma1		equ $A04002
 ymd1		equ $A04003
-psginput	equ $C00011
 z80ram		equ $A00000
 z80busreq	equ $A11100
-	elseif __smpsTarget=="fuckFM"
-psginput	equ $C00011
+	endif
+MSD_OverlaySignature	equ $3F7F6	; reads 'BATE' if overlay port was successful
+MSD_OverlayPort		equ $3F7FA	; write $CD54 to enable MegaSD control
+MSD_ResultPort		equ $3F7FC
+MSD_CommandPort		equ $3F7FE
+MSD_ParameterData	equ $3F800	; data from the ARM cpu
+MSD_ParameterEnd	equ $40000
+MSD_OverlayValue	equ $CD54
+
+msd_comm_playonce	equ $11		; play a song
+msd_comm_playloop	equ $12		; play a song and loop it when it's done
+msd_comm_pause		equ $13		; 1.04 uses parameter for a fadeout
+msd_comm_resume		equ $14		;
+msd_comm_volume		equ $15		; 0 is mute, 0xFF is max
+msd_comm_status		equ $16		; 1.04 ; 0 = no song playing, 1 = song playing
 	elseif __smpsTarget=="sys14"
 ymstat		equ $840101
 yma0		equ $840101
@@ -63,8 +77,8 @@ adpcmctrl	equ $800012		;
 psginput	equ $C00011
 adpcmdata	equ $800010		; reads return how many free bytes their are in the FIFO, writes add to the FIFO
 adpcmctrl	equ $800012		; 
-
-ymz263B_stat	equ $BFF801		; u8 ; YMZ263B Status read/address write (no Copera games write to this address, but it should work based on the YMZ263B datasheet)
+; (no Copera games write to stat, but it should work based on the YMZ263B datasheet)
+ymz263B_stat	equ $BFF801		; u8 ; YMZ263B Status read/address write
 ymz263B_ch1data	equ $BFF803		; u8 ; YMZ263B Channel #1 data
 ymz263B_addr	equ $BFF805		; u8 ; YMZ263B Address write
 ymz263B_ch2data	equ $BFF807		; u8 ; YMZ263B Channel #2 data
@@ -76,15 +90,15 @@ ymf262_addr2	equ $BFF834		; u  ; YMF262 Address Part #2 write
 
 ym712B		equ $BFF840		; u8 ; YM712B write
 	else
-	fatal "Unknown hardware target"
+		fatal "Unknown hardware target"
 	endif
 
 SMPS_stopZ80 macro
 	move.w	#$100,(z80busreq).l
 	endm
 SMPS_waitZ80 macro
-.w:	btst	#0,(z80busreq).l
-	bne.s	.w
+$$w:	btst	#0,(z80busreq).l
+	bne.s	$$w
 	endm
 SMPS_startZ80 macro
 	move.w	#0,(z80busreq).l
@@ -94,10 +108,6 @@ SMPS_kdebugtext macro
 	nop
 	endif
 	endm
-
-smpsren_vram_null	= 0
-smpsren_vram_plane	= $100
-smpsren_vram_length	= $200
 
 SMPS_assert macro
 	if __smpsDebug
@@ -110,7 +120,7 @@ SMPS_assert macro
 		even
 		endif
 	else
-	illegal
+		illegal
 	endif
 	endm
 SMPS_assertascii macro thing1,thing2
@@ -124,35 +134,6 @@ SMPS_assertascii macro thing1,thing2
 		endif
 	endif
 	endm
-
-; VDP/DMA
-; makes a VDP command
-vdpComm function addr,type,(((type)&3)<<30)|((addr&$3FFF)<<16)|(((type)&$FC)<<2)|((addr&$C000)>>14)
-; makes a VDP address difference
-vdpCommDelta function addr,((addr&$3FFF)<<16)|((addr&$C000)>>14)
-
-; function to calculate the location of a tile in plane mappings
-planeLoc function width,col,line,(((width*line)+col)*2)
-
-; simplication of the VDP memory access flags
-; in truth, bit 5 is DMA and bit 4 is a VRAM to VRAM DMA flag
-REG_WRITE	= %000010
-
-VRAM_READ	= %000000
-VRAM_WRITE	= %000001
-VRAM_DMA	= %100001
-VRAM_READ8	= %001100	; 8bit half reads, useful for reading with 128kb vram
-VRAM_COPYDMA	= %110001	; VRAM to VRAM DMA
-
-CRAM_READ	= %001000
-CRAM_WRITE	= %000011
-CRAM_DMA	= %100011
-CRAM_COPYDMA	= %110011	; CRAM to CRAM DMA
-
-VSRAM_READ	= %000100
-VSRAM_WRITE	= %000101
-VSRAM_DMA	= %100101
-VSRAM_COPYDMA	= %110101	; VSRAM to VSRAM DMA
 ; ---------------------------------------------------------------------------
 	phase 0
 drvdata:
@@ -273,6 +254,7 @@ v_dataptr:			ds.l 1
 
 v_driverflags2:			ds.b 1
 .muffle				equ 7	; must be 7
+.mdplus				equ 0
 
 v_communication:		ds.b __smpsCommBytes	; generally used for syncing gameplay with music
 v_communication_end:
@@ -301,7 +283,9 @@ v_contsfx_loop:			ds.b 1
 
 v_lastpsg4:			ds.b 1
 	ds.b (*)&1	; word-alignment
+	if __smpsJingle
 v_1up_save_ram:			ds.b 0
+	endif
 v_main_tempo_timeout:		ds.w 1
 v_main_tempo:			ds.w 1
 
@@ -328,10 +312,10 @@ v_music_psg_tracks_end:		ds.b 0
 v_music_track_ram_end:		ds.b 0
 
 v_music_fm3_multifreq:		ds.w 3*(__smpsFM3Multi<>0)
+	if __smpsJingle
 v_1up_save_ram_end:		ds.b 0
 
-	if __smpsJingle
-v_1up_ram_copy:
+v_1up_ram_copy:			ds.b 0
 	endif
 v_sfx_track_ram:		ds.b 0
 v_sfx_fm_tracks:		ds.b 0
@@ -361,7 +345,8 @@ v_bsfx_track_ram_end:		ds.b 0
 	endif
 
 	if __smpsJingle
-v_1up_ram_copy_overlap:		ds.b (v_1up_save_ram_end-v_1up_save_ram)-(v_1up_ram_copy_overlap-v_1up_ram_copy)
+v_1up_ram_copy_overlap:
+				ds.b (v_1up_save_ram_end-v_1up_save_ram)-(v_1up_ram_copy_overlap-v_1up_ram_copy)
 v_1up_ram_copy_end:		ds.b 0
 	endif
 v_endofvariables:
