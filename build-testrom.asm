@@ -782,8 +782,8 @@ ScreenText:
 		dc.l .a_writecomm
 		dc.l .a_guard
 		dc.l .a_unguard
-		dc.l .a_piano
 		dc.l .a_misc
+		dc.l .a_piano
 		dc.l .a_cdda
 .shortcut:
 		dc.l .s_stopall
