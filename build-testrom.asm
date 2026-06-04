@@ -77,19 +77,18 @@ v_stackend:		ds.b $100
 v_stack:		ds.b 0
 
 			ds.b (*)&1
+v_select:		ds.w 1
+v_prevselect:		ds.w 1
 v_apiindex:		ds.w 1
 v_soundid:		ds.w 1
+v_shortcut:		ds.w 1
 v_misccmd:		ds.w 1
 v_miscparam:		ds.w 1
 v_cddaid:		ds.b 1
 v_commindex:		ds.b 1
-v_commread:		ds.b 1
-v_commwrite:		ds.b 1
+v_commval:		ds.b 1
+v_runinvint:		ds.b 1
 v_dmalen:		ds.w 1
-
-v_shortcut:		ds.w 1
-v_select:		ds.w 1
-v_prevselect:		ds.w 1
 
 			ds.b (*)&1
 v_jpad:			ds.b 0
@@ -99,7 +98,6 @@ v_jpad2held:		ds.b 1
 v_jpad2press:		ds.b 1
 
 v_vsync:		ds.b 1
-v_runinvint:		ds.b 1
 
 			align 4	; this works
 v_hardresetend:		ds.b 0
@@ -341,6 +339,14 @@ GameProgram:
 		sf.b	v_vsync
 		bsr.s	HandleControl
 		bsr.w	HandleRender
+		cmp.b	#2,v_runinvint
+		blo.s	.norun
+		move.l	#$C0000000,vdpctrl			; cram visualiser
+		move.w	#$A00,vdpdata
+		bsr.w	CallAPI.setuppianoroll
+		move.l	#$C0000000,vdpctrl			; cram visualiser
+		move.w	#$000,vdpdata
+.norun:
 		bra.s	.mainloop
 
 HandleControl:
@@ -452,11 +458,11 @@ CallAPI:
 		move.b	v_commindex,d1
 		lea	v_soundram,a1
 		jsr	(SMPS_ReadComm).l
-		move.b	d0,v_commread
+		move.b	d0,v_commval
 		rts
 .writecomm:
 		move.b	v_commindex,d1
-		move.b	v_commwrite,d0
+		move.b	v_commval,d0
 		lea	v_soundram,a1
 		jmp	(SMPS_WriteComm).l
 .guarddriver:
@@ -660,7 +666,7 @@ HandleRender:
 		renhex.w v_misccmd,14
 		renhex.w v_miscparam,14
 		renhex.b v_cddaid,14
-		renhex.b v_commwrite,14
+		renhex.b v_commval,14
 		renhex.b v_commindex,14
 		renhex.w v_dmalen,14
 		rentext.b ScreenText.vintrun,v_runinvint,14
@@ -755,11 +761,17 @@ ControlList:
 		ctrllist 1,v_misccmd,	2
 		ctrllist 1,v_miscparam,	$FFFF
 		ctrllist 0,v_cddaid,	99
-		ctrllist 0,v_commwrite,	$FF
+		ctrllist 0,v_commval,	$FF
 		ctrllist 0,v_commindex,	1
 		ctrllist 1,v_dmalen,	$1000
-		ctrllist 0,v_runinvint,	1
+		ctrllist 0,v_runinvint,	2
 .e:
+
+dctxt macro padto,byteval
+$$p:	dc.b	byteval
+	dc.b	[padto-((*)-$$p)]" "
+	dc.b	0
+	endm
 ScreenText:
 .apicall:
 		dc.l .a_init
@@ -793,6 +805,7 @@ ScreenText:
 .vintrun:
 		dc.l .v_off
 		dc.l .v_on
+		dc.l .v_piano
 
 .main:		dc.b "SMPS-Dusted Debug ROM v1",1
 		dc.b "====================================",1
@@ -808,37 +821,42 @@ ScreenText:
 		dc.b " Vint Run:",1
 		dc.b "====================================",1
 		dc.b 0
-.a_init:	dc.b "InitDriver    ",0
-.a_run:		dc.b "RunDriver     ",0
-.a_sound:	dc.b "QueueSound    ",0
-.a_fifo:	dc.b "UpdateFIFO    ",0
-.a_readcomm:	dc.b "ReadComm      ",0
-.a_writecomm:	dc.b "WriteComm     ",0
-.a_guard:	dc.b "GuardDriver   ",0
-.a_unguard:	dc.b "UnguardDriver ",0
-.a_piano:	dc.b "SetupPianoRoll",0
-.a_misc:	dc.b "RunMiscCommand",0
-.a_cdda:	dc.b "PlayCDDA      ",0
 
-.s_stopall:	dc.b "Stop All     ",0
-.s_stopbgm:	dc.b "Stop BGM     ",0
-.s_stopsfx:	dc.b "Stop SFX     ",0
-.s_stopbsfm:	dc.b "Stop BSFX    ",0
-.s_stoppcmsfx:	dc.b "Stop PCM SFX ",0
-.s_stereo:	dc.b "Stereo pan   ",0
-.s_mono:	dc.b "Mono pan     ",0
-.s_ssgon:	dc.b "SSG on       ",0
-.s_ssgoff:	dc.b "SSG off      ",0
-.s_muffleoff:	dc.b "Muffle off   ",0
-.s_muffleon:	dc.b "Muffle on    ",0
-.s_fadeout:	dc.b "Fadeout      ",0
-.s_fadeoutbgm:	dc.b "Fadeout BGM  ",0
-.s_fadein:	dc.b "Fadein       ",0
-.s_pause:	dc.b "Pause Driver ",0
-.s_resume:	dc.b "Resume Driver",0
+.amax		equ 14
+.a_init:	dctxt .amax,"InitDriver"
+.a_run:		dctxt .amax,"RunDriver"
+.a_sound:	dctxt .amax,"QueueSound"
+.a_fifo:	dctxt .amax,"UpdateFIFO"
+.a_readcomm:	dctxt .amax,"ReadComm"
+.a_writecomm:	dctxt .amax,"WriteComm"
+.a_guard:	dctxt .amax,"GuardDriver"
+.a_unguard:	dctxt .amax,"UnguardDriver"
+.a_piano:	dctxt .amax,"SetupPianoRoll"
+.a_misc:	dctxt .amax,"RunMiscCommand"
+.a_cdda:	dctxt .amax,"PlayCDDA"
 
-.v_off:		dc.b "Off",0
-.v_on:		dc.b "On ",0
+.smax		equ 13
+.s_stopall:	dctxt .smax,"Stop All"
+.s_stopbgm:	dctxt .smax,"Stop BGM"
+.s_stopsfx:	dctxt .smax,"Stop SFX"
+.s_stopbsfm:	dctxt .smax,"Stop BSFX"
+.s_stoppcmsfx:	dctxt .smax,"Stop PCM SFX"
+.s_stereo:	dctxt .smax,"Stereo pan"
+.s_mono:	dctxt .smax,"Mono pan"
+.s_ssgon:	dctxt .smax,"SSG on"
+.s_ssgoff:	dctxt .smax,"SSG off"
+.s_muffleoff:	dctxt .smax,"Muffle off"
+.s_muffleon:	dctxt .smax,"Muffle on"
+.s_fadeout:	dctxt .smax,"Fadeout"
+.s_fadeoutbgm:	dctxt .smax,"Fadeout BGM"
+.s_fadein:	dctxt .smax,"Fadein"
+.s_pause:	dctxt .smax,"Pause Driver"
+.s_resume:	dctxt .smax,"Resume Driver"
+
+.vmax		equ 5
+.v_off:		dctxt .vmax,"Off"
+.v_on:		dctxt .vmax,"On"
+.v_piano:	dctxt .vmax,"Piano"
 		even
 ; ---------------------------------------------------------------------------
 JoypadInit:

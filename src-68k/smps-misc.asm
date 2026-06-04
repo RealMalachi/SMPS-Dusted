@@ -20,14 +20,14 @@ ReadComm:
 		cmp.b	#__smpsCommBytes,d1
 		bhs.s	.index
 		and.w	#$FF,d1
-		move.b	d0,v_communication(a1,d1.w)
+		move.b	v_communication(a1,d1.w),d0
 		rts
 .index:		SMPS_assert "ReadComm: Index is too large"
 WriteComm:
 		cmp.b	#__smpsCommBytes,d1
 		bhs.s	.index
 		and.w	#$FF,d1
-		move.b	v_communication(a1,d1.w),d0
+		move.b	d0,v_communication(a1,d1.w)
 		rts
 .index:		SMPS_assert "WriteComm: Index is too large"
 ; ===========================================================================

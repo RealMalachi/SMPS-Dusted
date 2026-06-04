@@ -1,4 +1,5 @@
 _out/
+/*.bak
 smps-def.asm
 smps-def-debug.asm
 smps-drv.bin

@@ -1382,13 +1382,13 @@ cfxLoopCSFX:
 ; ---------------------------------------------------------------------------
 ; If the chosen communication byte is zero, continue looping
 cfxCommJump:
-		moveq	#0,d0
-		move.b	(a4)+,d0
+		moveq	#0,d1
+		move.b	(a4)+,d1
 		if __smpsDebug=1
-		cmp.b	#__smpsCommBytes,d0
+		cmp.b	#__smpsCommBytes,d1
 		bhs.s	.index
 		endif
-		tst.b	TrackLoopCounters(a5,d0.w)
+		tst.b	v_communication(a6,d1.w)
 		beq.s	cfJumpTo
 		addq.w	#2,a4
 		rts
