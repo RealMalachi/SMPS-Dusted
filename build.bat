@@ -59,7 +59,7 @@ tools\sjasmplus\sjasmplus.exe src-z80/entry.a80 --raw=_out/entry-z80.bin --lst=_
 
 echo ============================================
 echo Building SMPS test rom
-tools\asw\asw.exe -xx -n -q -A -L -U -i . -olist _out\build-testrom.lst -E _out\build-testrom.log build-testrom.asm
+tools\asw\asw.exe -xx -n -q -A -L -U -g map -i . -olist _out\build-testrom.lst -E _out\build-testrom.log build-testrom.asm
 if not exist build-testrom.p goto _BUILDTYPE_ERROR_ROM
 tools\asw\p2bin.exe "build-testrom.p" "smps-testrom.gen" ""
 move build-testrom.p _out

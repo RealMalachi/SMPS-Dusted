@@ -23,7 +23,7 @@ SMPSCPUVer	equ "68K"	; 68K, Z80
 ; 4 = Sonic 3K
 ; 5 = Sonic 3D
 ; 6 = Sonic CD
-; 8 = Sonic Crackers??
+; 8 = Chaotix (and Sonic Crackers??)
 ; $F0E5xxxx = SMPS-Dusted
 ; ---------------------------------------------------------------------------
 ; Standard Octave Pitch Equates

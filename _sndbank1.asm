@@ -98,28 +98,44 @@ SMPS_VolEnvIndex:
 	smpsEnvTable VolEnv_s25,sTone_25
 	smpsEnvTable VolEnv_s26,sTone_26
 	smpsEnvTable VolEnv_s27,sTone_27
-	smpsEnvTable DATA_8A59,fS28bit_01
-	smpsEnvTable DATA_8A5B,fS28bit_02
-	smpsEnvTable DATA_8A62,fS28bit_03
-	smpsEnvTable DATA_8A6B,fS28bit_04
-;	smpsEnvTable DATA_8A78,fS28bit_05
-;	smpsEnvTable DATA_8A83,fS28bit_06
-;	smpsEnvTable DATA_8AA2,fS28bit_07
-;	smpsEnvTable DATA_8AAF,fS28bit_08
-;	smpsEnvTable DATA_8ABE,fS28bit_09
-;	smpsEnvTable DATA_8ACA,fS28bit_0A
-;	smpsEnvTable DATA_8AD0,fS28bit_0B
-;	smpsEnvTable DATA_8ADB,fS28bit_0C
-;	smpsEnvTable DATA_8AE8,fS28bit_0D
-;	smpsEnvTable DATA_8AF3,fS28bit_0E
-;	smpsEnvTable DATA_8B02,fS28bit_0F
-;	smpsEnvTable DATA_8B19,fS28bit_10
-;	smpsEnvTable DATA_8B2D,fS28bit_11
-;	smpsEnvTable DATA_8B44,fS28bit_12
-;	smpsEnvTable DATA_8B5B,fS28bit_13
-;	smpsEnvTable DATA_8B75,fS28bit_14
-;	smpsEnvTable DATA_8B8A,fS28bit_15
+	smpsEnvTable VolEnv_s28b01,fS28bit_01
+	smpsEnvTable VolEnv_s28b02,fS28bit_02
+	smpsEnvTable VolEnv_s28b03,fS28bit_03
+	smpsEnvTable VolEnv_s28b04,fS28bit_04
+;	smpsEnvTable VolEnv_s28b05,fS28bit_05
+;	smpsEnvTable VolEnv_s28b06,fS28bit_06
+;	smpsEnvTable VolEnv_s28b07,fS28bit_07
+;	smpsEnvTable VolEnv_s28b08,fS28bit_08
+;	smpsEnvTable VolEnv_s28b09,fS28bit_09
+;	smpsEnvTable VolEnv_s28b0A,fS28bit_0A
+;	smpsEnvTable VolEnv_s28b0B,fS28bit_0B
+;	smpsEnvTable VolEnv_s28b0C,fS28bit_0C
+;	smpsEnvTable VolEnv_s28b0D,fS28bit_0D
+;	smpsEnvTable VolEnv_s28b0E,fS28bit_0E
+;	smpsEnvTable VolEnv_s28b0F,fS28bit_0F
+;	smpsEnvTable VolEnv_s28b10,fS28bit_10
+;	smpsEnvTable VolEnv_s28b11,fS28bit_11
+;	smpsEnvTable VolEnv_s28b12,fS28bit_12
+;	smpsEnvTable VolEnv_s28b13,fS28bit_13
+;	smpsEnvTable VolEnv_s28b14,fS28bit_14
+;	smpsEnvTable VolEnv_s28b15,fS28bit_15
+	smpsEnvTable VolEnv_c01,cTone_01
+	smpsEnvTable VolEnv_c02,cTone_02
+	smpsEnvTable VolEnv_c03,cTone_03
+	smpsEnvTable VolEnv_c04,cTone_04
+	smpsEnvTable VolEnv_c05,cTone_05
+	smpsEnvTable VolEnv_c06,cTone_06
+	smpsEnvTable VolEnv_c07,cTone_07
+	smpsEnvTable VolEnv_c08,cTone_08
+	smpsEnvTable VolEnv_c09,cTone_09
+	smpsEnvTable VolEnv_c0A,cTone_0A
+	smpsEnvTable VolEnv_c0B,cTone_0B
+	smpsEnvTable VolEnv_c0C,cTone_0C
+	smpsEnvTable VolEnv_c0D,cTone_0D
+	smpsEnvTable VolEnv_c0E,cTone_0E
 	smpsEnvTable END,$100
+cTone_00	equ 0
+; Sonic 1, Sonic 2
 VolEnv_f01:	smpsEnvVolPsg $00,$00,$00,$01,$01,$01,$02,$02,$02,$03,$03,$03,$04,$04,$04,$05,$05,$05,$06,$06,$06,$07,HOLD
 VolEnv_f02:	smpsEnvVolPsg $00,$02,$04,$06,$08,$10,HOLD
 VolEnv_f03:	smpsEnvVolPsg $00,$00,$01,$01,$02,$02,$03,$03,$04,$04,$05,$05,$06,$06,$07,$07,HOLD
@@ -150,6 +166,7 @@ VolEnv_f0C:	smpsEnvVolPsg $04,$04,$03,$03,$02,$02,$01,$01,$01,$01,$01,$01,$01,$0
 		smpsEnvVolPsg $06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$07,HOLD
 VolEnv_f0D:	smpsEnvVolPsg $0E,$0D,$0C,$0B,$0A,$09,$08,$07,$06,$05,$04,$03,$02,$01,$00,HOLD
 
+; Sonic3K, Sonic 3D
 VolEnv_s01:	smpsEnvVolPsg $02,REST
 VolEnv_s02:	smpsEnvVolPsg $00,$02,$04,$06,$08,$10,REST
 VolEnv_s03:	smpsEnvVolPsg $02,$01,$00,$00,$01,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$03,$03,$03,$04,$04,$04,$05,HOLD
@@ -202,28 +219,48 @@ VolEnv_s26:	smpsEnvVolPsg $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$0
 ;		smpsEnvVolPsg $09,$09		; S3A has these two extra ticks
 		smpsEnvVolPsg $09,$09,REST
 VolEnv_s27:	smpsEnvVolPsg $00,$02,$02,$02,$03,$03,$03,$04,$04,$04,$05,$05,REST
+
 ; Sonic 2 SMS
-DATA_8A59:	smpsEnvVolPsg $00,$00,REST
-DATA_8A5B:	smpsEnvVolPsg $00,$00,$01,$04,$08,$0B,$0E,REST
-DATA_8A62:	smpsEnvVolPsg $00,$00,$00,$02,$04,$06,$07,$0A,$0C,REST
-DATA_8A6B:	smpsEnvVolPsg $00,$01,$02,$02,$02,$02,$02,$02,$02,$03,$03,$04,$04,REST
-;DATA_8A78:	smpsEnvVolPsg $02,$01,$00,$01,$02,$02,$03,$03,$04,$04,HOLD
-;DATA_8A83:	smpsEnvVolPsg $05,$02,$00,$00,$01,$01,$02,$02,$02,$02,$03,$03,$03,$03,$04,$04,$04,$04,$05,$05,$05,$05,$06,$06,$06,$06,$07,$07,$07,$08,HOLD
-;DATA_8AA2:	smpsEnvVolPsg $00,$00,$00,$00,$00,$00,$00,$00,$06,$07,$08,$09,REST
-;DATA_8AAF:	smpsEnvVolPsg $00,$00,$01,$01,$02,$02,$02,$03,$03,$03,$03,$04,$04,$05,HOLD
-;DATA_8ABE:	smpsEnvVolPsg $00,$00,$01,$01,$01,$02,$04,$03,$02,$02,$83,$04
-;DATA_8ACA:	smpsEnvVolPsg $02,$02,$03,$03,$0F,HOLD
-;DATA_8AD0:	smpsEnvVolPsg $03,$01,$01,$01,$01,$01,$02,$03,$04,$04,HOLD
-;DATA_8ADB:	smpsEnvVolPsg $00,$00,$01,$01,$02,$02,$03,$03,$04,$04,$05,$05,HOLD
-;DATA_8AE8:	smpsEnvVolPsg $00,$00,$00,$00,$08,$08,$08,$05,$05,$05,REST
-;DATA_8AF3:	smpsEnvVolPsg $01,$01,$01,$02,$02,$02,$02,$02,$03,$03,$04,$04,$04,$04,HOLD
-;DATA_8B02:	smpsEnvVolPsg $00,$00,$00,$00,$00,$02,$04,$04,$04,$04,$02,$02,$03,$03,$03,$03,$03,$03,$05,$06,$06,$06,HOLD
-;DATA_8B19:	smpsEnvVolPsg $00,$00,$01,$01,$02,$02,$03,$03,$04,$04,$08,$08,$04,$04,$03,$03,$02,$01,$00,HOLD
-;DATA_8B2D:	smpsEnvVolPsg $00,$00,$02,$03,$03,$04,$06,$06,$03,$03,$04,$04,$05,$05,$06,$06,$07,$07,$08,$08,$09,$09,HOLD
-;DATA_8B44:	smpsEnvVolPsg $04,$03,$03,$02,$01,$01,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$02,$02,$02,$02,$03,$03,HOLD
-;DATA_8B5B:	smpsEnvVolPsg $02,$02,$02,$02,$02,$08,$08,$08,$08,$08,$03,$03,$03,$03,$03,$08,$08,$08,$08,$08,$05,$05,$05,$05,$05,REPEAT
-;DATA_8B75:	smpsEnvVolPsg $00,$00,$01,$02,$03,$04,$04,$05,$05,$05,$06,$06,$06,$06,$07,$08,$08,$08,$08,$08,HOLD
-;DATA_8B8A:	smpsEnvVolPsg $00,$00,$03,$02,$03,$04,$06,$08,$08,$08,HOLD
+VolEnv_s28b01:	smpsEnvVolPsg $00,$00,REST
+VolEnv_s28b02:	smpsEnvVolPsg $00,$00,$01,$04,$08,$0B,$0E,REST
+VolEnv_s28b03:	smpsEnvVolPsg $00,$00,$00,$02,$04,$06,$07,$0A,$0C,REST
+VolEnv_s28b04:	smpsEnvVolPsg $00,$01,$02,$02,$02,$02,$02,$02,$02,$03,$03,$04,$04,REST
+VolEnv_s28b05:	smpsEnvVolPsg $02,$01,$00,$01,$02,$02,$03,$03,$04,$04,HOLD
+VolEnv_s28b06:	smpsEnvVolPsg $05,$02,$00,$00,$01,$01,$02,$02,$02,$02,$03,$03,$03,$03,$04,$04,$04,$04,$05,$05,$05,$05,$06,$06,$06,$06,$07,$07,$07,$08,HOLD
+VolEnv_s28b07:	smpsEnvVolPsg $00,$00,$00,$00,$00,$00,$00,$00,$06,$07,$08,$09,REST
+VolEnv_s28b08:	smpsEnvVolPsg $00,$00,$01,$01,$02,$02,$02,$03,$03,$03,$03,$04,$04,$05,HOLD
+VolEnv_s28b09:	smpsEnvVolPsg $00,$00,$01,$01,$01,$02,$04,$03,$02,$02,$83,$04
+VolEnv_s28b0A:	smpsEnvVolPsg $02,$02,$03,$03,$0F,HOLD
+VolEnv_s28b0B:	smpsEnvVolPsg $03,$01,$01,$01,$01,$01,$02,$03,$04,$04,HOLD
+VolEnv_s28b0C:	smpsEnvVolPsg $00,$00,$01,$01,$02,$02,$03,$03,$04,$04,$05,$05,HOLD
+VolEnv_s28b0D:	smpsEnvVolPsg $00,$00,$00,$00,$08,$08,$08,$05,$05,$05,REST
+VolEnv_s28b0E:	smpsEnvVolPsg $01,$01,$01,$02,$02,$02,$02,$02,$03,$03,$04,$04,$04,$04,HOLD
+VolEnv_s28b0F:	smpsEnvVolPsg $00,$00,$00,$00,$00,$02,$04,$04,$04,$04,$02,$02,$03,$03,$03,$03,$03,$03,$05,$06,$06,$06,HOLD
+VolEnv_s28b10:	smpsEnvVolPsg $00,$00,$01,$01,$02,$02,$03,$03,$04,$04,$08,$08,$04,$04,$03,$03,$02,$01,$00,HOLD
+VolEnv_s28b11:	smpsEnvVolPsg $00,$00,$02,$03,$03,$04,$06,$06,$03,$03,$04,$04,$05,$05,$06,$06,$07,$07,$08,$08,$09,$09,HOLD
+VolEnv_s28b12:	smpsEnvVolPsg $04,$03,$03,$02,$01,$01,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$02,$02,$02,$02,$03,$03,HOLD
+VolEnv_s28b13:	smpsEnvVolPsg $02,$02,$02,$02,$02,$08,$08,$08,$08,$08,$03,$03,$03,$03,$03,$08,$08,$08,$08,$08,$05,$05,$05,$05,$05,REPEAT
+VolEnv_s28b14:	smpsEnvVolPsg $00,$00,$01,$02,$03,$04,$04,$05,$05,$05,$06,$06,$06,$06,$07,$08,$08,$08,$08,$08,HOLD
+VolEnv_s28b15:	smpsEnvVolPsg $00,$00,$03,$02,$03,$04,$06,$08,$08,$08,HOLD
+
+; Knuckles' Chaotix
+VolEnv_c01:	smpsEnvVolPsg $02,REST
+VolEnv_c02:	smpsEnvVolPsg $00,$00,$00,$02,$04,$06,$08,$10,REST
+VolEnv_c03:	smpsEnvVolPsg 1, 0, 0, 0, 2, 4, 6, 8, 16, REST
+VolEnv_c04:	smpsEnvVolPsg 4, 3, 2, 1, 0, 0, 1, 1, 2, 2, 2, HOLD
+VolEnv_c05:	smpsEnvVolPsg 3, 0, 1, 1, 1, 2, 3, 4, 4, 5, HOLD
+VolEnv_c06:	smpsEnvVolPsg 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 8, 10, 12, 14, 16, 18, REST
+VolEnv_c07:	smpsEnvVolPsg 18, 18, 17, 17, 16, 16, 15, 15, 15, 14, 14, 14, 13, 13, 13, 13, 12, 12, 12, 12, 11, 11, 11, 11, 11, 10, 10, 10, 10, 9
+		smpsEnvVolPsg 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7, 6, 6, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 3, 3, 3, 2, 2, 2, 1, 1, 1, 0, 0, 2, 1, 0, HOLD
+VolEnv_c08:	smpsEnvVolPsg 2, 1, 0, 0, 1, 1, 2, HOLD
+VolEnv_c09:	smpsEnvVolPsg 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 4, 4, 4, 3, 3, 3, 3, 3, 3, 2, HOLD
+VolEnv_c0A:	smpsEnvVolPsg 1, 0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, HOLD
+VolEnv_c0B:	;smpsEnvVol    16, 32, 48, 64, 48, 32, 16, 0, -16, REPEAT
+VolEnv_c0C:	smpsEnvVolPsg 0, 0, 1, 1, 3, 3, 4, 5, REST
+VolEnv_c0D:	smpsEnvVolPsg 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 10, HOLD
+VolEnv_c0E:	smpsEnvVolPsg 0, 0, 2, 5, 9, 14, REST
+
+
 
 ; ---------------------------------------------------------------------------
 ; FM Universal Voice Bank
@@ -808,6 +845,7 @@ SMPS_MusicIndex:
 	musdef 0,0,0,BgmSoccer,bgm_Soccer
 	musdef 0,0,0,BgmSCDTimeTravel,bgm_SCDTimeTravel
 	musdef 0,0,0,BgmS28bUnused,bgm_S28bUnused
+	musdef 0,0,1,BgmDestructivePower,bgm_DestructivePower
 
 	musdef 0,0,0,BgmS1Title,bgm_S1Title
 	musdef 0,0,0,BgmS1GHZ,bgm_S1GHZ
@@ -1511,6 +1549,12 @@ SMPS_SampleTable:
 ;	pcmdef	PCM,	Rizzmas,		dRizzmas,		pcm_Rizzmas
 ; ============= type	expected pcm		sequence id end label	queue id end label
 	pcmdef	END,	MegaPCM2,		d__Last,		pcm__Last
+pCrash	equ dHipHopHitKick
+pKick	equ dKickS3
+pSnare	equ dSnareS3
+pTomHi	equ dHighTom
+pTomMid	equ dMidTomS3
+pTomLo	equ dLowTomS3
 
 ; ---------------------------------------------------------------------------
 ; Sound effect data
@@ -2340,6 +2384,8 @@ BgmSoccer:	include "res/bgm/MDSoccer-Title.asm"
 BgmSCDTimeTravel:	include "res/bgm/CD Time Travel.asm"
 		even
 BgmS28bUnused:	include "res/bgm/sonic2-8bit/Unknown Theme.asm"
+		even
+BgmDestructivePower:	include "res/bgm/destructive_power.asm"
 		even
 
 BgmS1Title:	include "res/bgm/sonic1/S1-Title.asm"

@@ -21,11 +21,20 @@ Excludes:
 - Sonic 2 hard-coded CPZ chemical balls play/not-play flag
 - Sonic 2 hard-coded spindash pitch increase (a non hard-coded method from Sonic 3 is provided)
 
-## Tools
+## Bundled tools
 - [flamewings asl macro assembler fork](https://github.com/flamewing/asl-releases), labelled as asw for... some reason
 - [clownacys p2bin](https://github.com/Clownacy/p2bin)
 - [sjasmplus](https://github.com/z00m128/sjasmplus)
 - [clownlzss](https://github.com/NaotoNTP/clownlzss)
+
+## Related tools
+- [smps2asm](https://forums.sonicretro.org/threads/smps2asm-and-improved-s-k-driver.26876)
+- [smpsopt](https://sonicresearch.org/community/index.php?threads/smps-optimizer.3001)
+- [vgm2smps](https://sonicresearch.org/community/index.php?threads/vgm2smps.5561)
+- [vgm2mid](https://vgmrips.net/wiki/Vgm2mid)
+- [mid2smps](https://forums.sonicretro.org/threads/mid2smps.25337)
+- [xm4smps](https://info.sonicretro.org/Xm4smps)
+- [furnace smps export](https://github.com/Pr0jectFM/furnace-smps-export)
 
 ## Special Thanks
 | person | thing |

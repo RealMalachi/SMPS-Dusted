@@ -613,18 +613,18 @@ InitRender:
 		move.l	#vdpComm(vram_plane<<5+planeLoc(64,2,1),VRAM_WRITE),d0
 		bra.w	PrintText
 
-rentext macro list,index,column,line
+rentext macro list,index
 		moveq	#0,d0
 		move.ATTRIBUTE	index,d0
 		lsl.l	#2,d0
 		lea	list(pc),a0
 		move.l	(a0,d0.l),a0
-		move.l	#vdpComm(vram_plane<<5+planeLoc(64,column,.l),VRAM_WRITE),d0
+		move.l	#vdpComm(vram_plane<<5+planeLoc(64,15,.l),VRAM_WRITE),d0
 		bsr.w	PrintText
 	set .l,.l+1
 	endm
-renhex macro hexval,column,line
-		move.l	#vdpComm(vram_plane<<5+planeLoc(64,column,.l),VRAM_WRITE),d0
+renhex macro hexval
+		move.l	#vdpComm(vram_plane<<5+planeLoc(64,15,.l),VRAM_WRITE),d0
 	if "ATTRIBUTE"=="b"
 		moveq	#2-1,d3
 		move.b	hexval,d1
@@ -660,16 +660,16 @@ HandleRender:
 		move.w	v_select,v_prevselect
 .selmatch:
 	set .l,3
-		rentext.w ScreenText.apicall,v_apiindex,14
-		rentext.w ScreenText.shortcut,v_shortcut,14
-		renhex.w v_soundid,14
-		renhex.w v_misccmd,14
-		renhex.w v_miscparam,14
-		renhex.b v_cddaid,14
-		renhex.b v_commval,14
-		renhex.b v_commindex,14
-		renhex.w v_dmalen,14
-		rentext.b ScreenText.vintrun,v_runinvint,14
+		rentext.w ScreenText.apicall,v_apiindex
+		rentext.w ScreenText.shortcut,v_shortcut
+		renhex.w v_soundid
+		renhex.w v_misccmd
+		renhex.w v_miscparam
+		renhex.b v_cddaid
+		renhex.b v_commval
+		renhex.b v_commindex
+		renhex.w v_dmalen
+		rentext.b ScreenText.vintrun,v_runinvint
 		rts
 PrintCursor:
 		and.l	#$FF,d0
@@ -809,8 +809,8 @@ ScreenText:
 
 .main:		dc.b "SMPS-Dusted Debug ROM v1",1
 		dc.b "====================================",1
-		dc.b " API Call:",1
-		dc.b " Shortcut:",1
+		dc.b " (A)API Call:",1
+		dc.b " (B)Shortcut:",1
 		dc.b " Sound ID:",1
 		dc.b " Misc CMD:",1
 		dc.b " Misc Param:",1
