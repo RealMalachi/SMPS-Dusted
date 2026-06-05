@@ -86,6 +86,10 @@ PSGSetFreq:
 	endif
 .notemode:
 		add.b	TrackTranspose(a5),d5
+	if __smpsRevFreq
+		neg.w	d5
+		add.w	#12*7,d5
+	endif
 	if __smpsDebug
 		cmp.w	#12*7,d5
 		bhi.s	.assert

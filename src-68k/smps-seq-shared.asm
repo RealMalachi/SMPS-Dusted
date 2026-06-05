@@ -473,11 +473,19 @@ GetFrequency:
 ; detune
 		move.b	TrackDetune(a5),d0 			; Get detune value
 		ext.w	d0
+	if __smpsRevFreq<2
 		add.w	d0,d6					; Add note frequency
+	else
+		sub.w	d0,d6					; Add note frequency
+	endif
 ; modulation algorithm
 		move.b	TrackModulationCtrl(a5),d0
 		bpl.s	.nomodalgo
+	if __smpsRevFreq<2
 		add.w	TrackModulationVal(a5),d6
+	else
+		sub.w	TrackModulationVal(a5),d6
+	endif
 .nomodalgo:
 ; modulation envelopes
 		;move.b	TrackModulationCtrl(a5),d0
@@ -516,7 +524,11 @@ GetFrequency:
 		endif
 		ext.w	d1
 .gotmodenv2:
+	if __smpsRevFreq<2
 		add.w	d1,d6
+	else
+		sub.w	d1,d6
+	endif
 		tst.b	d2					; we're just updating the frequency dont change the index
 		bne.s	.nomodenv
 		move.b	d0,TrackModEnvIndex(a5)

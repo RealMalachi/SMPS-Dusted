@@ -73,6 +73,10 @@ FMSetFreq:
 		bcs.s	.rest
 	endif
 		add.b	TrackTranspose(a5),d5			; Add track transposition
+	if __smpsRevFreq
+		neg.w	d5
+		add.w	#12*8,d5
+	endif
 	if __smpsDebug
 		cmp.w	#12*8,d5
 		bhi.s	.assert

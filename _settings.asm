@@ -16,6 +16,7 @@ __smpsPortamento	equ 1		; 1 enables portamento
 __smpsSeqStack		equ 10		; defines the amount of stack given for each sequence channel, ideally an even number
 __smpsCommBytes		equ 8		; defines the amount of driver communication bytes
 
+__smpsRevFreq		equ 0		; 1 reverses the frequency table, 2 reverses some other stuff on top of that. Why? Shits and giggles.
 ; __smpsTarget values:
 ; "md68k"		| 68K driver + Z80 PCM player
 ; "mdz80"		| (TODO) Z80 driver + 68K API
