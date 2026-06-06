@@ -325,8 +325,8 @@ GameProgram:
 		bsr.w	CallAPI.initdriver
 		bsr.w	JoypadInit
 		move.b	#1,v_runinvint	; run
-		move.w	#-1,v_prevselect
 		move.w	#2,v_select	; Sound ID
+		move.w	v_select,v_prevselect
 		move.w	#2,v_apiindex	; QueueSound
 		bsr.w	InitRender
 		bsr.w	HandleRender
@@ -373,7 +373,14 @@ HandleControl:
 		move.l	(a0),a1
 		move.l	4(a0),d1
 
-		btst	#btnLEFT,v_jpad1press
+		moveq	#$01,d6
+		move.b	v_jpad1press,d7
+		btst	#btnC,v_jpad1held
+		beq.s	.cnah
+		move.b	v_jpad1held,d7
+		moveq	#$20,d6
+.cnah:
+		btst	#btnLEFT,d7
 		beq.s	.lnah
 		moveq	#0,d0
 		move.b	(a0),d0
@@ -382,18 +389,18 @@ HandleControl:
 		bra.s	.lb
 		bra.s	.lw
 
-.lb:		subq.b	#1,(a1)
+.lb:		sub.b	d6,(a1)
 		bcc.s	.lc
 		move.b	d1,(a1)
 		bra.s	.lc
 .lw:
-		subq.w	#1,(a1)
+		sub.w	d6,(a1)
 		bcc.s	.lc
 		move.w	d1,(a1)
 ;		bra.s	.lc
 .lc:
 .lnah:
-		btst	#btnRIGHT,v_jpad1press
+		btst	#btnRIGHT,d7
 		beq.s	.rnah
 		moveq	#0,d0
 		move.b	(a0),d0
@@ -402,13 +409,13 @@ HandleControl:
 		bra.s	.rb
 		bra.s	.rw
 .rb:
-		addq.b	#1,(a1)
+		add.b	d6,(a1)
 		cmp.b	(a1),d1
 		bhs.s	.rc
 		clr.b	(a1)
 		bra.s	.rc
 .rw:
-		addq.w	#1,(a1)
+		add.w	d6,(a1)
 		cmp.w	(a1),d1
 		bhs.s	.rc
 		clr.w	(a1)
@@ -648,17 +655,17 @@ HandleRender:
 		lea	vdpctrl,a5
 		lea	vdpdata-vdpctrl(a5),a4
 
-		move.w	v_select,d0
-		cmp.w	v_prevselect,d0
-		beq.s	.selmatch
 		move.w	#" ",d1
 		move.w	v_prevselect,d0
 		bsr.w	PrintCursor
 		move.w	#">",d1
+		btst	#btnC,v_jpad1held
+		beq.s	.cnah
+		move.w	#"!",d1
+.cnah
 		move.w	v_select,d0
 		bsr.w	PrintCursor
 		move.w	v_select,v_prevselect
-.selmatch:
 	set .l,3
 		rentext.w ScreenText.apicall,v_apiindex
 		rentext.w ScreenText.shortcut,v_shortcut
