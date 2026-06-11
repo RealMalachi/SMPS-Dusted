@@ -93,7 +93,7 @@ SetupPianoRoll:
 ; PSG frequencies range from $3FF-$000 (higher is lower pitch)
 ; Margin of error is necessary due to detune/modulation/portamento
 .psg3:
-.psg:		moveq	#1,d2
+.psg:		moveq	#-1,d2
 		bsr.w	GetFrequency
 		bmi.s	.psg_rest
 		and.w	#$3FF,d6
@@ -149,7 +149,7 @@ SetupPianoRoll:
 ; ---------------------------------------------------------------------------
 ; FM frequencies range from $0000-$3FFF (lower is lower pitch)
 ; Margin of error is necessary due to detune/modulation/portamento
-.fm:		moveq	#1,d2
+.fm:		moveq	#-1,d2
 		bsr.w	GetFrequency
 		bmi.s	.fm_rest
 		and.w	#$3FFF,d6

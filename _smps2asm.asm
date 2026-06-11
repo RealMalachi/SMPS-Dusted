@@ -17,12 +17,13 @@ SMPS2ASMVer	equ 1
 SMPSCPUVer	equ "68K"	; 68K, Z80
 ; ---------------------------------------------------------------------------
 ; valid SourceDriver values
-; 1 = Sonic 1
+; 1 = Sonic 1 (modified SMPS 68K Type 1B)
 ; 2 = Sonic 2
-; 3 = Sonic 3
-; 4 = Sonic 3K
-; 5 = Sonic 3D
-; 6 = Sonic CD
+; 3 = Sonic 3 (modified SMPS Z80 Type 2)
+; 4 = Sonic 3K (compatibility)
+; 5 = Sonic 3D (compatibility)
+; 6 = Sonic CD FM
+; 7 = Sonic CD PCM
 ; 8 = Chaotix (and Sonic Crackers??)
 ; $F0E5xxxx = SMPS-Dusted
 ; ---------------------------------------------------------------------------
@@ -67,12 +68,8 @@ SMPSCPUVer	equ "68K"	; 68K, Z80
 
 ; SMPS2ASM uses nMaxPSG for songs from S1/S2 drivers.
 ; nMaxPSG1 and nMaxPSG2 are used only for songs from S3/S&K/S3D drivers.
-; The use of psgdelta is intended to both apply and undo the effects of pitch conversions
-; and ensure that the ending note is indeed the maximum PSG frequency.
-
 ; PSG conversion to S3/S&K/S3D drivers require a tone shift of 12 semi-tones.
-psgdelta	equ	12
-nMaxPSG		equ	nBb6-psgdelta
+nMaxPSG		equ	nBb6-12
 nMaxPSG1	equ	nBb6
 nMaxPSG2	equ	nB6
 ; ---------------------------------------------------------------------------
@@ -115,8 +112,8 @@ cSetTranspose		ds.b 1		; cfSetTranspose
 
 cModSet68K		ds.b 1		; cfModulation68K
 cModSetZ80		ds.b 1		; cfModulationZ80
-cModOn			ds.b 1		; cfEnableModulation
-cModOff			ds.b 1		; cfDisableModulation
+cModSet68K2		ds.b 1		; cfModulation68K2
+cModChg			ds.b 1		; cfModChg
 
 cTempoDiv		ds.b 1		; cfSetTempoDivider
 
@@ -155,7 +152,7 @@ cxHoldNoteIndefinitely	ds.b 1		; cfxHoldNoteIndefinitely
 cxReleaseNote		ds.b 1		; cfxReleaseNote
 cxSetPSG3		ds.b 1		; cfxSetPSG3
 cxLoopCSFX		ds.b 1		; cfxLoopCSFX
-cxModChg		ds.b 1		; cfxModChg
+cxPortamentoSpeed	ds.b 1		; cfxPortamentoSpeed
 cxModChg2		ds.b 1		; cfxModChg2
 cxRandPitch		ds.b 1		; cfxRandPitch
 cxSample		ds.b 1		; cfxSample
@@ -164,7 +161,6 @@ cxTempoDivAll		ds.b 1		; cfxSetTempoDividerAll
 cxDrumModeOn		ds.b 1		; cfxDrumModeOn
 cxDrumModeOff		ds.b 1		; cfxDrumModeOff
 cxCommJump		ds.b 1		; cfxCommJump
-cxPortamentoSpeed	ds.b 1		; cfxPortamentoSpeed
 cxFmKeyOnMask		ds.b 1		; cfxFmKeyOnMask
 ;cxSetFreqMode1		ds.b 1		; cfxSetFreqMode1
 ;cxSetFreqMode2		ds.b 1		; cfxSetFreqMode2
@@ -172,42 +168,30 @@ cxFmKeyOnMask		ds.b 1		; cfxFmKeyOnMask
 	dephase
 ; ---------------------------------------------------------------------------
 ; Conversion macros and functions
-;
-; Sonic 1 requires a timer-to-overflow converter and clearing the overflow in software
-; $100/mod rounding up and treating 0 as 256 results in this:
-; 1 = $00,     2 = $80,     3 = $56|clr, 4 = $40
-; 5 = $34|clr, 6 = $2B|clr, 7 = $25|clr, 8 = $20
-; ...
-; 256(0) = $01
-; old conversion functions, known issues are as follows:
-; - poor portability
-; - it isn't even remotely readable
-; - $1D (29) results in an overflow timer of 27
-;conv0To256  function n,((n==0)<<8)|n
-;s2TempotoS3 function n,($100-((n==0)|n))&$FF
-;s1TempotoS2 function n,((((conv0To256(n)-1)<<8)+(conv0To256(n)>>1))/conv0To256(n))&$FF
-;s1TempotoS3 function n,s2TempotoS3(s1TempotoS2(n))
-;	dc.w	(s1TempotoS3(mod)+((mod&1)-(mod==1)))<<8|mod&1
-;
-; Sonic 2 is just a non-overflow timer and can be easily inverted
+
+; SMPS-Dusted currently has two tempo modes:
+; - u12 overflow
+; - u12 overflow clear
+; overflow clear accounts for values that overflow can't, it's primarily for timeout compatibility
 convertMainTempoMod macro mod
-	if (SourceDriver>>16)==$F0E5
-	dc.w	mod
-	elseif SourceDriver==1
+	switch sourceBgmTempo
+	case -1
+		dc.w	mod
+	case 0
 		if mod==1
 		fatal "Invalid main tempo of 1 in song from Sonic 1/SMPS 68K"
 		endif
-	dc.w	(($100/(((mod==0)*256)|mod))+($100#(((mod==0)*256)|mod)<>0))<<8|1
-	elseif SourceDriver==2
+		dc.w	(($100/(((mod==0)*256)|mod))+($100#(((mod==0)*256)|mod)<>0))<<8|1
+	case 2
 		if mod==0
 		fatal "Invalid main tempo of 0 in song from Sonic 2"
 		endif
-	dc.w	(($100-mod)&$FF)<<8
-	elseif SourceDriver>=3
-	dc.w	mod<<8
-	else
+		dc.w	(($100-mod)&$FF)<<8
+	case 1
+		dc.w	mod<<8
+	elsecase
 		fatal "Unknown source driver, can't generate tempo"
-	endif
+	endcase
 	endm
 CheckedChannelPointer macro loc
 	if (MOMPASS=1)&&(DEFINED(loc))
@@ -220,23 +204,86 @@ CheckedChannelJump macro loc
 	endm
 ; ---------------------------------------------------------------------------
 ; Header Macros
-smpsHeaderStartSong macro ver, sourcesmps2asmver
-SourceDriver set ver
-songStart set *
-volenvHeader set 0
-modenvHeader set 0
-fmCount   set 0
-psgCount  set 0
-dacCount  set 0
-
-	if ("sourcesmps2asmver"<>"")
-	set SourceSMPS2ASM,sourcesmps2asmver
-	else
-	set SourceSMPS2ASM,0
-	endif
-
+smpsHeaderStartSong macro songbasedriver,sourcesmps2asmver
+	set SourceDriver,songbasedriver
+	set SourceSMPS2ASM,sourcesmps2asmver+0
+	set songStart,*
+	set volenvHeader,0
+	set modenvHeader,0
+	set fmCount,0
+	set psgCount,0
+	set dacCount,0
 	if (MOMPASS=1)&&(SMPS2ASMVer<SourceSMPS2ASM)
-	warning "Song at 0x\{songStart} was made for a newer version of SMPS2ASM (this is version \{SMPS2ASMVer}, but song wants at least version \{SourceSMPS2ASM})."
+		warning "Song at 0x\{songStart} was made for a newer version of SMPS2ASM (this is version \{SMPS2ASMVer}, but song wants at least version \{SourceSMPS2ASM})."
+	endif
+	if (SourceDriver>>16)==$F0E5
+		set sourceBgmTempo,-1
+		set sourceModAlgo,-1
+		set sourceNoteFill,-1
+		set sourceFmVolBits,7
+		set sourcePsgVolBits,7
+		set sourceDacVolBits,7
+		set sourceFmFadeOp,1
+		set sourceSetVol,1
+		set psgdelta,0
+		set sourcePsgHeaderMod,1
+	elseif SourceDriver==1
+		set sourceBgmTempo,0
+		set sourceModAlgo,0
+		set sourceNoteFill,0
+		set sourceFmVolBits,7
+		set sourcePsgVolBits,4
+		set sourceDacVolBits,0
+		set sourceFmFadeOp,0
+		set sourceSetVol,-1
+		set psgdelta,12
+		set sourcePsgHeaderMod,0
+	elseif SourceDriver==2
+		set sourceBgmTempo,2
+		set sourceModAlgo,2
+		set sourceNoteFill,0
+		set sourceFmVolBits,7
+		set sourcePsgVolBits,4
+		set sourceDacVolBits,0
+		set sourceFmFadeOp,0
+		set sourceSetVol,-1
+		set psgdelta,12
+		set sourcePsgHeaderMod,0
+	elseif (SourceDriver==3)||(SourceDriver==4)||(SourceDriver==5)
+		set sourceBgmTempo,1
+		set sourceModAlgo,1
+		set sourceNoteFill,1
+		set sourceFmVolBits,7
+		set sourcePsgVolBits,4
+		set sourceDacVolBits,0
+		set sourceFmFadeOp,1
+		set sourceSetVol,0
+		set psgdelta,0
+		set sourcePsgHeaderMod,1
+	elseif SourceDriver==6
+		set sourceBgmTempo,1
+		set sourceModAlgo,1
+		set sourceNoteFill,1
+		set sourceFmVolBits,7
+		set sourcePsgVolBits,0
+		set sourceDacVolBits,0
+		set sourceFmFadeOp,1
+		set sourceSetVol,-1
+		set psgdelta,0
+		set sourcePsgHeaderMod,1
+	elseif SourceDriver==8
+		set sourceBgmTempo,1
+		set sourceModAlgo,1
+		set sourceNoteFill,1
+		set sourceFmVolBits,7
+		set sourcePsgVolBits,4
+		set sourceDacVolBits,0
+		set sourceFmFadeOp,1
+		set sourceSetVol,-1
+		set psgdelta,0
+		set sourcePsgHeaderMod,1
+	else
+	fatal "Song at 0x\{songStart} uses an unknown source driver number (0x\{SourceDriver})"
 	endif
 	endm
 ; Header - Set up Voice Location
@@ -327,18 +374,29 @@ smpsHeaderFM macro loc,pitch,vol
 ; Header - Set up PSG Channel
 ; In standard SMPS 68k Type 1, frequency/modulation envelopes are skipped and can contain garbage.
 smpsHeaderPSG macro loc,pitch,vol,mod,voice
-	CheckedChannelPointer loc
-	if (SourceDriver>>16)==$F0E5
-	dc.b	pitch,vol,mod,voice
-	elseif SourceDriver>=3
-	dc.b	pitch,((vol&$F)<<3)|((vol)&$80),mod,voice
+	if sourcePsgHeaderMod==0
+vcTemp	set 0
+;		if (mod<>0) && (MOMPASS=1)
+;		warning "This track header specifies a modulation envelope, but the base driver does not support them."
+;		endif
 	else
-	dc.b	(pitch+psgdelta)&$FF,((vol&$F)<<3)|((vol)&$80),0,voice
+vcTemp	set mod
+	endif
+	CheckedChannelPointer loc
+	if sourcePsgVolBits==7
+	dc.b	(pitch+psgdelta)&$FF,vol,mod,voice
+	elseif sourcePsgVolBits==4
+	dc.b	(pitch+psgdelta)&$FF,((vol&$F)<<3)|((vol)&$80),vcTemp,voice
+	else
+	fatal "Unknown PSG volume bit length \{sourcePsgVolBits}"
 	endif
 	endm
-;		if (mod<>0) && (MOMPASS=1)
-;		warning "This track header specifies a frequency envelope, but this driver does not support them."
-;		endif
+
+; Header - Set up PWM Channel
+smpsHeaderPWM macro loc,vol
+	CheckedChannelPointer loc
+	dc.b	0,vol
+	endm
 
 ; Header macros for SFX (not for music)
 ; Header - Set up Tempo
@@ -369,12 +427,14 @@ smpsHeaderSFXChannel macro chanid,loc,pitch,vol
 ;		if (loc-((*)+1))>$FF
 ;		warning "SFX channel offset too large for u8: 0x\{loc-((*)+1)}"
 ;		endif
-	elseif (chanid<$80) || ((SourceDriver>>16)==$F0E5)
+	elseif chanid<$80
 	dc.b	chanid,pitch,vol,loc-((*)+1+3)
-	elseif SourceDriver>=3
-	dc.b	chanid,pitch,((vol&$F)<<3)|((vol)&$80),loc-((*)+1+3)
-	else
+	elseif sourcePsgVolBits==7
+	dc.b	chanid,(pitch+psgdelta)&$FF,vol,loc-((*)+1+3)
+	elseif sourcePsgVolBits==4
 	dc.b	chanid,(pitch+psgdelta)&$FF,((vol&$F)<<3)|((vol)&$80),loc-((*)+1+3)
+	else
+	fatal "Unknown PSG volume bit length \{sourcePsgVolBits}"
 	endif
 	endm
 ; ---------------------------------------------------------------------------
@@ -450,24 +510,30 @@ smpsSetTempoMod macro mod
 ; Set Volume to xx
 ; DUSTED bases this in attenuation like AlterVol, S3K bases it on volume-ish
 smpsSetVol macro vol
-	if (SourceDriver>>16)==$F0E5
+	if sourceSetVol==1
 	dc.b	cVolSet,vol
-	else
+	elseif sourceSetVol==0
 	dc.b	cVolSet,(vol&$7F)!$7F
+	else
+	fatal "This doesn't exist."
 	endif
 	endm
 smpsFMSetVol macro vol
-	if (SourceDriver>>16)==$F0E5
+	if sourceSetVol==1
 	dc.b	cVolSet,vol
-	else
+	elseif sourceSetVol==0
 	dc.b	cVolSet,(vol&$7F)!$7F
+	else
+	fatal "This doesn't exist."
 	endif
 	endm
 smpsPSGSetVol macro vol
-	if (SourceDriver>>16)==$F0E5
+	if sourceSetVol==1
 	dc.b	cVolSetPSG,vol
-	else
+	elseif sourceSetVol==0
 	dc.b	cVolSetPSG,((vol&$F)!&$F)<<3
+	else
+	fatal "This doesn't exist."
 	endif
 	endm
 ; Add to Volume by xx
@@ -497,7 +563,7 @@ smpsPSGAlterVol macro vol
 	if (vol=0) && (MOMPASS=1)
 	warning "eh?"
 	endif
-	if (SourceDriver>>16)==$F0E5
+	if sourcePsgVolBits==7
 	dc.b	cVolAddPSG,vol
 	else
 	dc.b	cVolAddPSG,((vol&$F)<<3)|((vol)&$80)
@@ -516,18 +582,19 @@ smpsReleaseNotes macro
 ; Set note fill to xx
 ; type 0 is 68K, type 1 is Z80, if type isn't specified then base it on the source driver
 smpsNoteFill macro val,type
-	if ("type"=="") && ((SourceDriver>>16)==$F0E5)
-	fatal "Please specify the note file version"
-	elseif ("type"=="") && (SourceDriver<3)
+	if ARGCOUNT>1
+vcTemp	set type
+	elseif sourceNoteFill==-1
+	fatal "smpsNoteFill: Please specify the note file version"
+	else
+vcTemp	set sourceNoteFill
+	endif
+	if vcTemp==0
 	dc.b	cNoteFill,val
-	elseif ("type"==""); && (SourceDriver>=3)
-	dc.b	cNoteFillZ80,val
-	elseif type=0
-	dc.b	cNoteFill,val
-	elseif type=1
+	elseif vcTemp==1
 	dc.b	cNoteFillZ80,val
 	else
-	fatal "Invalid smpsNoteFill type"
+	fatal "smpsNoteFill: Invalid smpsNoteFill type (0x\{vcTemp})"
 	endif
 	endm
 ; change pitch
@@ -545,35 +612,38 @@ smpsRandPitch macro valto,valfrom
 	endm
 
 ; initialize modulation algorithm
-; the algorithm type can be specified, DUSTED sources expect
-; you to define the type but it'll be auto-detected for others
 smpsModSet macro wait,speed,change,step,type
-	if ("type"=="") && ((SourceDriver>>16)==$F0E5)
-	fatal "Please specify the modulation algorithm version"
-	elseif ("type"=="") && (SourceDriver<3)
-	dc.b	cModSet68K,wait,speed,change,step
-	elseif ("type"==""); && (SourceDriver>=3)
-	dc.b	cModSetZ80,wait,speed,change,step
-	elseif type=0
-	dc.b	cModSet68K,wait,speed,change,step
-	elseif type=1
-	dc.b	cModSetZ80,wait,speed,change,step
+	if ARGCOUNT>4
+vcTemp	set type
+	elseif sourceModAlgo==-1
+	fatal "smpsModSet: Please specify the modulation algorithm version"
 	else
-	fatal "Invalid smpsModSet type"
+vcTemp	set sourceModAlgo
+	endif
+	if (vcTemp==0)
+	dc.b	cModSet68K,wait,speed,change,step
+	elseif vcTemp==1
+	dc.b	cModSetZ80,wait,speed,change,step
+	elseif (vcTemp==2)
+	dc.b	cModSet68K2,wait,speed,change,step
+	else
+	fatal "smpsModSet: Invalid smpsModSet type (0x\{vcTemp})"
 	endif
 	endm
-smpsModOn macro mod
-	if ("mod"="")||("mod"<>$80)
-	dc.b	cModOn
+smpsModOn macro type
+	if ("type"=="") && (sourceModAlgo==-1)
+	fatal "smpsModOn: Please specify the modulation algorithm version"
+	elseif ("type"=="")
+	dc.b	cModChg,1<<7|sourceModAlgo
 	else
-	dc.b	cExtCmd,cxModChg,mod
+	dc.b	cModChg,1<<7|type
 	endif
 	endm
 smpsModOff macro
-	dc.b	cModOff
+	dc.b	cModChg,0
 	endm
 smpsModChange macro mod
-	dc.b	cExtCmd,cxModChg,mod
+	dc.b	cModChg,(mod)&$7F
 	endm
 smpsModChange2 macro fmmod,psgmod
 	dc.b	cExtCmd,cxModChg2,fmmod,psgmod
@@ -750,6 +820,11 @@ smpsFM3SpecialMode macro ind1,ind2,ind3,ind4
 	fatal "smpsFM3SpecialMode is unsupported"
 	endm
 ;	dc.b	cExtCmd,0,ind1,ind2,ind3,ind4
+smpsPitchSlideSpeed macro
+	if MOMPASS==1
+	warning "smpsPitchSlideSpeed (Chaotix' portamento) is unsupported"
+	endif
+	endm
 ; ---------------------------------------------------------------------------
 ; using these is not advised
 
@@ -831,8 +906,8 @@ smpsConditionalJumpCD macro loc
 	smpsCommJump loc,0
 	endm
 ; DEVON NOOO-
-smpsSlideSpeed macro val
-	smpsDetune val
+smpsSlideSpeed macro
+	smpsDetune ALLARGS
 	endm
 ; ---------------------------------------------------------------------------
 ; unsupported with no interest to support
@@ -875,6 +950,12 @@ smpsPitchSlide macro enable
 	fatal "smpsPitchSlide is unsupported"
 	endm
 ;	dc.b	cExtCmd,0,enable
+; ---------------------------------------------------------------------------
+smpsFooterEndSong macro
+	if MOMPASS==1
+	message "Ah, a GHM4 song. Death sentence."
+	endif
+	endm
 ; ---------------------------------------------------------------------------
 ; syntax:
 ; smpsEnvTable START,$00
@@ -1135,12 +1216,7 @@ smpsVcAmsPms macro valams,valpms
 	endm
 ; Voices - TL for muffle flag
 smpsVcTotalLevelMuffle macro op1,op2,op3,op4
-	if (SourceDriver>>16)==$F0E5
-		set vcTLM1,op1
-		set vcTLM2,op2
-		set vcTLM3,op3
-		set vcTLM4,op4
-	elseif (SourceDriver<3)
+	if sourceFmFadeOp==0
 		set vcTLM1,op1&$7F|(1<<7)
 		set vcTLM2,op2&$7F|((vcAlgorithm>=5)<<7)
 		set vcTLM3,op3&$7F|((vcAlgorithm>=4)<<7)
@@ -1162,12 +1238,7 @@ smpsVcTotalLevelMuffle macro op1,op2,op3,op4
 ; Similarly, the original SMPS2ASM decides TL high bits automatically,
 ; but later versions leave it up to the user.
 smpsVcTotalLevel macro op1,op2,op3,op4
-	if (SourceDriver>>16)==$F0E5
-		set vcTL1,op1
-		set vcTL2,op2
-		set vcTL3,op3
-		set vcTL4,op4
-	elseif (SourceDriver<3)
+	if sourceFmFadeOp==0
 		set vcTL1,op1&$7F|(1<<7)
 		set vcTL2,op2&$7F|((vcAlgorithm>=5)<<7)
 		set vcTL3,op3&$7F|((vcAlgorithm>=4)<<7)

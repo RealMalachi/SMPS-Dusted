@@ -347,8 +347,8 @@ FMFinishTrackUpdate:
 	endif
 		tst.b	TrackModulationCtrl(a5)
 		bpl.s	.nomod
-		btst	#6,TrackModulationCtrl(a5)			; if using Z80 mod algo and resting, don't set anything
-		beq.s	.yesmod
+		cmp.b	#1<<7|1,TrackModulationCtrl(a5)			; if using Z80 mod algo and resting, don't set anything
+		bne.s	.yesmod
 		btst	#_resting,TrackPlaybackControl(a5)
 		bne.s	.z80mod
 .yesmod:
@@ -385,15 +385,50 @@ NoteTimeoutUpdate:
 .already:	clr.b	TrackNoteTimeout(a5)				; make sure it doesn't overflow
 .exit:		rts
 ; ===========================================================================
-DoModulation:
+StartModulation:
+		moveq	#0,d0
 		move.b	TrackModulationCtrl(a5),d0
 		bpl.s	.locret
-		add.b	d0,d0
-		bmi.s	.z80mode
-;.68kmode:
+		if __smpsDebug
+		cmp.b	#1<<7|2,d0
+		bls.s	.valid
+		SMPS_assert "StartModulation: Invalid modalgo id; TODO: print id"
+.valid:
+		endif
+		add.b	d0,d0						; remove sign bit
+		add.w	d0,d0
+		jmp	.lut(pc,d0.w)
+.locret:
+		rts
+.lut:
+		bra.w	ModAlgo_Null
+		bra.w	ModAlgo_Z80
+		bra.w	ModAlgo_68K
+DoModulation:
+		moveq	#0,d0
+		move.b	TrackModulationCtrl(a5),d0
+		bpl.s	.locret
+		if __smpsDebug
+		cmp.b	#1<<7|2,d0
+		bls.s	.valid
+		SMPS_assert "DoModulation: Invalid modalgo id; TODO: print id"
+.valid:
+		endif
+		add.b	d0,d0						; remove sign bit
+		add.w	d0,d0
+		jmp	.lut(pc,d0.w)
+.locret:
+		rts
+.lut:
+		bra.w	ModAlgo_68K
+		bra.w	ModAlgo_Z80
+		bra.w	ModAlgo_68K
+; ---------------------------------------------------------------------------
+ModAlgo_68K:
 		subq.b	#1,TrackModulationWait(a5)			; Has modulation wait expired?
 		bcc.s	.locret						; If not, exit
 		clr.b	TrackModulationWait(a5)				; Make sure wait doesn't overflow
+
 		subq.b	#1,TrackModulationSpeed(a5)			; Update speed
 		bne.s	.locret						; If it expired, want to update modulation
 		move.l	TrackModulationPtr(a5),a0			; Get modulation data
@@ -409,29 +444,34 @@ DoModulation:
 		move.b	TrackModulationDelta(a5),d6			; Get modulation delta
 		ext.w	d6
 		add.w	d6,TrackModulationVal(a5)			; Add to cumulative modulation change
+ModAlgo_Null:
 		rts
-.z80mode:
+; ---------------------------------------------------------------------------
+ModAlgo_Z80:
 		subq.b	#1,TrackModulationWait(a5)			; Has modulation wait expired?
-		bne.s	.z80_locret					; If not, exit
+		bne.s	.locret						; If not, exit
 		addq.b	#1,TrackModulationWait(a5)			; Make sure wait doesn't overflow
 
 		move.l	TrackModulationPtr(a5),a0			; Get modulation data
 		subq.b	#1,TrackModulationSpeed(a5)			; Update speed
-		bne.s	.z80_modsust					; If it expired, want to update modulation
+		bne.s	.modsust					; If it expired, want to update modulation
 		move.b	1(a0),TrackModulationSpeed(a5)			; Restore modulation speed
 		move.b	TrackModulationDelta(a5),d6			; Get modulation delta
 		ext.w	d6
 		add.w	d6,TrackModulationVal(a5)			; Add to cumulative modulation change
-.z80_modsust:
+.modsust:
 		subq.b	#1,TrackModulationSteps(a5)			; Check number of steps
-		bne.s	.z80_locret					; If nonzero, branch
+		bne.s	.locret						; If nonzero, branch
 		move.b	3(a0),TrackModulationSteps(a5)			; Restore from modulation data
 		neg.b	TrackModulationDelta(a5)			; Negate modulation delta
-.z80_locret:
+.locret:
 		;rts
 ; ===========================================================================
 ; INPUT
-; d2.b = frequency-related algorithm updater, 0 to update them, 1 to not
+; d2.b = frequency-related algorithm updater
+;        0 for sequence updates
+;        1 for tick updates
+;        -1 for no updates
 ; OUTPUT
 ; d6.w = note, rest 
 ; ccr = n-bit clear (bpl) if valid frequency was found
@@ -466,7 +506,7 @@ GetFrequency:
 		;bra.s	.doneportin
 .doneportin:
 		tst.b	d2
-		bne.s	.noporta
+		bmi.s	.noporta
 		move.w	d6,TrackPortamentoFreq(a5)
 .noporta:
 	endif
@@ -479,20 +519,34 @@ GetFrequency:
 		sub.w	d0,d6					; Add note frequency
 	endif
 ; modulation algorithm
+		moveq	#0,d0
 		move.b	TrackModulationCtrl(a5),d0
 		bpl.s	.nomodalgo
+; stupid fucking edgecase with SMPS 68K
+;		cmp.b	#$81,d0
+;		beq.s	.modalgo
+;		tst.b	d2
+;		beq.s	.nomodalgo
+;;		move.l	TrackModulationPtr(a5),a0			; Get modulation data
+;;		move.b	1(a0),d0
+;;		cmp.b	TrackModulationSpeed(a5),d0			; mod speed must match
+;;		bne.s	.nomodalgo
+;;		tst.b	TrackModulationSteps(a5)			; Steps must still be running
+;;		beq.s	.nomodalgo
+.modalgo:
 	if __smpsRevFreq<2
 		add.w	TrackModulationVal(a5),d6
 	else
 		sub.w	TrackModulationVal(a5),d6
 	endif
+		bra.s	.nomodenv
 .nomodalgo:
 ; modulation envelopes
+		;moveq	#0,d0
 		;move.b	TrackModulationCtrl(a5),d0
-		and.w	#$3F,d0
+		add.b	d0,d0			; remove sign bit
 		beq.s	.nomodenv
 	if __smpsModEnv
-		add.b	d0,d0
 		move.l	TrackModEnvPtr(a5),a0
 		move.b	-2(a0,d0.w),-(sp)
 		move.w	(sp)+,d1
@@ -530,7 +584,7 @@ GetFrequency:
 		sub.w	d1,d6
 	endif
 		tst.b	d2					; we're just updating the frequency dont change the index
-		bne.s	.nomodenv
+		bmi.s	.nomodenv
 		move.b	d0,TrackModEnvIndex(a5)
 	else
 		SMPS_assert "Driver disabled Modulation Envelopes"
@@ -604,7 +658,7 @@ GetFrequency:
 		bra.w	.loop
 .Rest:
 		tst.b	d2					; we're just updating the frequency dont mute the audio again
-		bne.s	.RestEnd
+		bmi.s	.RestEnd
 		pea	.RestEnd(pc)
 		move.b	TrackVoiceControl(a5),d0
 		add.b	d0,d0
@@ -840,8 +894,8 @@ CoordFlag:
 		bra.w	cfSetTranspose				; cSetTranspose
 		bra.w	cfModulation68K				; cModSet68K
 		bra.w	cfModulationZ80				; cxModSetZ80
-		bra.w	cfEnableModulation			; cModOn
-		bra.w	cfDisableModulation			; cModOff
+		bra.w	cfModulation68K2			; cModSet68K2
+		bra.w	cfModChg				; cModChg
 		bra.w	cfSetTempoDivider			; cTempoDiv
 		bra.w	cfJumpTo				; cJump
 		bra.w	cfJumpToN8				; cJumpN8
@@ -883,7 +937,7 @@ cfExtCmd:
 		dc.w  cfxReleaseNote-.lut			; cxReleaseNote
 		dc.w  cfxSetPSG3-.lut				; cxSetPSG3
 		dc.w  cfxLoopCSFX-.lut				; cxLoopCSFX
-		dc.w  cfxModChg-.lut				; cxModChg
+		dc.w  cfxPortamentoSpeed-.lut			; cxPortamentoSpeed
 		dc.w  cfxModChg2-.lut				; cxModChg2
 		dc.w  cfxRandPitch-.lut				; cxRandPitch
 		dc.w  cfxSample-.lut				; cxSample
@@ -892,7 +946,6 @@ cfExtCmd:
 		dc.w  cfxDrumModeOn-.lut			; cxDrumModeOn
 		dc.w  cfxDrumModeOff-.lut			; cxDrumModeOff
 		dc.w  cfxCommJump-.lut				; cxCommJump
-		dc.w  cfxPortamentoSpeed-.lut			; cxPortamentoSpeed
 		dc.w  cfxFmKeyOnMask-.lut			; cxFmKeyOnMask
 .lute:
 ; ===========================================================================
@@ -1284,8 +1337,14 @@ cfxFmKeyOnMask:
 		or.b	d0,TrackFmOperators(a5)
 		rts
 ; ===========================================================================
+cfModulation68K2:
+		move.b	#1<<7|2,TrackModulationCtrl(a5)
+		bra.s	cfModulation68K_cont
+
 cfModulation68K:
-		move.b	#1<<7,TrackModulationCtrl(a5)
+		move.b	#1<<7|0,TrackModulationCtrl(a5)
+
+cfModulation68K_cont:
 		move.l	a4,d0
 		move.w	d0,TrackModulationPtr+2(a5)
 		swap	d0
@@ -1300,8 +1359,9 @@ cfModulation68K:
 		rts
 ; ---------------------------------------------------------------------------
 cfModulationZ80:
+; NOTE: clear modenv
 ; As noted in Clone Driver, envelope clear is important for S3 miniboss theme
-		move.b	#1<<7|1<<6,TrackModulationCtrl(a5)
+		move.b	#1<<7|1,TrackModulationCtrl(a5)
 		move.l	a4,d0
 		move.w	d0,TrackModulationPtr+2(a5)
 		swap	d0
@@ -1309,15 +1369,12 @@ cfModulationZ80:
 		addq.w	#4,a4
 		rts
 ; ---------------------------------------------------------------------------
-cfEnableModulation:
-		or.b	#1<<7,TrackModulationCtrl(a5)
-		rts
-; ---------------------------------------------------------------------------
 cfDisableModulation:
-		and.b	#(1<<7)!$FF,TrackModulationCtrl(a5)
+		clr.b	TrackModulationCtrl(a5)
 		rts
 ; ---------------------------------------------------------------------------
-cfxModChg:
+; cfEnableModulation:
+cfModChg:
 		move.b	(a4)+,TrackModulationCtrl(a5)
 		rts
 ; ---------------------------------------------------------------------------

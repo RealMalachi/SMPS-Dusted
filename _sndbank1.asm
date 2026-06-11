@@ -18,9 +18,8 @@ SMPS_Start:
 ; ---------------------------------------------------------------------------
 ; Universal Modulation Envelopes
 ; ---------------------------------------------------------------------------
-SourceSMPS2ASM := 1
-SourceDriver := 1
 SMPS_ModEnvIndex:
+	smpsHeaderStartSong 1,1
 	smpsEnvTable START,1
 	smpsEnvTable ModEnv_m01,mEnv_01
 	smpsEnvTable ModEnv_m02,mEnv_02
@@ -30,7 +29,7 @@ SMPS_ModEnvIndex:
 	smpsEnvTable ModEnv_m06,mEnv_06
 	smpsEnvTable ModEnv_m07,mEnv_07
 	smpsEnvTable ModEnv_m08,mEnv_08
-	smpsEnvTable END,$40
+	smpsEnvTable END,$80
 ModEnv_m02:	smpsEnvMod $00
 ModEnv_m01:	smpsEnvMod $01,$02,$01,$00,-$01,-$02,-$03,-$04,-$03,-$02,-$01,REST
 ModEnv_m03:	smpsEnvMod $00,$00,$00,$00,$13,$26,$39,$4C,$5F,$72,$7F,$72,REST
@@ -42,9 +41,8 @@ ModEnv_m08:	smpsEnvMod $01,$02,$03,$04,$03,$02,$01,$00,-$01,-$02,-$03,-$04,-$03,
 ; ---------------------------------------------------------------------------
 ; Universal Volume Envelopes
 ; ---------------------------------------------------------------------------
-SourceSMPS2ASM := 1
-SourceDriver := 1
 SMPS_VolEnvIndex:
+	smpsHeaderStartSong 1,1
 	smpsEnvTable START,1
 	smpsEnvTable VolEnv_f01,fTone_01
 	smpsEnvTable VolEnv_f02,fTone_02
@@ -260,14 +258,11 @@ VolEnv_c0C:	smpsEnvVolPsg 0, 0, 1, 1, 3, 3, 4, 5, REST
 VolEnv_c0D:	smpsEnvVolPsg 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 10, HOLD
 VolEnv_c0E:	smpsEnvVolPsg 0, 0, 2, 5, 9, 14, REST
 
-
-
 ; ---------------------------------------------------------------------------
 ; FM Universal Voice Bank
 ; ---------------------------------------------------------------------------
-SourceSMPS2ASM := 1
-SourceDriver := 3
 SMPS_UVB_FM:
+	smpsHeaderStartSong 3,1
 ;	Voice 00h - Synth Bass 2
 	smpsVcIdentifier    SMPS_UVB_FM,pSynthBass2,pS3kSynthBass2
 	smpsVcAlgorithm     $04
@@ -797,15 +792,18 @@ SMPS_UVB_FM:
 ; PCM Drums
 ; ---------------------------------------------------------------------------
 SMPS_PcmDrumTable:
+	smpsHeaderStartSong 1,1
 ; ---------------------------------------------------------------------------
 ; FM Drums
 ; ---------------------------------------------------------------------------
 SMPS_FmDrumTable:
+	smpsHeaderStartSong 1,1
 ; ---------------------------------------------------------------------------
 ; PSG Drums
 ; ---------------------------------------------------------------------------
 ; noise,volume,volenv
 SMPS_PsgDrumTable:
+	smpsHeaderStartSong 1,1
 	smpsEnvTable START,$81
 ;	smpsEnvTable PsgDrum_01
 ;	smpsEnvTable PsgDrum_02
@@ -846,6 +844,7 @@ SMPS_MusicIndex:
 	musdef 0,0,0,BgmSCDTimeTravel,bgm_SCDTimeTravel
 	musdef 0,0,0,BgmS28bUnused,bgm_S28bUnused
 	musdef 0,0,1,BgmDestructivePower,bgm_DestructivePower
+	musdef 0,0,1,BgmEraserVS,bgm_EraserVS
 
 	musdef 0,0,0,BgmS1Title,bgm_S1Title
 	musdef 0,0,0,BgmS1GHZ,bgm_S1GHZ
@@ -1441,6 +1440,76 @@ SMPS_SoundIndex:
 	sfxdef $00,0,1,0,CsfxS3D9,csfxS3_MagneticSpike
 	sfxdef $00,0,1,0,CsfxS3DA,csfxS3_LeafBlower
 	sfxdef $00,0,1,0,CsfxS3DB,csfxS3_WaterSkid
+
+	sfxdef $00,0,0,0,SfxKC2A,sfxKC_2A
+	sfxdef $00,0,0,0,SfxKC2B,sfxKC_2B
+	sfxdef $00,0,0,0,SfxKC2C,sfxKC_2C
+	sfxdef $00,0,0,0,SfxKC2D,sfxKC_2D
+	sfxdef $00,0,0,0,SfxKC2E,sfxKC_2E
+	sfxdef $00,0,0,0,SfxKC2F,sfxKC_2F
+	sfxdef $00,0,0,0,SfxKC30,sfxKC_30
+	sfxdef $00,0,0,0,SfxKC31,sfxKC_31
+	sfxdef $00,0,0,0,SfxKC32,sfxKC_32
+	sfxdef $00,0,0,0,SfxKC33,sfxKC_33
+	sfxdef $00,0,0,0,SfxKC34,sfxKC_34
+	sfxdef $00,0,0,0,SfxKC35,sfxKC_35
+	sfxdef $00,0,0,0,SfxKC36,sfxKC_36
+	sfxdef $00,0,0,0,SfxKC37,sfxKC_37
+	sfxdef $00,0,0,0,SfxKC38,sfxKC_38
+	sfxdef $00,0,0,0,SfxKC39,sfxKC_39
+	sfxdef $00,0,0,0,SfxKC3A,sfxKC_3A
+	sfxdef $00,0,0,0,SfxKC3B,sfxKC_3B
+	sfxdef $00,0,0,0,SfxKC3C,sfxKC_3C
+	sfxdef $00,0,0,0,SfxKC3D,sfxKC_3D
+	sfxdef $00,0,0,0,SfxKC3E,sfxKC_3E
+	sfxdef $00,0,0,0,SfxKC3F,sfxKC_3F
+	sfxdef $00,0,0,0,SfxKC40,sfxKC_40
+	sfxdef $00,0,0,0,SfxKC41,sfxKC_41
+	sfxdef $00,0,0,0,SfxKC42,sfxKC_42
+	sfxdef $00,0,0,0,SfxKC43,sfxKC_43
+	sfxdef $00,0,0,0,SfxKC44,sfxKC_44
+	sfxdef $00,0,0,0,SfxKC45,sfxKC_45
+	sfxdef $00,0,0,0,SfxKC46,sfxKC_46
+	sfxdef $00,0,0,0,SfxKC47,sfxKC_47
+	sfxdef $00,0,0,0,SfxKC48,sfxKC_48
+	sfxdef $00,0,0,0,SfxKC49,sfxKC_49
+	sfxdef $00,0,0,0,SfxKC4A,sfxKC_4A
+	sfxdef $00,0,0,0,SfxKC4B,sfxKC_4B
+	sfxdef $00,0,0,0,SfxKC4C,sfxKC_4C
+	sfxdef $00,0,0,0,SfxKC4D,sfxKC_4D
+	sfxdef $00,0,0,0,SfxKC4E,sfxKC_4E
+	sfxdef $00,0,0,0,SfxKC4F,sfxKC_4F
+	sfxdef $00,0,0,0,SfxKC50,sfxKC_50
+	sfxdef $00,0,0,0,SfxKC51,sfxKC_51
+	sfxdef $00,0,0,0,SfxKC52,sfxKC_52
+	sfxdef $00,0,0,0,SfxKC53,sfxKC_53
+	sfxdef $00,0,0,0,SfxKC54,sfxKC_54
+	sfxdef $00,0,0,0,SfxKC55,sfxKC_55
+	sfxdef $00,0,0,0,SfxKC56,sfxKC_56
+	sfxdef $00,0,0,0,SfxKC57,sfxKC_57
+	sfxdef $00,0,0,0,SfxKC58,sfxKC_58
+	sfxdef $00,0,0,0,SfxKC59,sfxKC_59
+	sfxdef $00,0,0,0,SfxKC5A,sfxKC_5A
+	sfxdef $00,0,0,0,SfxKC5B,sfxKC_5B
+	sfxdef $00,0,0,0,SfxKC5C,sfxKC_5C
+	sfxdef $00,0,0,0,SfxKC5D,sfxKC_5D
+	sfxdef $00,0,0,0,SfxKC5E,sfxKC_5E
+	sfxdef $00,0,0,0,SfxKC5F,sfxKC_5F
+	sfxdef $00,0,0,0,SfxKC60,sfxKC_60
+	sfxdef $00,0,0,0,SfxKC61,sfxKC_61
+	sfxdef $00,0,0,0,SfxKC62,sfxKC_62
+	sfxdef $00,0,0,0,SfxKC63,sfxKC_63
+	sfxdef $00,0,0,0,SfxKC64,sfxKC_64
+	sfxdef $00,0,0,0,SfxKC65,sfxKC_65
+	sfxdef $00,0,0,0,SfxKC66,sfxKC_66
+	sfxdef $00,0,0,0,SfxKC67,sfxKC_67
+	sfxdef $00,0,0,0,SfxKC68,sfxKC_68
+	sfxdef $00,0,0,0,SfxKC69,sfxKC_69
+	sfxdef $00,0,0,0,SfxKC6A,sfxKC_6A
+	sfxdef $00,0,0,0,SfxKC6B,sfxKC_6B
+	sfxdef $00,0,0,0,SfxKC6C,sfxKC_6C
+	sfxdef $00,0,0,0,SfxKC6D,sfxKC_6D
+	sfxdef $00,0,0,0,SfxKC6E,sfxKC_6E
 
 	sfxdef END,sfx__Last
 SMPS_SoundIndex_Exit:
@@ -2372,6 +2441,145 @@ CsfxS3DA:	include "res/sfx/sonic3/DA.asm"
 CsfxS3DB:	include "res/sfx/sonic3/DB.asm"
 		even
 
+SfxKC2A:	include "res/sfx/chaotix/2A.asm"
+		even
+SfxKC2B:	include "res/sfx/chaotix/2B.asm"
+		even
+SfxKC2C:	include "res/sfx/chaotix/2C.asm"
+		even
+SfxKC69:	include "res/sfx/chaotix/69.asm"	; KC2D
+		even
+SfxKC2D:	include "res/sfx/chaotix/2D.asm"
+		even
+SfxKC2E:	include "res/sfx/chaotix/2E.asm"
+		even
+SfxKC2F:	include "res/sfx/chaotix/2F.asm"
+		even
+SfxKC30:	include "res/sfx/chaotix/30.asm"
+		even
+SfxKC31:	include "res/sfx/chaotix/31.asm"
+		even
+SfxKC32:	include "res/sfx/chaotix/32.asm"
+		even
+SfxKC33:	include "res/sfx/chaotix/33.asm"
+		even
+SfxKC34:	include "res/sfx/chaotix/34.asm"
+		even
+SfxKC35:	include "res/sfx/chaotix/35.asm"
+		even
+SfxKC36:	include "res/sfx/chaotix/36.asm"
+		even
+SfxKC37:	include "res/sfx/chaotix/37.asm"
+		even
+SfxKC38:	include "res/sfx/chaotix/38.asm"
+		even
+SfxKC39:	include "res/sfx/chaotix/39.asm"
+		even
+SfxKC3A:	include "res/sfx/chaotix/3A.asm"
+		even
+SfxKC3B:	include "res/sfx/chaotix/3B.asm"
+		even
+SfxKC3C:	include "res/sfx/chaotix/3C.asm"
+		even
+SfxKC3D:	include "res/sfx/chaotix/3D.asm"
+		even
+SfxKC3E:	include "res/sfx/chaotix/3E.asm"
+		even
+SfxKC3F:	include "res/sfx/chaotix/3F.asm"
+		even
+SfxKC40:	include "res/sfx/chaotix/40.asm"
+		even
+SfxKC41:	include "res/sfx/chaotix/41.asm"
+		even
+SfxKC42:	include "res/sfx/chaotix/42.asm"
+		even
+SfxKC43:	include "res/sfx/chaotix/43.asm"
+		even
+SfxKC44:	include "res/sfx/chaotix/44.asm"
+		even
+SfxKC45:	include "res/sfx/chaotix/45.asm"
+		even
+SfxKC46:	include "res/sfx/chaotix/46.asm"
+		even
+SfxKC47:	include "res/sfx/chaotix/47.asm"
+		even
+SfxKC48:	include "res/sfx/chaotix/48.asm"
+		even
+SfxKC49:	include "res/sfx/chaotix/49.asm"
+		even
+SfxKC4A:	include "res/sfx/chaotix/4A.asm"
+		even
+SfxKC4B:	include "res/sfx/chaotix/4B.asm"
+		even
+SfxKC4C:	include "res/sfx/chaotix/4C.asm"
+		even
+SfxKC4D:	include "res/sfx/chaotix/4D.asm"
+		even
+SfxKC4E:	include "res/sfx/chaotix/4E.asm"
+		even
+SfxKC4F:	include "res/sfx/chaotix/4F.asm"
+		even
+SfxKC50:	include "res/sfx/chaotix/50.asm"
+		even
+SfxKC51:	include "res/sfx/chaotix/51.asm"
+		even
+SfxKC52:	include "res/sfx/chaotix/52.asm"
+		even
+SfxKC53:	include "res/sfx/chaotix/53.asm"
+		even
+SfxKC54:	include "res/sfx/chaotix/54.asm"
+		even
+SfxKC55:	include "res/sfx/chaotix/55.asm"
+		even
+SfxKC56:	include "res/sfx/chaotix/56.asm"
+		even
+SfxKC57:	include "res/sfx/chaotix/57.asm"
+		even
+SfxKC58:	include "res/sfx/chaotix/58.asm"
+		even
+SfxKC59:	include "res/sfx/chaotix/59.asm"
+		even
+SfxKC5A:	include "res/sfx/chaotix/5A.asm"
+		even
+SfxKC5B:	include "res/sfx/chaotix/5B.asm"
+		even
+SfxKC5E:	include "res/sfx/chaotix/5E.asm"	; KC5C
+		even
+SfxKC5C:	include "res/sfx/chaotix/5C.asm"
+		even
+SfxKC5D:	include "res/sfx/chaotix/5D.asm"
+		even
+SfxKC5F:	include "res/sfx/chaotix/5F.asm"
+		even
+SfxKC60:	include "res/sfx/chaotix/60.asm"
+		even
+SfxKC61:	include "res/sfx/chaotix/61.asm"
+		even
+SfxKC62:	include "res/sfx/chaotix/62.asm"
+		even
+SfxKC63:	include "res/sfx/chaotix/63.asm"
+		even
+SfxKC64:	include "res/sfx/chaotix/64.asm"
+		even
+SfxKC65:	include "res/sfx/chaotix/65.asm"
+		even
+SfxKC66:	include "res/sfx/chaotix/66.asm"
+		even
+SfxKC67:	include "res/sfx/chaotix/67.asm"
+		even
+SfxKC68:	include "res/sfx/chaotix/68.asm"
+		even
+SfxKC6A:	include "res/sfx/chaotix/6A.asm"
+		even
+SfxKC6B:	include "res/sfx/chaotix/6B.asm"
+		even
+SfxKC6C:	include "res/sfx/chaotix/6C.asm"
+		even
+SfxKC6D:	include "res/sfx/chaotix/6D.asm"
+		even
+SfxKC6E:	include "res/sfx/chaotix/6E.asm"
+		even
+
 ; ---------------------------------------------------------------------------
 ; Music data
 ; ---------------------------------------------------------------------------
@@ -2386,6 +2594,8 @@ BgmSCDTimeTravel:	include "res/bgm/CD Time Travel.asm"
 BgmS28bUnused:	include "res/bgm/sonic2-8bit/Unknown Theme.asm"
 		even
 BgmDestructivePower:	include "res/bgm/destructive_power.asm"
+		even
+BgmEraserVS:	include "res/bgm/Eraser VS GHM4.asm"
 		even
 
 BgmS1Title:	include "res/bgm/sonic1/S1-Title.asm"

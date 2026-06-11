@@ -10,7 +10,7 @@ FMUpdateTrack:
 		bne.s	.locret
 		bsr.w	DoVolEnv				; bsr is necessary for stack reasons, see `VolEnvCommands`
 		bsr.w	DoPanEnv				; bsr is necessary for stack reasons
-		bsr.w	DoModulation
+		bsr.w	StartModulation
 		bsr.w	FMPrepareNote
 		bra.w	FMNoteOn
 ; ---------------------------------------------------------------------------
@@ -124,16 +124,17 @@ FMFrequencies:
 FMFrequenciesEnd:
 ; ===========================================================================
 FMUpdateFreq:
+		moveq	#1,d2
+		move.b	TrackModulationCtrl(a5),d0		; is modulation (algorithm or envelopes) enabled?
 	if __smpsPortamento
-		tst.b	TrackPortamentoTime(a5)
-		bne.s	FMPrepareNote
+		or.b	TrackPortamentoTime(a5),d0		; or portamento?
 	endif
-		moveq_	%10111111,d0
-		and.b	TrackModulationCtrl(a5),d0		; is modulation (calculated or envelopes) enabled?
-		beq.s	FMPrepareNote.exit			; if not, branch
+		bne.s	FMPrepareNote.cont			; if so, branch
+		rts
 
 FMPrepareNote:
 		moveq	#0,d2
+.cont:
 		bsr.w	GetFrequency
 		bpl.s	.valid
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
