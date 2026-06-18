@@ -2,20 +2,20 @@ StopAllSound:
 .startaddr	= v_startofvariables
 .endaddr	= v_endofvariables
 .clrLen		= .endaddr-.startaddr
-		lea	.startaddr(a6),a1
+		lea	.startaddr(a1),a2
 		moveq	#0,d0
 		move.w	#(.clrLen)/4-1,d1
-.clrLoop:	move.l	d0,(a1)+
+.clrLoop:	move.l	d0,(a2)+
 		dbf	d1,.clrLoop
 	if (.clrLen)&2
-		move.w	d0,(a1)+
+		move.w	d0,(a2)+
 	endif
 	if (.clrLen)&1
-		move.b	d0,(a1)+
+		move.b	d0,(a2)+
 	endif
 		moveq_	$FF!(1<<v_driverflags.speedsong|1<<v_driverflags.jingle),d0
-		and.b	v_driverflags(a6),d0
-		move.b	d0,v_driverflags(a6)
+		and.b	v_driverflags(a1),d0
+		move.b	d0,v_driverflags(a1)
 .skipram:
 		bsr.w	StopCDDA
 		bsr.w	DACStopSample			; TODO: DACStopAll
@@ -23,7 +23,7 @@ StopAllSound:
 		bra.w	PSGSilenceAll
 ; ===========================================================================
 StopBGM:
-		lea	v_music_pcm_tracks(a6),a5
+		lea	v_music_pcm_tracks(a1),a5
 		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d6
 .dacloop:	tst.b	TrackPlaybackControl(a5)
 		bpl.s	.dacnext
@@ -39,7 +39,7 @@ StopBGM:
 	if __smpsBSFX=1
 		move.w	(a3,d3.w),d0
 		beq.s	.dacgetptr
-		move.l	a6,a3
+		move.l	a1,a3
 		add.w	d0,a3
 		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
@@ -49,7 +49,7 @@ StopBGM:
 	endif
 		move.w	(a3,d3.w),d0
 		beq.s	.dacnext
-		move.l	a6,a3
+		move.l	a1,a3
 		add.w	d0,a3
 		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
@@ -60,7 +60,7 @@ StopBGM:
 		dbf	d6,.dacloop
 
 
-		lea	v_music_fm_tracks(a6),a5
+		lea	v_music_fm_tracks(a1),a5
 		moveq	#((v_music_fm_tracks_end-v_music_fm_tracks)/TrackFmSz)-1,d6
 .fmloop:	tst.b	TrackPlaybackControl(a5)
 		bpl.s	.fmnext
@@ -73,7 +73,7 @@ StopBGM:
 	if __smpsBSFX=1
 		move.w	(a3,d3.w),d0
 		beq.s	.fmgetptr
-		move.l	a6,a3
+		move.l	a1,a3
 		add.w	d0,a3
 		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
@@ -83,7 +83,7 @@ StopBGM:
 	endif
 		move.w	(a3,d3.w),d0
 		beq.s	.fmnext
-		move.l	a6,a3
+		move.l	a1,a3
 		add.w	d0,a3
 		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
@@ -98,7 +98,7 @@ StopBGM:
 		dbf	d6,.fmloop
 
 
-		lea	v_music_psg_tracks(a6),a5
+		lea	v_music_psg_tracks(a1),a5
 		moveq	#((v_music_psg_tracks_end-v_music_psg_tracks)/TrackPsgSz)-1,d6
 .psgloop:	tst.b	TrackPlaybackControl(a5)
 		bpl.s	.psgnext
@@ -111,7 +111,7 @@ StopBGM:
 	if __smpsBSFX=1
 		move.w	(a3,d3.w),d0
 		beq.s	.psggetptr
-		move.l	a6,a3
+		move.l	a1,a3
 		add.w	d0,a3
 		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
@@ -121,7 +121,7 @@ StopBGM:
 	endif
 		move.w	(a3,d3.w),d0
 		beq.s	.psgnext
-		move.l	a6,a3
+		move.l	a1,a3
 		add.w	d0,a3
 		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
@@ -135,9 +135,11 @@ StopBGM:
 		rts
 ; ===========================================================================
 StopSFX:
-		clr.b	v_sndprio(a6)
+		clr.b	v_sndprio(a1)
+		btst	#v_driverflags.jingle,v_driverflags(a1)
+		bne.w	.exit
 
-		lea	v_sfx_fm_tracks(a6),a5
+		lea	v_sfx_fm_tracks(a1),a5
 		moveq	#((v_sfx_fm_tracks_end-v_sfx_fm_tracks)/TrackFmSz)-1,d6
 .fmloop:	tst.b	TrackPlaybackControl(a5)
 		bpl.s	.fmnext
@@ -150,7 +152,7 @@ StopSFX:
 		lea	RAM_BSFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.fmgetptr
-		move.l	a6,a3
+		move.l	a1,a3
 		add.w	d0,a3
 		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
@@ -160,7 +162,7 @@ StopSFX:
 		lea	RAM_BGMChannel(pc),a3
 		move.w	(a3,d3.w),d0
 	 	beq.s	.fmnext
-		move.l	a6,a3
+		move.l	a1,a3
 		add.w	d0,a3
 		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
@@ -175,7 +177,7 @@ StopSFX:
 		dbf	d6,.fmloop
 
 
-		lea	v_sfx_psg_tracks(a6),a5
+		lea	v_sfx_psg_tracks(a1),a5
 		moveq	#((v_sfx_psg_tracks_end-v_sfx_psg_tracks)/TrackPsgSz)-1,d6
 .psgloop:	tst.b	TrackPlaybackControl(a5)
 		bpl.s	.psgnext
@@ -188,7 +190,7 @@ StopSFX:
 		lea	RAM_BSFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.psggetptr
-		move.l	a6,a3
+		move.l	a1,a3
 		add.w	d0,a3
 		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
@@ -198,7 +200,7 @@ StopSFX:
 		lea	RAM_BGMChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.psgnext
-		move.l	a6,a3
+		move.l	a1,a3
 		add.w	d0,a3
 		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
@@ -208,12 +210,14 @@ StopSFX:
 .psgnext:
 		add.w	#TrackPsgSz,a5
 		dbf	d6,.psgloop
-
+.exit:
 		rts
-; ===========================================================================
 		if __smpsBSFX=1
+; ===========================================================================
 StopBSFX:
-		lea	v_bsfx_fm_tracks(a6),a5
+		btst	#v_driverflags.jingle,v_driverflags(a1)
+		bne.w	.exit
+		lea	v_bsfx_fm_tracks(a1),a5
 		moveq	#((v_bsfx_fm_tracks_end-v_bsfx_fm_tracks)/TrackFmSz)-1,d6
 .fmloop:	tst.b	TrackPlaybackControl(a5)
 		bpl.s	.fmnext
@@ -225,7 +229,7 @@ StopBSFX:
 		lea	RAM_SFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.fmgetptr
-		move.l	a6,a3
+		move.l	a1,a3
 		add.w	d0,a3
 		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
@@ -234,7 +238,7 @@ StopBSFX:
 		lea	RAM_BGMChannel(pc),a3
 		move.w	(a3,d3.w),d0
 	 	beq.s	.fmnext
-		move.l	a6,a3
+		move.l	a1,a3
 		add.w	d0,a3
 		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
@@ -249,7 +253,7 @@ StopBSFX:
 		dbf	d6,.fmloop
 
 
-		lea	v_bsfx_psg_tracks(a6),a5
+		lea	v_bsfx_psg_tracks(a1),a5
 		moveq	#((v_bsfx_psg_tracks_end-v_bsfx_psg_tracks)/TrackPsgSz)-1,d6
 .psgloop:	tst.b	TrackPlaybackControl(a5)
 		bpl.s	.psgnext
@@ -261,7 +265,7 @@ StopBSFX:
 		lea	RAM_SFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.psggetptr
-		move.l	a6,a3
+		move.l	a1,a3
 		add.w	d0,a3
 		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
@@ -270,7 +274,7 @@ StopBSFX:
 		lea	RAM_BGMChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.psgnext
-		move.l	a6,a3
+		move.l	a1,a3
 		add.w	d0,a3
 		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)
@@ -280,7 +284,7 @@ StopBSFX:
 .psgnext:
 		add.w	#TrackPsgSz,a5
 		dbf	d6,.psgloop
-
+.exit:
 		rts
 		endif
 ; ===========================================================================
@@ -739,7 +743,7 @@ DoVolEnv:
 .noenv:
 ; ---------------------------------------------------------------------------
 ; TRASHES
-; d0-d3/a0-a2
+; d0-d3/a0/a2-a3
 SetVolume:
 		moveq	#1<<_resting|1<<_sfxoverride,d0
 		and.b	TrackPlaybackControl(a5),d0
@@ -813,7 +817,7 @@ GetVolume:
 .envcmd:	add.w	d1,d0
 .noenv:
 		move.b	TrackVoiceControl(a5),d3
-		tst.b	v_driverflags2(a6)			; is underwater muffle enabled?
+		tst.b	v_driverflags2(a1)			; is underwater muffle enabled?
 		bpl.s	.nouservol
 		btst	#_nomuffle,TrackPlaybackControl(a5)
 		bne.s	.nouservol
@@ -828,12 +832,12 @@ GetVolume:
 		lea	RAM_BGMChannel(pc),a0
 		move.w	d1,d2
 		move.w	(a0,d1.w),d1
-		move.l	a6,a0
+		move.l	a1,a0
 		add.w	d1,a0
 		cmp.l	a5,a0
 		bne.s	.nobgm
 		moveq	#0,d1
-		move.b	v_fadein_counter(a6),d1
+		move.b	v_fadein_counter(a1),d1
 		cmp.b	#$40,d3
 		blo.s	.fmbgm
 		add.w	d1,d1
@@ -846,7 +850,7 @@ GetVolume:
 		rts
 ; ===========================================================================
 UpdatePanning:
-		btst	#v_driverflags.mono,v_driverflags(a6)
+		btst	#v_driverflags.mono,v_driverflags(a1)
 		bne.s	.mono
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	.exit
@@ -863,7 +867,7 @@ UpdatePanning:
 .exit:		rts
 ; ---------------------------------------------------------------------------
 DoPanEnv:
-;		btst	#v_driverflags.mono,v_driverflags(a6)
+;		btst	#v_driverflags.mono,v_driverflags(a1)
 ;		bne.s	.mono
 .mono:		rts
 ; ===========================================================================
@@ -995,7 +999,7 @@ cfxSetPanAMSFMS:
 		move.b	d1,TrackAMSFMSPan(a5)		; Save pan value
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	.exit
-		btst	#v_driverflags.mono,v_driverflags(a6)
+		btst	#v_driverflags.mono,v_driverflags(a1)
 		bne.s	.mono
 		add.b	d2,d2
 		bmi.s	.pcm
@@ -1124,7 +1128,7 @@ cfSetTranspose:
 ; RAND16 % (from-to) + to
 cfxRandPitch:
 		moveq	#0,d0
-		move.w	v_random(a6),d0
+		move.w	v_random(a1),d0
 		move.b	(a4)+,d1
 		ext.w	d1
 		divs.w	d1,d0
@@ -1132,6 +1136,34 @@ cfxRandPitch:
 		move.b	(a4)+,d1
 		add.w	d1,d0
 		move.b	d0,TrackTranspose(a5)
+		rts
+; ---------------------------------------------------------------------------
+cfxRevUp:
+		move.b	v_revving_pitch(a1),d0
+		tst.b	v_revving_timer(a1)
+		bne.s	.timeractive
+		moveq	#-1,d0				; start pitch at 0
+
+.timeractive:
+		addq.b	#1,d0
+		cmpi.b	#12-1,d0
+		bhs.s	.limitreached
+		move.b	d0,v_revving_pitch(a1)
+
+.limitreached:
+		move.b	#60,v_revving_timer(a1)		; Set timer
+;		bra.s	cfRevAddCurr
+; ---------------------------------------------------------------------------
+cfxRevAddCur:
+		tst.b	v_revving_timer(a1)
+		beq.s	.norevving
+		move.b	v_revving_pitch(a1),d0
+		add.b	d0,TrackTranspose(a5)
+.norevving:
+		rts
+; ---------------------------------------------------------------------------
+cfxRevReset:
+		clr.b	v_revving_timer(a1)
 		rts
 ; ===========================================================================
 cfSetTempoDivider:
@@ -1145,7 +1177,7 @@ cfxSetTempoDividerAll:
 		lea	RAM_BGMChannel(pc),a3	; check if this channel even has bgm channel
 		move.w	(a3,d0.w),d0
 		beq.s	.error
-		move.l	a6,a3
+		move.l	a1,a3
 		adda.w	d0,a3
 		cmp.l	a3,a5				; check that the location matches
 		beq.s	.valid
@@ -1155,17 +1187,17 @@ cfxSetTempoDividerAll:
 		move.b	(a4)+,d0
 	set .val,v_music_pcm_tracks+TrackTempoDivider
 	rept (v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz
-		move.b	d0,.val(a6)
+		move.b	d0,.val(a1)
 	set .val,.val+TrackDacSz
 	endr
 	set .val,v_music_fm_tracks+TrackTempoDivider
 	rept (v_music_fm_tracks_end-v_music_fm_tracks)/TrackFmSz
-		move.b	d0,.val(a6)
+		move.b	d0,.val(a1)
 	set .val,.val+TrackFmSz
 	endr
 	set .val,v_music_psg_tracks+TrackTempoDivider
 	rept (v_music_psg_tracks_end-v_music_psg_tracks)/TrackPsgSz
-		move.b	d0,.val(a6)
+		move.b	d0,.val(a1)
 	set .val,.val+TrackPsgSz
 	endr
 		rts
@@ -1177,7 +1209,7 @@ cfxSetTempoMod:
 		lea	RAM_BGMChannel(pc),a3	; check if this channel even has bgm channel
 		move.w	(a3,d0.w),d0
 		beq.s	.error
-		move.l	a6,a3
+		move.l	a1,a3
 		adda.w	d0,a3
 		cmp.l	a3,a5				; check that the location matches
 		beq.s	.valid
@@ -1187,8 +1219,8 @@ cfxSetTempoMod:
 		move.b	(a4)+,-(sp)
 		move.w	(sp)+,d0
 		move.b	(a4)+,d0
-		move.w	d0,v_main_tempo(a6)			; Set main tempo
-		clr.w	v_main_tempo_timeout(a6)		; And reset timeout
+		move.w	d0,v_main_tempo(a1)			; Set main tempo
+		clr.w	v_main_tempo_timeout(a1)		; And reset timeout
 		rts
 ; ===========================================================================
 cfxSample:
@@ -1222,28 +1254,28 @@ cfSetPSGNoise:
 ; ensure that only PSG3 or PSG4 channels are trying to use this
 		move.w	RAM_BGMChannel+24(pc),d0
 		beq.s	.nopsg3bgm
-		move.l	a6,a3
+		move.l	a1,a3
 		adda.w	d0,a3
 		cmp.l	a3,a5
 		beq.s	.valid
 .nopsg3bgm:
 		move.w	RAM_BGMChannel+28(pc),d0
 		beq.s	.nopsg4bgm
-		move.l	a6,a3
+		move.l	a1,a3
 		adda.w	d0,a3
 		cmp.l	a3,a5
 		beq.s	.valid
 .nopsg4bgm:
 		move.w	RAM_SFXChannel+24(pc),d0
 		beq.s	.nopsg3sfx
-		move.l	a6,a3
+		move.l	a1,a3
 		adda.w	d0,a3
 		cmp.l	a3,a5
 		beq.s	.valid
 .nopsg3sfx:
 		move.w	RAM_SFXChannel+28(pc),d0
 		beq.s	.nopsg4sfx
-		move.l	a6,a3
+		move.l	a1,a3
 		adda.w	d0,a3
 		cmp.l	a3,a5
 		beq.s	.valid
@@ -1251,14 +1283,14 @@ cfSetPSGNoise:
 	if __smpsBSFX
 		move.w	RAM_BSFXChannel+24(pc),d0
 		beq.s	.nopsg3bsfx
-		move.l	a6,a3
+		move.l	a1,a3
 		adda.w	d0,a3
 		cmp.l	a3,a5
 		beq.s	.valid
 .nopsg3bsfx:
 		move.w	RAM_BSFXChannel+28(pc),d0
 		beq.s	.nopsg4bsfx
-		move.l	a6,a3
+		move.l	a1,a3
 		adda.w	d0,a3
 		cmp.l	a3,a5
 		beq.s	.valid
@@ -1280,7 +1312,7 @@ cfSetPSGNoise:
 		bne.s	.exit
 		move.b	#$DF,(psginput).l			; mute PSG3
 .psg4:
-		clr.b	v_lastpsg4(a6)
+		clr.b	v_lastpsg4(a1)
 .exit:
 		move.b	d1,TrackVoiceControl(a5)
 		rts
@@ -1290,14 +1322,14 @@ cfxSetPSG3:
 ; ensure that only PSG3 channels are trying to use this
 		move.w	RAM_BGMChannel+24(pc),d0
 		beq.s	.nopsg3bgm
-		move.l	a6,a3
+		move.l	a1,a3
 		adda.w	d0,a3
 		cmp.l	a3,a5
 		beq.s	.valid
 .nopsg3bgm:
 		move.w	RAM_SFXChannel+24(pc),d0
 		beq.s	.nopsg3sfx
-		move.l	a6,a3
+		move.l	a1,a3
 		adda.w	d0,a3
 		cmp.l	a3,a5
 		beq.s	.valid
@@ -1305,7 +1337,7 @@ cfxSetPSG3:
 	if __smpsBSFX
 		move.w	RAM_BSFXChannel+24(pc),d0
 		beq.s	.nopsg3bsfx
-		move.l	a6,a3
+		move.l	a1,a3
 		adda.w	d0,a3
 		cmp.l	a3,a5
 		beq.s	.valid
@@ -1440,13 +1472,13 @@ cfxConditionalJump:
 ; ---------------------------------------------------------------------------
 ; Jump until and decrement contsfx until it's zero
 cfxLoopCSFX:
-		tst.b	v_contsfx_loop(a6)
+		tst.b	v_contsfx_loop(a1)
 		bne.s	.nope
-		clr.w	v_contsfx_lastid(a6)
+		clr.w	v_contsfx_lastid(a1)
 		addq.w	#2,a4
 		rts
 .nope:
-		subq.b	#1,v_contsfx_loop(a6)
+		subq.b	#1,v_contsfx_loop(a1)
 		bra.s	cfJumpTo
 ; ---------------------------------------------------------------------------
 ; If the chosen communication byte is zero, continue looping
@@ -1457,7 +1489,7 @@ cfxCommJump:
 		cmp.b	#__smpsCommBytes,d1
 		bhs.s	.index
 		endif
-		tst.b	v_communication(a6,d1.w)
+		tst.b	v_communication(a1,d1.w)
 		beq.s	cfJumpTo
 		addq.w	#2,a4
 		rts
@@ -1537,7 +1569,7 @@ cfCommunicate:
 		cmp.b	#__smpsCommBytes,d1
 		bhs.s	.index
 		endif
-		move.b	(a4)+,v_communication(a6,d1.w)
+		move.b	(a4)+,v_communication(a1,d1.w)
 		rts
 .index:		SMPS_assert "cfCommunicate: Index is too large"
 ; ===========================================================================
@@ -1548,18 +1580,21 @@ cfxStopFM:
 		;bra.s	cfStopTrack
 ; ---------------------------------------------------------------------------
 cfStopTrack:
-		addq.w	#8,sp						; stop processing this channel
+; stop processing this channel
+		addq.w	#8,sp
 		and.b	#(1<<_playing|1<<_noattack)!$FF,TrackPlaybackControl(a5)
-		smpsMakeChannelRamIndex d3,TrackVoiceControl(a5)
 ; find parallel channels to restore
+		btst	#v_driverflags.jingle,v_driverflags(a1)		; is a jingle playing?
+		bne.w	.nobgm						; in that case, there's nothing to restore
+		smpsMakeChannelRamIndex d3,TrackVoiceControl(a5)
 		lea	RAM_SFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.nosfx
-		move.l	a6,a3
+		move.l	a1,a3
 		adda.w	d0,a3
 		cmp.l	a5,a3						; if we're stopping the SFX channel...
 		bne.s	.notsfx						; ...clear SFX priority and check other channels
-		clr.b	v_sndprio(a6)
+		clr.b	v_sndprio(a1)
 		bra.s	.nosfx
 .notsfx:	and.b	#(1<<_sfxoverride)!$FF,TrackPlaybackControl(a3)
 		tst.b	TrackPlaybackControl(a3)			; restore SFX if track is playing
@@ -1569,7 +1604,7 @@ cfStopTrack:
 		lea	RAM_BSFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.nobsfx
-		move.l	a6,a3
+		move.l	a1,a3
 		adda.w	d0,a3
 		cmp.l	a5,a3						; if we're stopping the BSFX channel...
 		beq.s	.nobsfx						; ...check other channels
@@ -1581,7 +1616,7 @@ cfStopTrack:
 		lea	RAM_BGMChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.nobgm
-		move.l	a6,a3
+		move.l	a1,a3
 		adda.w	d0,a3
 		cmp.l	a5,a3						; if we're stopping the BGM channel...
 		beq.s	.nobgm						; ...check other channels
@@ -1601,7 +1636,7 @@ cfStopTrack:
 		beq.s	.psgnah
 		cmp.b	#$E0,TrackVoiceControl(a5)
 		blo.s	.psgnah
-		clr.b	v_lastpsg4(a6)
+		clr.b	v_lastpsg4(a1)
 .psgnah:
 		bra.w	PSGNoteOff
 .dac:
@@ -1638,69 +1673,43 @@ cfStopTrack:
 		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
 		move.b	TrackAMSFMSPan(a5),d1
-		btst	#v_driverflags.mono,v_driverflags(a6)
+		btst	#v_driverflags.mono,v_driverflags(a1)
 		beq.s	.stereo
 		or.b	#$C0,d1
 .stereo:	bsr.w	DACSetPan
 		exg.l	a3,a5
 		rts
-; ===========================================================================
-cfxRevUp:
-		move.b	v_revving_pitch(a6),d0
-		tst.b	v_revving_timer(a6)
-		bne.s	.sfx_timeractive
-		moveq	#-1,d0				; start pitch at 0
-
-.sfx_timeractive:
-		addq.b	#1,d0
-		cmpi.b	#12-1,d0
-		bhs.s	.sfx_limitreached
-		move.b	d0,v_revving_pitch(a6)
-
-.sfx_limitreached:
-		move.b	#60,v_revving_timer(a6)		; Set timer
-;		bra.s	cfRevAddCurr
 ; ---------------------------------------------------------------------------
-cfxRevAddCur:
-		tst.b	v_revving_timer(a6)
-		beq.s	.norevving
-		move.b	v_revving_pitch(a6),d0
-		add.b	d0,TrackTranspose(a5)
-.norevving:
-		rts
-; ---------------------------------------------------------------------------
-cfxRevReset:
-		clr.b	v_revving_timer(a6)
-		rts
-; ===========================================================================
 cfxFadeInToPrevious:
 	if __smpsJingle=0
 		SMPS_assert "smpsFade: __smpsJingle is disabled"
 	else
-		bclr	#v_driverflags.jingle,v_driverflags(a6)
+		bclr	#v_driverflags.jingle,v_driverflags(a1)
 		bne.s	.valid
 		SMPS_assert "smpsFade: That was not a jingle track."
 .valid:
-		move.b	(a4)+,v_fadein_counter(a6)		; Trigger fade-in
-; restore track
-		lea	v_1up_save_ram(a6),a0
-		lea	v_1up_ram_copy(a6),a1
+		move.b	(a4)+,v_fadein_counter(a1)		; Trigger fade-in
+; stop processing all sequences for this frame
+		lea	12(sp),sp
+		pea	HandleSequencerEnd(pc)
+; restore prior track
+		lea	v_1up_save_ram(a1),a0
+		lea	v_1up_ram_copy(a1),a2
 		moveq	#0,d0
 		move.w	#((v_1up_ram_copy_end-v_1up_ram_copy)/4)-1,d1
 .restore:
-		move.l	(a1),(a0)+
-		move.l	d0,(a1)+
+		move.l	(a2),(a0)+
+		move.l	d0,(a2)+
 		dbf	d1,.restore
 	if (v_1up_ram_copy_end-v_1up_ram_copy)&2
-		move.w	(a1),(a0)+
-		move.w	d0,(a1)+
+		move.w	(a2),(a0)+
+		move.w	d0,(a2)+
 	endif
 
-		move.l	a5,a3
-		move.l	d7,-(sp)
+;		movem.l	d7/a5,-(sp)
 
 		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d7
-		lea	v_music_pcm_tracks(a6),a5
+		lea	v_music_pcm_tracks(a1),a5
 .dacloop:	tst.b	TrackPlaybackControl(a5)
 		bpl.s	.nextdac
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
@@ -1710,7 +1719,7 @@ cfxFadeInToPrevious:
 		dbf	d7,.dacloop
 
 		moveq	#((v_music_fm_tracks_end-v_music_fm_tracks)/TrackFmSz)-1,d7
-		lea	v_music_fm_tracks(a6),a5
+		lea	v_music_fm_tracks(a1),a5
 .fmloop:	tst.b	TrackPlaybackControl(a5)
 		bpl.s	.nextfm
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
@@ -1720,7 +1729,7 @@ cfxFadeInToPrevious:
 		dbf	d7,.fmloop
 
 		moveq	#((v_music_psg_tracks_end-v_music_psg_tracks)/TrackPsgSz)-1,d7
-		lea	v_music_psg_tracks(a6),a5
+		lea	v_music_psg_tracks(a1),a5
 .psgloop:	tst.b	TrackPlaybackControl(a5)
 		bpl.s	.nextpsg
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
@@ -1730,18 +1739,15 @@ cfxFadeInToPrevious:
 .nextpsg:
 		dbf	d7,.psgloop
 
-		move.l	(sp)+,d7
-		move.l	a3,a5
-; stop processing all BGM channels for this frame
-		lea	12(sp),sp
-		bra.w	HandleSequencerEnd
+;		movem.l	(sp)+,d7/a5
+		rts
 	endif
 ; ===========================================================================
 cfxPlayID:
 		move.b	(a4)+,-(sp)
 		move.w	(sp)+,d0
 		move.b	(a4)+,d0
-		lea	v_soundqueue_start(a6),a3
+		lea	v_soundqueue_start(a1),a3
 		moveq	#(v_soundqueue_end-v_soundqueue_start)/2-1,d1
 .next:		tst.w	(a3)+
 		dbeq	d1,.next

@@ -62,7 +62,7 @@ PSGSetFreq:
 		btst	#_drummode,TrackPlaybackControl(a5)
 		beq.s	.notemode
 
-		move.l	v_dataptr(a6),a0
+		move.l	v_dataptr(a1),a0
 		moveq	#0,d0
 		move.w	drvdata.psgdrum(a0),d0
 		add.l	d0,a0
@@ -147,18 +147,18 @@ PSGPrepareNote:
 		btst	#_special,TrackPlaybackControl(a5)
 		beq.s	.notpsg3noise
 		or.b	#$E0,d2
-		cmp.b	v_lastpsg4(a6),d2
+		cmp.b	v_lastpsg4(a1),d2
 		beq.s	.notpsg3noise
-		move.b	d2,v_lastpsg4(a6)
+		move.b	d2,v_lastpsg4(a1)
 		move.b	d2,(a0)					; 1110.nnn
 .notpsg3noise:
 		move.b	d1,(a0)					; 1cc0ffff
 		move.b	d6,(a0)					; 0.ffffff
 		rts
 .noise:
-		cmp.b	v_lastpsg4(a6),d2
+		cmp.b	v_lastpsg4(a1),d2
 		beq.s	.nexit
-		move.b	d2,v_lastpsg4(a6)
+		move.b	d2,v_lastpsg4(a1)
 		move.b	d2,(a0)					; 1cc0.nnn
 .nexit:
 		rts

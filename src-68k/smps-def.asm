@@ -49,6 +49,7 @@ ymd1		equ $A04003
 z80ram		equ $A00000
 z80busreq	equ $A11100
 	endif
+; MegaSD/MDPlus
 MSD_OverlaySignature	equ $3F7F6	; reads 'BATE' if overlay port was successful
 MSD_OverlayPort		equ $3F7FA	; write $CD54 to enable MegaSD control
 MSD_ResultPort		equ $3F7FC
@@ -63,6 +64,32 @@ msd_comm_pause		equ $13		; 1.04 uses parameter for a fadeout
 msd_comm_resume		equ $14		;
 msd_comm_volume		equ $15		; 0 is mute, 0xFF is max
 msd_comm_status		equ $16		; 1.04 ; 0 = no song playing, 1 = song playing
+
+; MegaCD
+CdBootRom:      equ $400000   ; Main-CPU boot ROM
+CdPrgRam:       equ $420000   ; PRG-RAM window
+CdWordRam:      equ $600000   ; WORD-RAM window
+
+CdSubCtrl:	equ $A12000  ; Sub-CPU reset/busreq, etc.
+CdMemCtrl:	equ $A12002  ; Mega CD memory mode, bank, etc.
+
+CdCommMain1:	equ $A12010  ; Main-CPU to Sub-CPU port #1
+CdCommMain2:	equ $A12012  ; Main-CPU to Sub-CPU port #2
+CdCommMain3:	equ $A12014  ; Main-CPU to Sub-CPU port #3
+CdCommMain4:	equ $A12016  ; Main-CPU to Sub-CPU port #4
+CdCommMain5:	equ $A12018  ; Main-CPU to Sub-CPU port #5
+CdCommMain6:	equ $A1201A  ; Main-CPU to Sub-CPU port #6
+CdCommMain7:	equ $A1201C  ; Main-CPU to Sub-CPU port #7
+CdCommMain8:	equ $A1201E  ; Main-CPU to Sub-CPU port #8
+
+CdCommSub1:	equ $A12020  ; Sub-CPU to Main-CPU port #1
+CdCommSub2:	equ $A12022  ; Sub-CPU to Main-CPU port #2
+CdCommSub3:	equ $A12024  ; Sub-CPU to Main-CPU port #3
+CdCommSub4:	equ $A12026  ; Sub-CPU to Main-CPU port #4
+CdCommSub5:	equ $A12028  ; Sub-CPU to Main-CPU port #5
+CdCommSub6:	equ $A1202A  ; Sub-CPU to Main-CPU port #6
+CdCommSub7:	equ $A1202C  ; Sub-CPU to Main-CPU port #7
+CdCommSub8:	equ $A1202E  ; Sub-CPU to Main-CPU port #8
 	elseif __smpsTarget=="sys14"
 ymstat		equ $840101
 yma0		equ $840101
@@ -114,9 +141,8 @@ SMPS_assert macro
 		if ARGCOUNT==0
 		bra.w	RenderAssert
 		else
-		pea	.t(pc)
-		bra.w	RenderAssert
-.t:		SMPS_assertascii ALLARGS
+		bsr.w	RenderAssert		; 0(sp) = *+4
+		SMPS_assertascii ALLARGS
 		even
 		endif
 	else
@@ -255,6 +281,7 @@ v_dataptr:			ds.l 1
 v_driverflags2:			ds.b 1
 .muffle				equ 7	; must be 7
 .mdplus				equ 0
+.mcd				equ 1
 
 v_communication:		ds.b __smpsCommBytes	; generally used for syncing gameplay with music
 v_communication_end:

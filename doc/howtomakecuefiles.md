@@ -18,5 +18,7 @@ REM LOOP xxxxx
 REM COMMENT "xxxxx"
 ```
 Loop points are based on CDDA frames (75fps)
+
 For Audacity, this can be seen by clicking on the right arrow on most of the timers, which shows a variety of timing types.
+
 Select "CDDA Frames", and figure out the loop point you desire relative to CDDA frame timing.

@@ -1,34 +1,28 @@
 ; ===========================================================================
+; a1 = driver ram
 DACInitDriver:
+;		rts
+; ===========================================================================
+; a0 = dac bank
+; a1 = driver ram
 DACLoadBank:
-		rts
+;		rts
 ; ===========================================================================
 ; a1 = driver ram
 DACGuard:
 DACUnguard:
-		rts
+;		rts
 ; ===========================================================================
+; a1 = driver ram
 DACPauseSample:
 DACResumeSample:
-		rts
+;		rts
 ; ===========================================================================
-; INPUT:
-; a6 = driver ram
+; a1 = driver ram
 DACUpdateSFX:
-		tst.b	v_pcmsfx(a6)
-		beq.s	.exit
-		moveq	#7,d0
-.loop:		btst	d0,v_pcmsfx(a6)
-		dbeq	d0,.loop
-		bne.s	.exit
-		; finders code
-		bclr	d0,v_pcmsfx(a6)
-		bsr.s	DACRestoreFromSFX
-		dbf	d0,.loop
-.exit:		rts
+;		rts
 ; ===========================================================================
-; INPUT:
-; a6 = driver ram
+; a1 = driver ram
 ; d0.b = pcm channel number, -1 for all channels (stopsample, restorefromsfx)
 ; d1.w = sample id (queuesample), panning (setpan:00,40,80,C0), volume (setvolume:0-7F)
 DACQueueSample:

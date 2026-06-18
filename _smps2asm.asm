@@ -271,6 +271,8 @@ smpsHeaderStartSong macro songbasedriver,sourcesmps2asmver
 		set sourceSetVol,-1
 		set psgdelta,0
 		set sourcePsgHeaderMod,1
+	elseif SourceDriver==7
+		fatal "SMPS-Dusted currently doesn't support Sonic CDs PCM songs. Sorry."
 	elseif SourceDriver==8
 		set sourceBgmTempo,1
 		set sourceModAlgo,1

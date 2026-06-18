@@ -8,87 +8,9 @@ DACInitDriver:
 		move.w	#$100,d0
 		move.w	d0,(.z80busreq).l
 		move.w	d0,(.z80busreset).l
-		lea	.z80(pc),a0
-		lea	(.z80ram).l,a1
-; ---------------------------------------------------------------------------
-; KosinskiPlus decompression
-	movem.l	d3-d5/a5,-(sp)
-; KosPlusDec:
-	moveq	#0,d3					; Flag as having no bits left.
-	bra.s	.FetchNewCode
-; ---------------------------------------------------------------------------
-.FetchCodeLoop:
-	; Code 1 (Uncompressed byte).
-	move.b	(a0)+,(a1)+
-
-.FetchNewCode:
-	bsr.s	.ReadBit
-	bcs.s	.FetchCodeLoop				; If code = 1, branch.
-
-	; Codes 00 and 01.
-	moveq	#-1,d5
-	lea	(a1),a5
-	bsr.s	.ReadBit
-	bcs.s	.Code_01
-
-	; Code 00 (Dictionary ref. short).
-	move.b	(a0)+,d5				; d5 = displacement.
-	adda.w	d5,a5
-	; Always copy at least two bytes.
-	move.b	(a5)+,(a1)+
-	move.b	(a5)+,(a1)+
-	bsr.s	.ReadBit
-	bcc.s	.Copy_01
-	move.b	(a5)+,(a1)+
-	move.b	(a5)+,(a1)+
-
-.Copy_01:
-	bsr.s	.ReadBit
-	bcc.s	.FetchNewCode
-	bra.s	.Copy_01_Cont
-;	move.b	(a5)+,(a1)+
-;	bra.s	.FetchNewCode
-; ---------------------------------------------------------------------------
-.Code_01:
-	; Code 01 (Dictionary ref. long / special).
-	move.b	(a0)+,d4				; d4 = %xxxxxxxx HHHHHCCC.
-	move.b	d4,d5					; d5 = %11111111 HHHHHCCC.
-	lsl.w	#5,d5					; d5 = %111HHHHH CCC00000.
-	move.b	(a0)+,d5				; d5 = %111HHHHH LLLLLLLL.
-	adda.w	d5,a5
-
-	and.w	#7,d4					; d4 = %00000000 00000CCC.
-	beq.s	.dolargecopy
-; ---------------------------------------------------------------------------
-.StreamCopy:
-	neg.w	d4					; -10
-	addq.w	#8,d4					; 10-2, -1 for dbf, another -1 for .Copy_01_Cont
-	bra.s	.largeloop
-; ---------------------------------------------------------------------------
-.ReadBit:
-	dbra	d3,.SkipRead
-	moveq	#7,d3					; We have 8 new bits, but will use one up below.
-	move.b	(a0)+,d0				; Get desc field low-byte.
-.SkipRead:
-	add.b	d0,d0					; Get a bit from the bitstream.
-	rts
-; ---------------------------------------------------------------------------
-.dolargecopy:
-	; special mode (extended counter)
-	move.b	(a0)+,d4				; Read cnt
-	beq.s	.Quit					; If cnt=0, quit decompression.
-	addq.w	#7,d4					; val+8, -1 for .Copy_01_Cont
-.largeloop:
-	move.b	(a5)+,(a1)+
-	dbra	d4,.largeloop
-
-.Copy_01_Cont:
-	move.b	(a5)+,(a1)+
-	bra.s	.FetchNewCode
-; ---------------------------------------------------------------------------
-.Quit:
-	movem.l	(sp)+,d3-d5/a5
-; ---------------------------------------------------------------------------
+		lea	.z80(pc),a5
+		lea	(.z80ram).l,a6
+		include "src-68k/cmp-zx0.asm"
 		moveq	#0,d1
 		move.w	d1,(.z80busreset).l
 		or.l	d0,d0
@@ -96,8 +18,9 @@ DACInitDriver:
 		move.w	d0,(.z80busreset).l
 		move.w	d1,(.z80busreq).l
 		rts
-.z80:		binclude "_out/mpcm1.kosp"
-.z80e:		even
+; ---------------------------------------------------------------------------
+.z80:		binclude "_out/mpcm1.zx0"
+		even
 ; ===========================================================================
 ; INPUT
 ; a0 = pcm table

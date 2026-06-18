@@ -62,8 +62,11 @@ vram_null	equ $000
 vram_plane	equ $100
 vram_length	equ $200
 ; ---------------------------------------------------------------------------
-;	include "smps-def.asm"
+	if __smpsDebug==0
+	include "smps-def.asm"
+	else
 	include "smps-def-debug.asm"
+	endif
 	include "smps-ids.asm"
 ; ram def
 	phase $FF0000
@@ -450,6 +453,7 @@ CallAPI:
 .initdriver:
 		lea	(SMPS_DriverData).l,a0
 		lea	v_soundram,a1
+		moveq	#0,d0
 		jmp	(SMPS_InitDriver).l
 .rundriver:
 		lea	v_soundram,a1
@@ -489,7 +493,6 @@ CallAPI:
 		jmp	(SMPS_SetupPianoRoll).l
 .playcdda:
 		move.b	v_cddaid,d0
-		add.b	d0,d0		; TODO: lazy fix
 		lea	v_soundram,a1
 		jmp	(SMPS_PlayCDDA).l
 
@@ -767,7 +770,7 @@ ControlList:
 		ctrllist 1,v_soundid,	$FFFF
 		ctrllist 1,v_misccmd,	2
 		ctrllist 1,v_miscparam,	$FFFF
-		ctrllist 0,v_cddaid,	99
+		ctrllist 0,v_cddaid,	(99*2)
 		ctrllist 0,v_commval,	$FF
 		ctrllist 0,v_commindex,	1
 		ctrllist 1,v_dmalen,	$1000
@@ -906,7 +909,8 @@ JoypadRead:
 		rts
 ; ---------------------------------------------------------------------------
 	org $8000
-;	org $3F400	; MSD bank test
+;	org $3F800	; MSD bank test 1
+;	org $40000	; MSD bank test 2
 SMPS_InitDriver			equ *+00
 SMPS_RunDriver			equ *+04
 SMPS_QueueSound			equ *+08
@@ -919,8 +923,11 @@ SMPS_SetupPianoRoll		equ *+32
 SMPS_RunMiscCommand		equ *+36
 SMPS_PlayCDDA			equ *+40
 SMPS_Signature			equ *+64	; ASCII with zero-terminator
-;	binclude "smps-drv.bin"
+	if __smpsDebug==0
+	binclude "smps-drv.bin"
+	else
 	binclude "smps-drv-debug.bin"
+	endif
 	org $10000
 SMPS_DriverData:
 	binclude "smps-snd.bin"

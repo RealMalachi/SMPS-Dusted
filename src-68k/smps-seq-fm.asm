@@ -246,17 +246,17 @@ WriteFMchannel_exit:
 SetVoicePan:
 SetVoice:
 		fmstart	a0
-		move.l	TrackFmVoicePtr(a5),a1		; voice pointer
+		move.l	TrackFmVoicePtr(a5),a3		; voice pointer
 		moveq	#0,d1
 		move.b	TrackFmVoiceIndex(a5),d1	; Current voice
 		lsl.w	#5,d1		; x32
-		adda.w	d1,a1		; x32
+		adda.w	d1,a3		; x32
 
 		moveq_	$C0,d1
 		and.b	TrackAMSFMSPan(a5),d1
-		or.b	(a1)+,d1
+		or.b	(a3)+,d1
 		move.b	d1,TrackAMSFMSPan(a5)
-		btst	#v_driverflags.mono,v_driverflags(a6)
+		btst	#v_driverflags.mono,v_driverflags(a1)
 		beq.s	.stereo
 		or.b	#$C0,d1
 .stereo:
@@ -280,7 +280,7 @@ SetVoice:
 		add.b	d2,d0
 		fmwrite	a0,d0,d1,0
 .loop1:		move.b	(a2)+,d0
-		move.b	(a1)+,d1
+		move.b	(a3)+,d1
 		add.b	d2,d0				; Add in voice control bits
 		fmwrite	a0,d0,d1,0
 		dbf	d3,.loop1
@@ -290,7 +290,7 @@ SetVoice:
 		add.b	d2,d0
 		fmwrite	a0,d0,d1,1
 .loop2:		move.b	(a2)+,d0
-		move.b	(a1)+,d1
+		move.b	(a3)+,d1
 		add.b	d2,d0
 		fmwrite	a0,d0,d1,1
 		dbf	d3,.loop2
@@ -298,24 +298,24 @@ SetVoice:
 		fmstop	a0
 ; volume is handled later by DoVolEnv and UpdateVolume
 ;		bsr.w	SendVoiceTL
-		btst	#v_driverflags.ssgoff,v_driverflags(a6)		; if SSG-EG is disabled, uhh, disable it.
+		btst	#v_driverflags.ssgoff,v_driverflags(a1)		; if SSG-EG is disabled, uhh, disable it.
 		beq.s	SendVoiceSSG.gotptr
 		rts
 ; ---------------------------------------------------------------------------
 SendVoiceSSG:
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	.locret
-		move.l	TrackFmVoicePtr(a5),a1
+		move.l	TrackFmVoicePtr(a5),a3
 		moveq	#0,d1
 		move.b	TrackFmVoiceIndex(a5),d1
 		lsl.w	#5,d1		; x32
-		adda.w	d1,a1		; x32
-		adda.w	#22,a1		; Want SSG
+		adda.w	d1,a3		; x32
+		adda.w	#22,a3		; Want SSG
 .gotptr:
-		move.b	(a1)+,-(sp)
+		move.b	(a3)+,-(sp)
 		move.w	(sp)+,d4
-		move.b	(a1)+,d4
-		btst	#v_driverflags.ssgoff,v_driverflags(a6)		; if SSG-EG is disabled, uhh, disable it.
+		move.b	(a3)+,d4
+		btst	#v_driverflags.ssgoff,v_driverflags(a1)		; if SSG-EG is disabled, uhh, disable it.
 		beq.s	.firecunt
 		moveq	#0,d4
 .firecunt:
@@ -332,7 +332,7 @@ SendVoiceSSG:
 ; INPUT
 ; d0.w = volume
 ; TRASHES
-; d0-d3/a0-a2
+; d0-d3/a0/a2-a3
 SendVoiceTL_Exit:
 		rts
 SendVoiceTL:
@@ -340,25 +340,25 @@ SendVoiceTL:
 		bne.s	SendVoiceTL_Exit
 		bsr.w	GetVolume
 .gotvol:
-		move.l	TrackFmVoicePtr(a5),a1
+		move.l	TrackFmVoicePtr(a5),a3
 		moveq	#0,d1
 		move.b	TrackFmVoiceIndex(a5),d1
 		lsl.w	#5,d1		; x32
-		adda.w	d1,a1		; x32
-		adda.w	#24,a1		; Wants TL
+		adda.w	d1,a3		; x32
+		adda.w	#24,a3		; Wants TL
 
-		tst.b	v_driverflags2(a6)			; is underwater muffle enabled?
+		tst.b	v_driverflags2(a1)			; is underwater muffle enabled?
 		bpl.s	.nomuffle
 		btst	#_nomuffle,TrackPlaybackControl(a5)	; is song going "nuh uh"?
 		bne.s	.nomuffle
-		addq.w	#4,a1		; Wants TL muffle
+		addq.w	#4,a3		; Wants TL muffle
 .nomuffle:
 		move.w	d0,d3
 		swap	d3
 		move.w	#4-1,d3
 		moveq	#$40,d0
 
-.loop:		move.b	(a1)+,d1
+.loop:		move.b	(a3)+,d1
 		bpl.s	.send_tl
 		move.l	d3,d2
 		swap	d2

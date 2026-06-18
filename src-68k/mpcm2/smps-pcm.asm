@@ -1,105 +1,26 @@
 ; ---------------------------------------------------------------------------
-; INPUT: 
-; TRASHES: d0-d1/a0-a1
+; INPUT
+; a1 = driver ram
 DACInitDriver:
 		move.w	sr,-(sp)
 		move.w	#$2700,sr				; disable interrupts
-		move.l	a3,-(sp)
-		lea	MPCM_Z80_BUSREQ,a3
+		lea	MPCM_Z80_BUSREQ,a2
 		move.w	#$100,d0
-		move.w	d0,(a3)					; request Z80 bus (stop Z80)
-		move.w	d0,MPCM_Z80_RESET-MPCM_Z80_BUSREQ(a3)	; release Z80 reset
+		move.w	d0,(a2)					; request Z80 bus (stop Z80)
+		move.w	d0,MPCM_Z80_RESET-MPCM_Z80_BUSREQ(a2)	; release Z80 reset
 		; Loads Mega PCM program into Z80 memory ...
 ;	KDebug.WriteLine "Decompressing Mega PCM 2.0 driver..."
-		lea	.drv(pc),a0
-		lea	(MPCM_Z80_RAM).l,a1
-; ---------------------------------------------------------------------------
-; KosinskiPlus decompression
-	movem.l	d3-d5/a5,-(sp)
-; KosPlusDec:
-	moveq	#0,d3					; Flag as having no bits left.
-	bra.s	.FetchNewCode
-; ---------------------------------------------------------------------------
-.FetchCodeLoop:
-	; Code 1 (Uncompressed byte).
-	move.b	(a0)+,(a1)+
-
-.FetchNewCode:
-	bsr.s	.ReadBit
-	bcs.s	.FetchCodeLoop				; If code = 1, branch.
-
-	; Codes 00 and 01.
-	moveq	#-1,d5
-	lea	(a1),a5
-	bsr.s	.ReadBit
-	bcs.s	.Code_01
-
-	; Code 00 (Dictionary ref. short).
-	move.b	(a0)+,d5				; d5 = displacement.
-	adda.w	d5,a5
-	; Always copy at least two bytes.
-	move.b	(a5)+,(a1)+
-	move.b	(a5)+,(a1)+
-	bsr.s	.ReadBit
-	bcc.s	.Copy_01
-	move.b	(a5)+,(a1)+
-	move.b	(a5)+,(a1)+
-
-.Copy_01:
-	bsr.s	.ReadBit
-	bcc.s	.FetchNewCode
-	bra.s	.Copy_01_Cont
-;	move.b	(a5)+,(a1)+
-;	bra.s	.FetchNewCode
-; ---------------------------------------------------------------------------
-.Code_01:
-	; Code 01 (Dictionary ref. long / special).
-	move.b	(a0)+,d4				; d4 = %xxxxxxxx HHHHHCCC.
-	move.b	d4,d5					; d5 = %11111111 HHHHHCCC.
-	lsl.w	#5,d5					; d5 = %111HHHHH CCC00000.
-	move.b	(a0)+,d5				; d5 = %111HHHHH LLLLLLLL.
-	adda.w	d5,a5
-
-	and.w	#7,d4					; d4 = %00000000 00000CCC.
-	beq.s	.dolargecopy
-; ---------------------------------------------------------------------------
-.StreamCopy:
-	neg.w	d4					; -10
-	addq.w	#8,d4					; 10-2, -1 for dbf, another -1 for .Copy_01_Cont
-	bra.s	.largeloop
-; ---------------------------------------------------------------------------
-.ReadBit:
-	dbra	d3,.SkipRead
-	moveq	#7,d3					; We have 8 new bits, but will use one up below.
-	move.b	(a0)+,d0				; Get desc field low-byte.
-.SkipRead:
-	add.b	d0,d0					; Get a bit from the bitstream.
-	rts
-; ---------------------------------------------------------------------------
-.dolargecopy:
-	; special mode (extended counter)
-	move.b	(a0)+,d4				; Read cnt
-	beq.s	.Quit					; If cnt=0, quit decompression.
-	addq.w	#7,d4					; val+8, -1 for .Copy_01_Cont
-.largeloop:
-	move.b	(a5)+,(a1)+
-	dbra	d4,.largeloop
-
-.Copy_01_Cont:
-	move.b	(a5)+,(a1)+
-	bra.s	.FetchNewCode
-; ---------------------------------------------------------------------------
-.Quit:
-	movem.l	(sp)+,d3-d5/a5
-; ---------------------------------------------------------------------------
+		lea	.drv(pc),a5
+		lea	(MPCM_Z80_RAM).l,a6
+		include "src-68k/cmp-zx0.asm"
 		; Starts Z80 and prepares for "wait Mega PCM ready" cycle
 ;	KDebug.WriteLine "Preparing Mega PCM 2.0 driver..."
 		moveq	#0,d1
-		move.w	d1,MPCM_Z80_RESET-MPCM_Z80_BUSREQ(a3)	; reset Z80. Wait for 16 cycles before release
+		move.w	d1,MPCM_Z80_RESET-MPCM_Z80_BUSREQ(a2)	; reset Z80. Wait for 16 cycles before release
 		lea	(MPCM_Z80_RAM+Z_MPCM_DriverReady).l,a0	; 8(x/x) ; a0 = Z_MPCM_DriverReady
 		or.l	d0,d0					; 8(x/x) ; 
-		move.w	d0,MPCM_Z80_RESET-MPCM_Z80_BUSREQ(a3)	; release Z80 reset
-		move.w	d1,(a3)					; release Z80 bus (start Z80)
+		move.w	d0,MPCM_Z80_RESET-MPCM_Z80_BUSREQ(a2)	; release Z80 reset
+		move.w	d1,(a2)					; release Z80 bus (start Z80)
 		; Waits until Mega PCM reports that it's ready
 ;	KDebug.WriteLine "Waiting for Mega PCM initialization..."
 		; WARNING! Mega PCM performs ROM/RAM benchmarks during boot to
@@ -111,22 +32,24 @@ DACInitDriver:
 .RedoLoop:
 		move.w	#$1000-1,d0
 		dbf	d0,*		; waste 40k+ cycles
-		SMPS_stopZ80 (a3)
-		SMPS_waitZ80 (a3)
+		SMPS_stopZ80 (a2)
+		SMPS_waitZ80 (a2)
 		move.b	(a0),d1			; d1 = Z_MPCM_DriverReady
-		SMPS_startZ80 (a3)
+		SMPS_startZ80 (a2)
 		cmp.b	#'R',d1			; is driver ready?
 		bne.s	.RedoLoop		; if not, loop
 		; Release additional registers, restore SR and quit
-		move.l	(sp)+,a3
 		move.w	(sp)+,sr
 		rts
-.drv:	binclude "_out/mpcm2.kosp"
-	even
+; ---------------------------------------------------------------------------
+.drv:		binclude "_out/mpcm2.zx0"
+		even
 ; ===========================================================================
-; INPUT: a0 = table
-; OUTPUT: d0.w = error code, see MPCM_ST_[] in smps-pcm-def
-; TRASHES: d1/a1
+; INPUT:
+; a0 = table
+; a1 = driver ram
+; OUTPUT:
+; d0.w = error code, see MPCM_ST_[] in smps-pcm-def
 DACLoadBank:
 
 ;MPCM_ST_TOO_MANY_SAMPLES:			equ	$01
@@ -172,7 +95,7 @@ MegaPCM_LoadSampleTable:
 
 	lea		MPCM_Z80_BUSREQ, a3
 
-	lea		MPCM_Z80_RAM+Z_MPCM_SampleTable, a1
+	lea		MPCM_Z80_RAM+Z_MPCM_SampleTable, a5
 	subq.w	#4, sp						; used for fast LE->BE conversion
 	moveq	#$7F-1, d2			; load at most $7F samples (but table should have an end marker anyways!)
 
@@ -300,15 +223,15 @@ MegaPCM_LoadSampleTable:
 		MPCM_stopZ80	(a3)
 		or.l	d0,d0				; ML: this fixes an error where the Z80 hasn't stopped fast
 		MPCM_waitZ80	(a3)		; enough for the first samples data to be written safely
-		move.b	d5, (a1)+				; 00h	- sample type
-		move.b	d4, (a1)+				; 01h	- sample flags
-		move.b	d3, (a1)+				; 02h	- pitch
-		move.b	d0, (a1)+				; 03h	- start bank
-		move.b	d1, (a1)+				; 04h	- end bank
-		move.b	2+1(sp), (a1)+			; 05h	- start offset LOW
-		move.b	2+0(sp), (a1)+			; 06h	- start offset HIGH
-		move.b	2+3(sp), (a1)+			; 07h	- end offset LOW
-		move.b	2+2(sp), (a1)+			; 08h	- end offset HIGH
+		move.b	d5, (a5)+				; 00h	- sample type
+		move.b	d4, (a5)+				; 01h	- sample flags
+		move.b	d3, (a5)+				; 02h	- pitch
+		move.b	d0, (a5)+				; 03h	- start bank
+		move.b	d1, (a5)+				; 04h	- end bank
+		move.b	2+1(sp), (a5)+			; 05h	- start offset LOW
+		move.b	2+0(sp), (a5)+			; 06h	- start offset HIGH
+		move.b	2+3(sp), (a5)+			; 07h	- end offset LOW
+		move.b	2+2(sp), (a5)+			; 08h	- end offset HIGH
 		MPCM_startZ80 (a3)
 		move.w	(sp)+, sr							; restore interrupts		
 
@@ -336,7 +259,7 @@ MegaPCM_LoadSampleTable:
 		move.w	#$2700, sr							; disable interrupts
 		MPCM_stopZ80	(a3)
 		rept 9
-			move.b	d5, (a1)+
+			move.b	d5, (a5)+
 		endr
 		MPCM_startZ80 (a3)
 		move.w	(sp)+, sr							; restore interrupts
@@ -398,15 +321,15 @@ MegaPCM_LoadSampleTable:
 	; Print raw error code
 
 	; Print error description
-		lea	.ErrorCodeToDescription-4(pc),a1
+		lea	.ErrorCodeToDescription-4(pc),a5
 		pea	.Str_UnknownError(pc)		; fallback in case error description isn't found
 
 	.findErrorDescriptionLoop:
-		addq.w	#4,a1				; skip string pointer
-		cmp.b	(a1),d0
+		addq.w	#4,a5				; skip string pointer
+		cmp.b	(a5),d0
 		bhi.s	.findErrorDescriptionLoop
 		blo.s	.errorDescriptionLoopDone	; search failure
-		move.l	(a1),d0
+		move.l	(a5),d0
 		add.l	d0,(sp)				; (sp) = error description string
 		clr.b	(sp)				; safety
 	.errorDescriptionLoopDone:
@@ -468,7 +391,7 @@ DACResumeSample:
 DACUpdateSFX_Exit:
 		rts
 DACUpdateSFX:
-		tst.b	v_pcmsfx(a6)
+		tst.b	v_pcmsfx(a1)
 		beq.s	DACUpdateSFX_Exit
 		SMPS_stopZ80
 		SMPS_waitZ80
@@ -478,15 +401,15 @@ DACUpdateSFX:
 		SMPS_startZ80
 		cmp.w	#Z_MPCM_LOOP_IDLE<<8|0,d0
 		bne.s	DACUpdateSFX_Exit
-		clr.b	v_pcmsfx(a6)
+		clr.b	v_pcmsfx(a1)
 ;		bra.s	DACRestoreFromSFX
 ; ---------------------------------------------------------------------------
 DACRestoreFromSFX:
 	if ((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)=1
-		lea	v_music_pcm_tracks(a6),a5
+		lea	v_music_pcm_tracks(a1),a5
 		tst.b	TrackPlaybackControl(a5)
 	else
-		lea	v_music_pcm_tracks-TrackDacSz(a6),a5
+		lea	v_music_pcm_tracks-TrackDacSz(a1),a5
 		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d7
 .bgmdacloop:	add.w	#TrackDacSz,a5
 		tst.b	TrackPlaybackControl(a5)
@@ -496,13 +419,13 @@ DACRestoreFromSFX:
 		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
 		move.b	TrackAMSFMSPan(a5),d1
-		btst	#v_driverflags.mono,v_driverflags(a6)
+		btst	#v_driverflags.mono,v_driverflags(a1)
 		beq.s	.stereo
 		or.b	#$C0,d1
 .stereo:	bra.w	DACSetPan
 ; ===========================================================================
 DACQueueSample:
-		tst.b	v_pcmsfx(a6)
+		tst.b	v_pcmsfx(a1)
 		bne.s	.exit
 		SMPS_stopZ80
 		add.w	#$81,d1
@@ -514,7 +437,7 @@ DACQueueSample:
 DACQueueSampleSFX:
 		SMPS_stopZ80
 		add.w	#$81,d1
-		st.b	v_pcmsfx(a6)
+		st.b	v_pcmsfx(a1)
 		SMPS_waitZ80
 		move.b	d1, MPCM_Z80_RAM+Z_MPCM_CommandInput
 		move.b	#$00, MPCM_Z80_RAM+Z_MPCM_VolumeInput
@@ -523,7 +446,7 @@ DACQueueSampleSFX:
 		rts
 ; ===========================================================================
 DACStopSample:
-		tst.b	v_pcmsfx(a6)
+		tst.b	v_pcmsfx(a1)
 		bne.s	.exit
 		SMPS_stopZ80
 		SMPS_waitZ80
@@ -533,14 +456,14 @@ DACStopSample:
 ; ---------------------------------------------------------------------------
 DACStopSampleSFX:
 		SMPS_stopZ80
-		clr.b	v_pcmsfx(a6)
+		clr.b	v_pcmsfx(a1)
 		SMPS_waitZ80
 		move.b	#Z_MPCM_COMMAND_STOP, MPCM_Z80_RAM+Z_MPCM_CommandInput
 		SMPS_startZ80
 		bra.w	DACRestoreFromSFX
 ; ===========================================================================
 DACSetPan:
-		tst.b	v_pcmsfx(a6)
+		tst.b	v_pcmsfx(a1)
 		bne.s	.exit
 		SMPS_stopZ80
 		SMPS_waitZ80
@@ -552,7 +475,7 @@ DACSetPanSFX:
 		illegal
 ; ===========================================================================
 DACSetVolume:
-		tst.b	v_pcmsfx(a6)
+		tst.b	v_pcmsfx(a1)
 		bne.s	.exit
 		SMPS_stopZ80
 		lsr.b	#3,d1

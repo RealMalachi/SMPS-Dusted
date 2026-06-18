@@ -26,6 +26,7 @@ Excludes:
 - [clownacys p2bin](https://github.com/Clownacy/p2bin)
 - [sjasmplus](https://github.com/z00m128/sjasmplus)
 - [clownlzss](https://github.com/NaotoNTP/clownlzss)
+- [ZX0 salvador](https://github.com/emmanuel-marty/salvador)
 
 ## Related tools
 - [smps2asm](https://forums.sonicretro.org/threads/smps2asm-and-improved-s-k-driver.26876)
@@ -42,7 +43,7 @@ Excludes:
 | Alex Field | Disassembling Sonic 2 Simon Wai |
 | Devon | Disassembling Sonic CD |
 | Flamewing | Disassembling/compiling Sonic 3D Blasts OST, asl |
-| Clownacy | Clone Driver, "Dual-Clown", p2bin, clownlzss |
+| Clownacy | Clone Driver V2, p2bin, clownlzss |
 | Undying-Star | Flicky sounds |
 | Tomatowave | Beta testing |
 
