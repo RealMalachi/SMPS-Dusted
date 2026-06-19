@@ -1,7 +1,7 @@
 @echo off
 set BuildCleanup=0
 set BuildDriver=1
-set BuildData=0
+set BuildData=1
 set BuildTestRom=1
 
 if %BuildCleanup% == 1 (
