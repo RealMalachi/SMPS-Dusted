@@ -172,6 +172,7 @@ drvdata:
 .uvbfm:		ds.w 1
 .uvbvol:	ds.w 1
 .uvbmod:	ds.w 1
+.uvbpan:	ds.w 1
 .uvbdac:	ds.w 1
 .fmdrum:	ds.w 1
 .psgdrum:	ds.w 1
@@ -214,6 +215,15 @@ TrackDataPointer:		ds.l 1			; All
 
 TrackNoteTimeout:		ds.b 1			; All
 TrackNoteTimeoutMaster:		ds.b 1			; All
+
+	if __smpsPanEnv
+TrackPanSavedDelay:		;ds.b 1			; FM/PCM
+TrackPanEnvPtr:			ds.l 1			; FM/PCM
+TrackPanCtrl:			ds.b 1			; FM/PCM ; IIII ITTT ; T is the panning type, I is the animation ID
+TrackPanIndex:			ds.b 1			; FM/PCM
+TrackPanEndIndex:		ds.b 1			; FM/PCM
+TrackPanDelay:			ds.b 1			; FM/PCM
+	endif
 
 ; loop indexes start upward, subroutine calls extend downward
 TrackGoSubStackEnd:		ds.b 0			; All

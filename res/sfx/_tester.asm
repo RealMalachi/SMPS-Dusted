@@ -12,6 +12,14 @@ TestSfx_Header:
 TestSfx_FM5:
 	smpsFMvoice	$00
 	smpsCall	TestSfx_ParityTest
+; panning animation test
+	smpsPanAni 2,1,pEnv_00,"UPD-REPEAT"
+	smpsCall	TestSfx_FM5_Call
+	smpsPanAni 2,1,pEnv_00,"TICK-REPEAT"
+	smpsCall	TestSfx_FM5_Call
+	smpsPanAni 2,1,pEnv_00,"TICK-HOLD"
+	smpsCall	TestSfx_FM5_Call
+	smpsPanAni "OFF"
 ; FM instrument SSG-EG test
 	smpsFMvoice	$01
 	smpsCall	TestSfx_FM5_Call

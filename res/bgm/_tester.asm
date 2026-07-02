@@ -54,7 +54,14 @@ Mus_TestBgm_DAC_Loop3:
 	dc.b	smpsNoAttack, nRst, $02
 	smpsLoop 0,8,Mus_TestBgm_DAC_Loop3
 	smpsPanCentre
-; pcm panenv test (TODO)
+; pcm panenv test
+	smpsPanAni 2,1,pEnv_00,"UPD-REPEAT"
+	dc.b	dIntroKick, $18, $18, $18, $18, $18, $18, $18, $18
+	smpsPanAni 2,1,pEnv_00,"TICK-REPEAT"
+	dc.b	dIntroKick, $18, $18, $18, $18, $18, $18, $18, $18
+	smpsPanAni 2,1,pEnv_00,"TICK-HOLD"
+	dc.b	dIntroKick, $18, $18, $18, $18, $18, $18, $18, $18
+	smpsPanAni "OFF"
 
 ; pcm modulation test (TODO)
 ; pcm modenv test (TODO)

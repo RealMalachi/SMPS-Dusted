@@ -11,15 +11,27 @@ SMPS_Start:
 	dc.w SMPS_UVB_FM-.s
 	dc.w SMPS_VolEnvIndex-.s
 	dc.w SMPS_ModEnvIndex-.s
+	dc.w SMPS_PanEnvIndex-.s
 	dc.w SMPS_SampleTable-.s
 	dc.w SMPS_FmDrumTable-.s
 	dc.w SMPS_PsgDrumTable-.s
 	dc.w SMPS_PcmDrumTable-.s
 ; ---------------------------------------------------------------------------
+; Universal Panning Envelopes
+; ---------------------------------------------------------------------------
+SMPS_PanEnvIndex:
+	smpsEnvTable START,0
+	smpsEnvTable PanEnv_m00,pEnv_00
+	smpsEnvTable PanEnv_m01,pEnv_01
+	smpsEnvTable PanEnv_m01,pEnv_02
+	smpsEnvTable END,$20
+PanEnv_m00:	smpsEnvPan panRight,panLeft
+PanEnv_m01:	smpsEnvPan panRight,panCentre,panLeft
+PanEnv_m02:	smpsEnvPan panCentre,panLeft,panCentre,panRight
+; ---------------------------------------------------------------------------
 ; Universal Modulation Envelopes
 ; ---------------------------------------------------------------------------
 SMPS_ModEnvIndex:
-	smpsHeaderStartSong 1,1
 	smpsEnvTable START,1
 	smpsEnvTable ModEnv_m01,mEnv_01
 	smpsEnvTable ModEnv_m02,mEnv_02
@@ -42,7 +54,6 @@ ModEnv_m08:	smpsEnvMod $01,$02,$03,$04,$03,$02,$01,$00,-$01,-$02,-$03,-$04,-$03,
 ; Universal Volume Envelopes
 ; ---------------------------------------------------------------------------
 SMPS_VolEnvIndex:
-	smpsHeaderStartSong 1,1
 	smpsEnvTable START,1
 	smpsEnvTable VolEnv_f01,fTone_01
 	smpsEnvTable VolEnv_f02,fTone_02
@@ -257,7 +268,6 @@ VolEnv_c0B:	;smpsEnvVol    16, 32, 48, 64, 48, 32, 16, 0, -16, REPEAT
 VolEnv_c0C:	smpsEnvVolPsg 0, 0, 1, 1, 3, 3, 4, 5, REST
 VolEnv_c0D:	smpsEnvVolPsg 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 10, HOLD
 VolEnv_c0E:	smpsEnvVolPsg 0, 0, 2, 5, 9, 14, REST
-
 ; ---------------------------------------------------------------------------
 ; FM Universal Voice Bank
 ; ---------------------------------------------------------------------------
@@ -792,18 +802,19 @@ SMPS_UVB_FM:
 ; PCM Drums
 ; ---------------------------------------------------------------------------
 SMPS_PcmDrumTable:
-	smpsHeaderStartSong 1,1
+;	smpsEnvTable START,$81
+;	smpsEnvTable END,$E0
 ; ---------------------------------------------------------------------------
 ; FM Drums
 ; ---------------------------------------------------------------------------
 SMPS_FmDrumTable:
-	smpsHeaderStartSong 1,1
+;	smpsEnvTable START,$81
+;	smpsEnvTable END,$E0
 ; ---------------------------------------------------------------------------
 ; PSG Drums
 ; ---------------------------------------------------------------------------
 ; noise,volume,volenv
 SMPS_PsgDrumTable:
-	smpsHeaderStartSong 1,1
 	smpsEnvTable START,$81
 ;	smpsEnvTable PsgDrum_01
 ;	smpsEnvTable PsgDrum_02

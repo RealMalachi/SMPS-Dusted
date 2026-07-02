@@ -36,7 +36,7 @@ StopBGM:
 		add.b	d3,d3
 		add.w	#((30/2)-$40)*2,d3
 		lea	RAM_SFXChannel(pc),a3
-	if __smpsBSFX=1
+	if __smpsBSFX
 		move.w	(a3,d3.w),d0
 		beq.s	.dacgetptr
 		move.l	a1,a3
@@ -70,7 +70,7 @@ StopBGM:
 		move.b	TrackVoiceControl(a5),d3
 		add.b	d3,d3
 		lea	RAM_SFXChannel(pc),a3
-	if __smpsBSFX=1
+	if __smpsBSFX
 		move.w	(a3,d3.w),d0
 		beq.s	.fmgetptr
 		move.l	a1,a3
@@ -108,7 +108,7 @@ StopBGM:
 		move.b	TrackVoiceControl(a5),d3
 		lsr.b	#3,d3
 		lea	RAM_SFXChannel(pc),a3
-	if __smpsBSFX=1
+	if __smpsBSFX
 		move.w	(a3,d3.w),d0
 		beq.s	.psggetptr
 		move.l	a1,a3
@@ -148,7 +148,7 @@ StopSFX:
 		moveq	#0,d3
 		move.b	TrackVoiceControl(a5),d3
 		add.b	d3,d3
-	if __smpsBSFX=1
+	if __smpsBSFX
 		lea	RAM_BSFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.fmgetptr
@@ -186,7 +186,7 @@ StopSFX:
 		moveq	#0,d3
 		move.b	TrackVoiceControl(a5),d3
 		lsr.b	#3,d3
-	if __smpsBSFX=1
+	if __smpsBSFX
 		lea	RAM_BSFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.psggetptr
@@ -212,7 +212,7 @@ StopSFX:
 		dbf	d6,.psgloop
 .exit:
 		rts
-		if __smpsBSFX=1
+		if __smpsBSFX
 ; ===========================================================================
 StopBSFX:
 		btst	#v_driverflags.jingle,v_driverflags(a1)
@@ -372,21 +372,21 @@ FMFinishTrackUpdate:
 		rts
 ; ===========================================================================
 NoteTimeoutUpdate:
-		subq.b	#1,TrackNoteTimeout(a5)				; Update note fill timeout
-		bcs.s	.already					; if already expired or not set to run, branch
-		bne.s	.exit						; if not yet expired, branch
-		addq.w	#4,sp						; Do not return to caller
+		subq.b	#1,TrackNoteTimeout(a5)			; Update note fill timeout
+		bcs.s	.already				; if already expired or not set to run, branch
+		bne.s	.exit					; if not yet expired, branch
+		addq.w	#4,sp					; Do not return to caller
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	.exit
 		move.b	TrackVoiceControl(a5),d0
 		add.b	d0,d0
 		bcs.w	SendPSGNoteOff
-		bpl.w	FMNoteOff					; also checks for noattack
+		bpl.w	FMNoteOff				; also checks for noattack
 		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
 		bra.w	DACStopSample
-.already:	clr.b	TrackNoteTimeout(a5)				; make sure it doesn't overflow
+.already:	clr.b	TrackNoteTimeout(a5)			; make sure it doesn't overflow
 .exit:		rts
 ; ===========================================================================
 StartModulation:
@@ -399,7 +399,7 @@ StartModulation:
 		SMPS_assert "StartModulation: Invalid modalgo id; TODO: print id"
 .valid:
 		endif
-		add.b	d0,d0						; remove sign bit
+		add.b	d0,d0					; remove sign bit
 		add.w	d0,d0
 		jmp	.lut(pc,d0.w)
 .locret:
@@ -418,7 +418,7 @@ DoModulation:
 		SMPS_assert "DoModulation: Invalid modalgo id; TODO: print id"
 .valid:
 		endif
-		add.b	d0,d0						; remove sign bit
+		add.b	d0,d0					; remove sign bit
 		add.w	d0,d0
 		jmp	.lut(pc,d0.w)
 .locret:
@@ -429,45 +429,45 @@ DoModulation:
 		bra.w	ModAlgo_68K
 ; ---------------------------------------------------------------------------
 ModAlgo_68K:
-		subq.b	#1,TrackModulationWait(a5)			; Has modulation wait expired?
-		bcc.s	.locret						; If not, exit
-		clr.b	TrackModulationWait(a5)				; Make sure wait doesn't overflow
+		subq.b	#1,TrackModulationWait(a5)		; Has modulation wait expired?
+		bcc.s	.locret					; If not, exit
+		clr.b	TrackModulationWait(a5)			; Make sure wait doesn't overflow
 
-		subq.b	#1,TrackModulationSpeed(a5)			; Update speed
-		bne.s	.locret						; If it expired, want to update modulation
-		move.l	TrackModulationPtr(a5),a0			; Get modulation data
-		move.b	1(a0),TrackModulationSpeed(a5)			; Restore modulation speed
-		tst.b	TrackModulationSteps(a5)			; Check number of steps
-		bne.s	.calcfreq					; If nonzero, branch
-		move.b	3(a0),TrackModulationSteps(a5)			; Restore from modulation data
-		neg.b	TrackModulationDelta(a5)			; Negate modulation delta
+		subq.b	#1,TrackModulationSpeed(a5)		; Update speed
+		bne.s	.locret					; If it expired, want to update modulation
+		move.l	TrackModulationPtr(a5),a0		; Get modulation data
+		move.b	1(a0),TrackModulationSpeed(a5)		; Restore modulation speed
+		tst.b	TrackModulationSteps(a5)		; Check number of steps
+		bne.s	.calcfreq				; If nonzero, branch
+		move.b	3(a0),TrackModulationSteps(a5)		; Restore from modulation data
+		neg.b	TrackModulationDelta(a5)		; Negate modulation delta
 .locret:
 		rts
 .calcfreq:
-		subq.b	#1,TrackModulationSteps(a5)			; Update modulation steps
-		move.b	TrackModulationDelta(a5),d6			; Get modulation delta
+		subq.b	#1,TrackModulationSteps(a5)		; Update modulation steps
+		move.b	TrackModulationDelta(a5),d6		; Get modulation delta
 		ext.w	d6
-		add.w	d6,TrackModulationVal(a5)			; Add to cumulative modulation change
+		add.w	d6,TrackModulationVal(a5)		; Add to cumulative modulation change
 ModAlgo_Null:
 		rts
 ; ---------------------------------------------------------------------------
 ModAlgo_Z80:
-		subq.b	#1,TrackModulationWait(a5)			; Has modulation wait expired?
-		bne.s	.locret						; If not, exit
-		addq.b	#1,TrackModulationWait(a5)			; Make sure wait doesn't overflow
+		subq.b	#1,TrackModulationWait(a5)		; Has modulation wait expired?
+		bne.s	.locret					; If not, exit
+		addq.b	#1,TrackModulationWait(a5)		; Make sure wait doesn't overflow
 
-		move.l	TrackModulationPtr(a5),a0			; Get modulation data
-		subq.b	#1,TrackModulationSpeed(a5)			; Update speed
-		bne.s	.modsust					; If it expired, want to update modulation
-		move.b	1(a0),TrackModulationSpeed(a5)			; Restore modulation speed
-		move.b	TrackModulationDelta(a5),d6			; Get modulation delta
+		move.l	TrackModulationPtr(a5),a0		; Get modulation data
+		subq.b	#1,TrackModulationSpeed(a5)		; Update speed
+		bne.s	.modsust				; If it expired, want to update modulation
+		move.b	1(a0),TrackModulationSpeed(a5)		; Restore modulation speed
+		move.b	TrackModulationDelta(a5),d6		; Get modulation delta
 		ext.w	d6
-		add.w	d6,TrackModulationVal(a5)			; Add to cumulative modulation change
+		add.w	d6,TrackModulationVal(a5)		; Add to cumulative modulation change
 .modsust:
-		subq.b	#1,TrackModulationSteps(a5)			; Check number of steps
-		bne.s	.locret						; If nonzero, branch
-		move.b	3(a0),TrackModulationSteps(a5)			; Restore from modulation data
-		neg.b	TrackModulationDelta(a5)			; Negate modulation delta
+		subq.b	#1,TrackModulationSteps(a5)		; Check number of steps
+		bne.s	.locret					; If nonzero, branch
+		move.b	3(a0),TrackModulationSteps(a5)		; Restore from modulation data
+		neg.b	TrackModulationDelta(a5)		; Negate modulation delta
 .locret:
 		;rts
 ; ===========================================================================
@@ -531,11 +531,11 @@ GetFrequency:
 ;		beq.s	.modalgo
 ;		tst.b	d2
 ;		beq.s	.nomodalgo
-;;		move.l	TrackModulationPtr(a5),a0			; Get modulation data
+;;		move.l	TrackModulationPtr(a5),a0		; Get modulation data
 ;;		move.b	1(a0),d0
-;;		cmp.b	TrackModulationSpeed(a5),d0			; mod speed must match
+;;		cmp.b	TrackModulationSpeed(a5),d0		; mod speed must match
 ;;		bne.s	.nomodalgo
-;;		tst.b	TrackModulationSteps(a5)			; Steps must still be running
+;;		tst.b	TrackModulationSteps(a5)		; Steps must still be running
 ;;		beq.s	.nomodalgo
 .modalgo:
 	if __smpsRevFreq<2
@@ -590,8 +590,8 @@ GetFrequency:
 		tst.b	d2					; we're just updating the frequency dont change the index
 		bmi.s	.nomodenv
 		move.b	d0,TrackModEnvIndex(a5)
-	else
-		SMPS_assert "Driver disabled Modulation Envelopes"
+	elseif __smpsWarnDisabledUsage
+		SMPS_assert "GetFrequency: __smpsModEnv is disabled"
 	endif
 .nomodenv:
 		and.w	#$7FFF,d6				; clear sign bit and ccr n-bit
@@ -849,27 +849,108 @@ GetVolume:
 .nocap:
 		rts
 ; ===========================================================================
+	if __smpsPanEnv
+DoPanEnv:
+		moveq	#7,d0
+		and.b	TrackPanCtrl(a5),d0
+		if __smpsDebug
+		cmp.b	#3,d0
+		bls.s	.valid
+		SMPS_assert "DoPanEnv: Invalid panning type; TODO: print ID"
+.valid:
+		endif
+		add.w	d0,d0
+		jmp	.lut(pc,d0.w)
+.lut:		bra.s	PanType_Off		; Off
+		bra.s	PanType_UpdRepeat	; Per-Update, repeat
+		bra.s	PanType_TickHold	; Per-Tick, hold
+		bra.s	PanType_TickRepeat	; Per-Tick, repeat
 UpdatePanning:
+		moveq	#7,d0
+		and.b	TrackPanCtrl(a5),d0
+		if __smpsDebug
+		cmp.b	#3,d0
+		bls.s	.valid
+		SMPS_assert "UpdatePanning: Invalid panning type; TODO: print ID"
+.valid:
+		endif
+		add.w	d0,d0
+		jmp	.lut(pc,d0.w)
+.lut:		bra.s	PanType_Off_1
+		bra.s	PanType_UpdRepeat_1
+		bra.s	PanType_TickHold_1
+		bra.s	PanType_TickRepeat_1
+PanType_Off:
+PanType_Off_1:
+PanType_UpdRepeat_1:
+		rts
+
+PanType_TickHold:
+PanType_TickRepeat:
+		move.b	TrackPanSavedDelay(a5),TrackPanDelay(a5)
+		clr.b	TrackPanIndex(a5)
+
+PanType_UpdRepeat:
+PanType_TickHold_1:
+PanType_TickRepeat_1:
+		subq.b	#1,TrackPanDelay(a5)
+		bne.s	.exit
+
+		move.b	TrackPanEndIndex(a5),d0
+		cmp.b	TrackPanIndex(a5),d0
+		bne.s	.notend
+; (hackishly) check for hold types
+		moveq	#7,d0
+		and.b	TrackPanCtrl(a5),d0
+		cmp.b	#2,d0
+		beq.s	.exit
+; repeat
+		clr.b	TrackPanIndex(a5)
+.notend:
+		addq.b	#1,TrackPanIndex(a5)
+		move.b	TrackPanSavedDelay(a5),TrackPanDelay(a5)
+
 		btst	#v_driverflags.mono,v_driverflags(a1)
-		bne.s	.mono
+		bne.s	.exit
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	.exit
-		move.b	TrackAMSFMSPan(a5),d1
-		move.b	TrackVoiceControl(a5),d2
-		add.b	d2,d2
+
+		move.l	TrackPanEnvPtr(a5),a0
+		move.b	TrackPanCtrl(a5),d0
+		lsr.b	#3-1,d0
+		and.w	#$1F<<1,d0
+		move.b	(a0,d0.w),-(sp)
+		move.w	(sp)+,d1
+		move.b	1(a0,d0.w),d1
+		adda.w	d1,a0
+
+		moveq	#0,d0
+		move.b	TrackPanIndex(a5),d0
+		move.b	-1(a0,d0.w),d1				; pan data
+
+		move.b	TrackVoiceControl(a5),d0
+		add.b	d0,d0
 		bmi.s	.pcm
-.fm:		moveq_	fmreg.panamspms,d0			; Command to set AMS/FMS/panning
+.fm:
+		moveq	#%00110111,d0
+		and.b	TrackAMSFMSPan(a5),d0
+		or.b	d0,d1
+		moveq_	fmreg.panamspms,d0			; Command to set AMS/FMS/panning
 		bra.w	WriteFMIorII
-.pcm:		moveq	#$3F,d0
+.exit:
+		rts
+.pcm:
+		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
 		bra.w	DACSetPan
-.mono:
-.exit:		rts
-; ---------------------------------------------------------------------------
+	elseif __smpsWarnDisabledUsage
+UpdatePanning:	SMPS_assert "UpdatePanning: __smpsPanEnv is disabled"
+DoPanEnv:	SMPS_assert "DoPanEnv: __smpsPanEnv is disabled"
+	else
+UpdatePanning:
 DoPanEnv:
-;		btst	#v_driverflags.mono,v_driverflags(a1)
-;		bne.s	.mono
-.mono:		rts
+		rts
+	endif
 ; ===========================================================================
 ; handle control flags 
 CoordFlag:
@@ -900,7 +981,7 @@ CoordFlag:
 		bra.w	cfModulationZ80				; cxModSetZ80
 		bra.w	cfModulation68K2			; cModSet68K2
 		bra.w	cfModChg				; cModChg
-		bra.w	cfSetTempoDivider			; cTempoDiv
+		bra.w	cfSample				; cSample
 		bra.w	cfJumpTo				; cJump
 		bra.w	cfJumpToN8				; cJumpN8
 		bra.w	cfRepeatAtPos				; cRept
@@ -926,11 +1007,10 @@ cfExtCmd:
 		dc.w  cfxWriteFMIorII-.lut			; cxWriteReg
 		dc.w  cfxWriteFMI-.lut				; cxWriteFM1
 		dc.w  cfxWriteFMII-.lut				; cxWriteFM2
-		dc.w  cfxPanAuto-.lut				; cPanAuto
+		dc.w  cfxPanAuto-.lut				; cxPanAuto
+		dc.w  cfxPanManual-.lut				; cxPanManual
 		dc.w  cfxPanningAMSFMS-.lut			; cxPanAMSFMS
 		dc.w  cfxSetLFORate-.lut			; cxSetLFORate
-		dc.w  cfxFadeInToPrevious-.lut			; cxSongFadeIn
-		dc.w  .unk-.lut					; cxSpecialFM3
 		dc.w  cfxRevUp-.lut				; cxRevUp
 		dc.w  cfxRevAddCur-.lut				; cxRevAddCur
 		dc.w  cfxRevReset-.lut				; cxRevReset
@@ -944,8 +1024,8 @@ cfExtCmd:
 		dc.w  cfxPortamentoSpeed-.lut			; cxPortamentoSpeed
 		dc.w  cfxModChg2-.lut				; cxModChg2
 		dc.w  cfxRandPitch-.lut				; cxRandPitch
-		dc.w  cfxSample-.lut				; cxSample
 		dc.w  cfxSetTempoMod-.lut			; cxTempoMod
+		dc.w  cfxSetTempoDivider-.lut			; cxTempoDiv
 		dc.w  cfxSetTempoDividerAll-.lut		; cxTempoDivAll
 		dc.w  cfxDrumModeOn-.lut			; cxDrumModeOn
 		dc.w  cfxDrumModeOff-.lut			; cxDrumModeOff
@@ -960,9 +1040,12 @@ cfxDrumModeOn:
 cfxDrumModeOff:
 		and.b	#(1<<_drummode)!$FF,TrackPlaybackControl(a5)
 		rts
-	else
+	elseif __smpsWarnDisabledUsage
 cfxDrumModeOn:	SMPS_assert "cfxDrumModeOn: __smpsDrum setting was disabled"
 cfxDrumModeOff:	SMPS_assert "cfxDrumModeOff: __smpsDrum setting was disabled"
+	else
+cfxDrumModeOn:
+cfxDrumModeOff:	rts
 	endif
 ; ===========================================================================
 ; set LFOs global modulation rate
@@ -985,25 +1068,25 @@ cfPanCentre:
 		bra.s	cfPanOnly
 ; ---------------------------------------------------------------------------
 cfxPanningAMSFMS:
-		move.b	(a4)+,d1			; New AMS/FMS/panning value
-		bclr	#3,d1				; bit 3 is a flag to not retain previous AMS/FMS
+		move.b	(a4)+,d1				; New AMS/FMS/panning value
+		bclr	#3,d1					; bit 3 is a flag to not retain previous AMS/FMS
 		bne.s	cfxSetPanAMSFMS
 cfPanOnly:
-		moveq	#%00111111,d0			; Change panning, retain AMS/FMS
+		moveq	#%00111111,d0				; Change panning, retain AMS/FMS
 		and.b	TrackAMSFMSPan(a5),d0
-		or.b	d0,d1				; logically OR previous pan/AMS/FMS on top of the new AMS/FMS
+		or.b	d0,d1					; logically OR previous pan/AMS/FMS on top of the new AMS/FMS
 
 cfxSetPanAMSFMS:
-		move.b	TrackVoiceControl(a5),d2	; this isn't the game gear
+		move.b	TrackVoiceControl(a5),d2		; this isn't the game gear
 		bmi.s	.psg
-		move.b	d1,TrackAMSFMSPan(a5)		; Save pan value
+		move.b	d1,TrackAMSFMSPan(a5)			; Save pan value
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	.exit
 		btst	#v_driverflags.mono,v_driverflags(a1)
 		bne.s	.mono
 		add.b	d2,d2
 		bmi.s	.pcm
-		moveq_	fmreg.panamspms,d0		; Command to set AMS/FMS/panning
+		moveq_	fmreg.panamspms,d0			; Command to set AMS/FMS/panning
 		bra.w	WriteFMIorII
 ; ---------------------------------------------------------------------------
 .pcm:		moveq	#$3F,d0
@@ -1014,28 +1097,41 @@ cfxSetPanAMSFMS:
 .mono:
 .exit:		rts
 ; ===========================================================================
+	if __smpsPanEnv
 cfxPanAuto:
-	if __smpsDebug
+		if __smpsDebug
 		tst.b	TrackVoiceControl(a5)
 		bpl.s	.notpsg
 		SMPS_assert "cfxPanAuto: Attempted PSG channel panning"
 .notpsg:
-	endif
-;		move.b	(a4)+,pan_no(a5)		; pan no. set
-;		beq.s	.off				; if pan no.= 0 then AUTOPAN OFF
-;		move.b	(a4)+,pan_tb(a5)		; pan table set
-;		move.b	(a4)+,pan_start(a5)		; pan start no. set
-;		move.b	(a4)+,pan_limit(a5)		; pan limit set
-;		move.b	(a4),pan_leng(a5)		; pan length set
-;		move.b	(a4)+,pan_cont(a5)		; pan control set (=length)
-;		rts
+		endif
+		move.b	(a4)+,TrackPanCtrl(a5)
+		move.b	(a4)+,TrackPanEndIndex(a5)
+		move.b	(a4)+,TrackPanSavedDelay(a5)
+		clr.b	TrackPanIndex(a5)
+		move.b	#1,TrackPanDelay(a5)
+		rts
+cfxPanManual:
+		if __smpsDebug
+		tst.b	TrackVoiceControl(a5)
+		bpl.s	.notpsg
+		SMPS_assert "cfxPanManual: Attempted PSG channel panning"
+.notpsg:
+		endif
+		clr.b	TrackPanCtrl(a5)
 ; restore previous panning
-.off:
 		move.b	TrackAMSFMSPan(a5),d1
 		bra.w	cfPanOnly
+	elseif __smpsWarnDisabledUsage
+cfxPanAuto:	SMPS_assert "cfxPanAuto: __smpsPanEnv is disabled"
+cfxPanManual:	SMPS_assert "cfxPanManual: __smpsPanEnv is disabled"
+	else
+cfxPanAuto:	addq.w	#5,a4
+cfxPanManual:	rts
+	endif
 ; ===========================================================================
 cfDetune:
-		move.b	(a4)+,TrackDetune(a5)		; Set detune value
+		move.b	(a4)+,TrackDetune(a5)			; Set detune value
 		rts
 ; ===========================================================================
 cfxPortamentoSpeed:
@@ -1050,8 +1146,11 @@ cfxPortamentoSpeed:
 		endif
 		move.b	(a4)+,TrackPortamentoTime(a5)
 		rts
-	else
+	elseif __smpsWarnDisabledUsage
 		SMPS_assert "cfxPortamentoSpeed: __smpsPortamento is disabled"
+	else
+		addq.w	#1,a4
+		rts
 	endif
 ; ===========================================================================
 cfAddVolume:
@@ -1142,7 +1241,7 @@ cfxRevUp:
 		move.b	v_revving_pitch(a1),d0
 		tst.b	v_revving_timer(a1)
 		bne.s	.timeractive
-		moveq	#-1,d0				; start pitch at 0
+		moveq	#-1,d0					; start pitch at 0
 
 .timeractive:
 		addq.b	#1,d0
@@ -1151,7 +1250,7 @@ cfxRevUp:
 		move.b	d0,v_revving_pitch(a1)
 
 .limitreached:
-		move.b	#60,v_revving_timer(a1)		; Set timer
+		move.b	#60,v_revving_timer(a1)			; Set timer
 ;		bra.s	cfRevAddCurr
 ; ---------------------------------------------------------------------------
 cfxRevAddCur:
@@ -1166,20 +1265,20 @@ cfxRevReset:
 		clr.b	v_revving_timer(a1)
 		rts
 ; ===========================================================================
-cfSetTempoDivider:
+cfxSetTempoDivider:
 		move.b	(a4)+,TrackTempoDivider(a5)
 		rts
 ; ---------------------------------------------------------------------------
 cfxSetTempoDividerAll:
-		if __smpsDebug=1
+		if __smpsDebug
 ; ensure that it's a bgm track using this bgm exclusive command
 		smpsMakeChannelRamIndex d0,TrackVoiceControl(a5)
-		lea	RAM_BGMChannel(pc),a3	; check if this channel even has bgm channel
+		lea	RAM_BGMChannel(pc),a3			; check if this channel even has bgm channel
 		move.w	(a3,d0.w),d0
 		beq.s	.error
 		move.l	a1,a3
 		adda.w	d0,a3
-		cmp.l	a3,a5				; check that the location matches
+		cmp.l	a3,a5					; check that the location matches
 		beq.s	.valid
 .error:		SMPS_assert "cfxSetTempoDividerAll: Non-BGM, TODO: print SFX channel"
 .valid:
@@ -1203,15 +1302,15 @@ cfxSetTempoDividerAll:
 		rts
 ; ---------------------------------------------------------------------------
 cfxSetTempoMod:
-		if __smpsDebug=1
+		if __smpsDebug
 ; ensure that it's a bgm track using this bgm exclusive command
 		smpsMakeChannelRamIndex d0,TrackVoiceControl(a5)
-		lea	RAM_BGMChannel(pc),a3	; check if this channel even has bgm channel
+		lea	RAM_BGMChannel(pc),a3			; check if this channel even has bgm channel
 		move.w	(a3,d0.w),d0
 		beq.s	.error
 		move.l	a1,a3
 		adda.w	d0,a3
-		cmp.l	a3,a5				; check that the location matches
+		cmp.l	a3,a5					; check that the location matches
 		beq.s	.valid
 .error:		SMPS_assert "cfxSetTempoMod: Non-BGM, TODO: print SFX channel"
 .valid:
@@ -1223,7 +1322,7 @@ cfxSetTempoMod:
 		clr.w	v_main_tempo_timeout(a1)		; And reset timeout
 		rts
 ; ===========================================================================
-cfxSample:
+cfSample:
 		move.b	(a4)+,d1
 		cmp.b	#$40,TrackVoiceControl(a5)
 		blo.s	.nope
@@ -1234,7 +1333,8 @@ cfxSample:
 		and.b	TrackVoiceControl(a5),d0
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		beq.w	DACQueueSample
-.nope:		rts
+		rts
+.nope:		SMPS_assert "cfSample: Attempted non-DAC usage; TODO print channel"
 ; ===========================================================================
 cfSetFMVoice:
 		move.b	(a4)+,d0
@@ -1250,7 +1350,7 @@ cfSetVolEnv:
 		rts
 ; ---------------------------------------------------------------------------
 cfSetPSGNoise:
-		if __smpsDebug=1
+		if __smpsDebug
 ; ensure that only PSG3 or PSG4 channels are trying to use this
 		move.w	RAM_BGMChannel+24(pc),d0
 		beq.s	.nopsg3bgm
@@ -1318,7 +1418,7 @@ cfSetPSGNoise:
 		rts
 ; ---------------------------------------------------------------------------
 cfxSetPSG3:
-		if __smpsDebug=1
+		if __smpsDebug
 ; ensure that only PSG3 channels are trying to use this
 		move.w	RAM_BGMChannel+24(pc),d0
 		beq.s	.nopsg3bgm
@@ -1485,7 +1585,7 @@ cfxLoopCSFX:
 cfxCommJump:
 		moveq	#0,d1
 		move.b	(a4)+,d1
-		if __smpsDebug=1
+		if __smpsDebug
 		cmp.b	#__smpsCommBytes,d1
 		bhs.s	.index
 		endif
@@ -1493,14 +1593,16 @@ cfxCommJump:
 		beq.s	cfJumpTo
 		addq.w	#2,a4
 		rts
+		if __smpsDebug
 .index:		SMPS_assert "cfxCommJump: Index is too large"
+		endif
 ; ---------------------------------------------------------------------------
 cfJumpToGosub:
 		moveq	#0,d0
 		move.b	TrackStackPointer(a5),d0
 		lea	(a5,d0.w),a0
 		subq.b	#3,d0					; decrement stack
-		if __smpsDebug=1
+		if __smpsDebug
 		cmp.b	#TrackGoSubStackEnd,d0
 		blo.s	.exceeding
 		endif
@@ -1515,7 +1617,7 @@ cfJumpToGosub:
 		move.b	d1,-(a0)
 		bra.w	cfJumpTo
 
-		if __smpsDebug=1
+		if __smpsDebug
 .exceeding:	SMPS_assert "cfJumpToGosub: Stack overflow, TODO: print stack offset"
 		endif
 ; ---------------------------------------------------------------------------
@@ -1524,7 +1626,7 @@ cfJumpReturn:
 		move.b	TrackStackPointer(a5),d0
 		lea	(a5,d0.w),a0
 		addq.b	#3,d0					; increment stack
-		if __smpsDebug=1
+		if __smpsDebug
 		cmp.b	#TrackGoSubStack,d0
 		bhi.s	.exceeding
 		endif
@@ -1537,13 +1639,13 @@ cfJumpReturn:
 		move.w	(sp)+,d1
 		move.b	(a0)+,d1
 		moveq	#0,d0
-		move.b	d0,-(a0)					; clear stack (might get used by loops later)
+		move.b	d0,-(a0)				; clear stack (might get used by loops later)
 		move.b	d0,-(a0)
 		move.b	d0,-(a0)
 		move.l	d1,a4
 		rts
 
-		if __smpsDebug=1
+		if __smpsDebug
 .exceeding:	SMPS_assert "cfJumpReturn: Stack overflow, TODO: print stack offset"
 		endif
 ; ===========================================================================
@@ -1565,13 +1667,14 @@ cfxWriteFMII:
 cfCommunicate:
 		moveq	#0,d1
 		move.b	(a4)+,d1
-		if __smpsDebug=1
+		if __smpsDebug
 		cmp.b	#__smpsCommBytes,d1
-		bhs.s	.index
+		blo.s	.index
+		SMPS_assert "cfCommunicate: Index is too large"
+.index:
 		endif
 		move.b	(a4)+,v_communication(a1,d1.w)
 		rts
-.index:		SMPS_assert "cfCommunicate: Index is too large"
 ; ===========================================================================
 cfxStopFM:
 		cmp.b	#$40,TrackVoiceControl(a5)
@@ -1583,9 +1686,32 @@ cfStopTrack:
 ; stop processing this channel
 		addq.w	#8,sp
 		and.b	#(1<<_playing|1<<_noattack)!$FF,TrackPlaybackControl(a5)
-; find parallel channels to restore
+; check if a bgm needs to be restored
+	if __smpsJingle
 		btst	#v_driverflags.jingle,v_driverflags(a1)		; is a jingle playing?
-		bne.w	.nobgm						; in that case, there's nothing to restore
+		beq.s	.nojingle
+		moveq	#0,d0
+	set .val,v_music_pcm_tracks+TrackPlaybackControl
+	rept (v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz
+		or.b	.val(a1),d0
+	set .val,.val+TrackDacSz
+	endr
+	set .val,v_music_fm_tracks+TrackPlaybackControl
+	rept (v_music_fm_tracks_end-v_music_fm_tracks)/TrackFmSz
+		or.b	.val(a1),d0
+	set .val,.val+TrackFmSz
+	endr
+	set .val,v_music_psg_tracks+TrackPlaybackControl
+	rept (v_music_psg_tracks_end-v_music_psg_tracks)/TrackPsgSz
+		or.b	.val(a1),d0
+	set .val,.val+TrackPsgSz
+	endr
+		and.b	#1<<_playing,d0				; check if any bgm channels are playing
+		bne.w	.nobgm					; if there's any left, don't restore the prior bgm
+		bra.w	cfStopTrack_Jingle			; restore
+.nojingle:
+	endif
+; find parallel channels to restore
 		smpsMakeChannelRamIndex d3,TrackVoiceControl(a5)
 		lea	RAM_SFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
@@ -1600,7 +1726,7 @@ cfStopTrack:
 		tst.b	TrackPlaybackControl(a3)			; restore SFX if track is playing
 		bmi.s	.restore
 .nosfx:
-	if __smpsBSFX=1
+	if __smpsBSFX
 		lea	RAM_BSFXChannel(pc),a3
 		move.w	(a3,d3.w),d0
 		beq.s	.nobsfx
@@ -1651,7 +1777,7 @@ cfStopTrack:
 ; found channel to restore, initiate the new one
 .restore:
 		or.b	#1<<_resting,TrackPlaybackControl(a3)
-		move.b	TrackVoiceControl(a5),d0			; Get voice control bits
+		move.b	TrackVoiceControl(a5),d0		; Get voice control bits
 		add.b	d0,d0
 		bcs.s	.r_psg
 		bmi.s	.r_dac
@@ -1679,34 +1805,23 @@ cfStopTrack:
 .stereo:	bsr.w	DACSetPan
 		exg.l	a3,a5
 		rts
-; ---------------------------------------------------------------------------
-cfxFadeInToPrevious:
-	if __smpsJingle=0
-		SMPS_assert "smpsFade: __smpsJingle is disabled"
-	else
-		bclr	#v_driverflags.jingle,v_driverflags(a1)
-		bne.s	.valid
-		SMPS_assert "smpsFade: That was not a jingle track."
-.valid:
-		move.b	(a4)+,v_fadein_counter(a1)		; Trigger fade-in
-; stop processing all sequences for this frame
-		lea	12(sp),sp
-		pea	HandleSequencerEnd(pc)
+
+	if __smpsJingle
+cfStopTrack_Jingle:
+		bclr	#v_driverflags.jingle,v_driverflags(a1)	; Disable jingle
+		move.b	#$50,v_fadein_counter(a1)		; Trigger fade-in
 ; restore prior track
 		lea	v_1up_save_ram(a1),a0
 		lea	v_1up_ram_copy(a1),a2
 		moveq	#0,d0
 		move.w	#((v_1up_ram_copy_end-v_1up_ram_copy)/4)-1,d1
-.restore:
-		move.l	(a2),(a0)+
+.prior:		move.l	(a2),(a0)+
 		move.l	d0,(a2)+
-		dbf	d1,.restore
+		dbf	d1,.prior
 	if (v_1up_ram_copy_end-v_1up_ram_copy)&2
 		move.w	(a2),(a0)+
 		move.w	d0,(a2)+
 	endif
-
-;		movem.l	d7/a5,-(sp)
 
 		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d7
 		lea	v_music_pcm_tracks(a1),a5
@@ -1738,9 +1853,9 @@ cfxFadeInToPrevious:
 		add.w	#TrackPsgSz,a5
 .nextpsg:
 		dbf	d7,.psgloop
-
-;		movem.l	(sp)+,d7/a5
-		rts
+; stop processing all sequences for this frame
+		addq.w	#4,sp
+		bra.w	HandleSequencerEnd
 	endif
 ; ===========================================================================
 cfxPlayID:
@@ -1754,11 +1869,3 @@ cfxPlayID:
 		bne.s	.full
 		move.w	d0,-(a3)
 .full:		rts
-; ===========================================================================
-; cfxToggleAltFreqMode:
-;cfxSetFreqMode1:
-;		and.b	#(1<<_freqmode)!$FF,TrackPlaybackControl(a5)
-;		rts
-;cfxSetFreqMode2:
-;		or.b	#1<<_freqmode,TrackPlaybackControl(a5)
-;		rts

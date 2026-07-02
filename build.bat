@@ -71,7 +71,7 @@ if %BuildData% == 1 (
 if not exist _out mkdir _out
 echo ============================================
 echo Building SMPS blob
-tools\asw\asw.exe -xx -n -q -A -L -U -i . -a -shareout smps-ids.asm -olist _out\build-snd.lst -E _out\build-snd.log build-snd.asm
+tools\asw\asw.exe -xx -n -q -A -L -U -i . -a -shareout smps-ids.asm -olist _out\build-snd.lst -E _out\build-snd.log build-snd.asm -D __smpsDebug=0
 if not exist build-snd.p goto _BUILDTYPE_ERROR_DATA
 tools\asw\p2bin.exe "build-snd.p" "smps-snd.bin" ""
 move build-snd.p _out

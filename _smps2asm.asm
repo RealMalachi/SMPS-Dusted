@@ -115,7 +115,7 @@ cModSetZ80		ds.b 1		; cfModulationZ80
 cModSet68K2		ds.b 1		; cfModulation68K2
 cModChg			ds.b 1		; cfModChg
 
-cTempoDiv		ds.b 1		; cfSetTempoDivider
+cSample			ds.b 1		; cfSample
 
 cJump			ds.b 1		; cfJumpTo
 cJumpN8			ds.b 1		; cfJumpToN8
@@ -137,11 +137,10 @@ cExtCmd			ds.b 1		; cfExtendedCommands
 cxWriteReg		ds.b 1		; cfxWriteFMIorII
 cxWriteFM1		ds.b 1		; cfxWriteFMI
 cxWriteFM2		ds.b 1		; cfxWriteFMII
-cxPanAuto		ds.b 1		; cfxUnk
+cxPanAuto		ds.b 1		; cfxPanAuto
+cxPanManual		ds.b 1		; cfxPanManual
 cxPanAMSFMS		ds.b 1		; cfxPanningAMSFMS
 cxSetLFORate		ds.b 1		; cfxSetLFORate
-cxSongFadeIn		ds.b 1		; cfxFadeInToPrevious
-cxSpecialFM3		ds.b 1		; cfxUnk
 cxRevUp			ds.b 1		; cfxRevUp
 cxRevAddCur		ds.b 1		; cfxRevAddCur
 cxRevReset		ds.b 1		; cfxRevReset
@@ -155,8 +154,8 @@ cxLoopCSFX		ds.b 1		; cfxLoopCSFX
 cxPortamentoSpeed	ds.b 1		; cfxPortamentoSpeed
 cxModChg2		ds.b 1		; cfxModChg2
 cxRandPitch		ds.b 1		; cfxRandPitch
-cxSample		ds.b 1		; cfxSample
 cxTempoMod		ds.b 1		; cfxSetTempoMod
+cxTempoDiv		ds.b 1		; cfSetTempoDivider
 cxTempoDivAll		ds.b 1		; cfxSetTempoDividerAll
 cxDrumModeOn		ds.b 1		; cfxDrumModeOn
 cxDrumModeOff		ds.b 1		; cfxDrumModeOff
@@ -164,7 +163,7 @@ cxCommJump		ds.b 1		; cfxCommJump
 cxFmKeyOnMask		ds.b 1		; cfxFmKeyOnMask
 ;cxSetFreqMode1		ds.b 1		; cfxSetFreqMode1
 ;cxSetFreqMode2		ds.b 1		; cfxSetFreqMode2
-
+;cxSpecialFM3		ds.b 1		; cfxSpecialFM3
 	dephase
 ; ---------------------------------------------------------------------------
 ; Conversion macros and functions
@@ -176,19 +175,19 @@ cxFmKeyOnMask		ds.b 1		; cfxFmKeyOnMask
 convertMainTempoMod macro mod
 	switch sourceBgmTempo
 	case -1
-		dc.w	mod
+		!dc.w	mod
 	case 0
 		if mod==1
 		fatal "Invalid main tempo of 1 in song from Sonic 1/SMPS 68K"
 		endif
-		dc.w	(($100/(((mod==0)*256)|mod))+($100#(((mod==0)*256)|mod)<>0))<<8|1
+		!dc.w	(($100/(((mod==0)*256)|mod))+($100#(((mod==0)*256)|mod)<>0))<<8|1
+	case 1
+		!dc.w	mod<<8
 	case 2
 		if mod==0
 		fatal "Invalid main tempo of 0 in song from Sonic 2"
 		endif
-		dc.w	(($100-mod)&$FF)<<8
-	case 1
-		dc.w	mod<<8
+		!dc.w	(($100-mod)&$FF)<<8
 	elsecase
 		fatal "Unknown source driver, can't generate tempo"
 	endcase
@@ -197,10 +196,10 @@ CheckedChannelPointer macro loc
 	if (MOMPASS=1)&&(DEFINED(loc))
 	fatal "$\{loc-(*)-2} Tracks must come after the header"
 	endif
-	dc.w	loc-((*)+2)
+	!dc.w	loc-((*)+2)
 	endm
 CheckedChannelJump macro loc
-	dc.w	loc-((*)+1)
+	!dc.w	loc-((*)+1)
 	endm
 ; ---------------------------------------------------------------------------
 ; Header Macros
@@ -210,6 +209,7 @@ smpsHeaderStartSong macro songbasedriver,sourcesmps2asmver
 	set songStart,*
 	set volenvHeader,0
 	set modenvHeader,0
+	set panenvHeader,0
 	set fmCount,0
 	set psgCount,0
 	set dacCount,0
@@ -301,7 +301,7 @@ smpsHeaderVoiceNull macro
 	if songStart<>*
 	fatal "Missing smpsHeaderStartSong"
 	endif
-	dc.w	0
+	!dc.w	0
 	endm
 
 ; Header - Set up Voice Location as S3's Universal Voice Bank
@@ -310,7 +310,7 @@ smpsHeaderVoiceUVB macro
 	if songStart<>*
 	fatal "Missing smpsHeaderStartSong"
 	endif
-	dc.w	0
+	!dc.w	0
 	endm
 
 smpsHeaderVolEnv macro loc
@@ -321,36 +321,45 @@ smpsHeaderModEnv macro loc
 modenvHeader set loc
 	endm
 
+smpsHeaderPanEnv macro loc
+panenvHeader set loc
+	endm
+
 ; Header macros for music (not for SFX)
 ; Header - Set up Channel Usage
 smpsHeaderChan macro fm,psg,dac
 	if ARGCOUNT>2
-fmCount  set fm
-psgCount set psg
-dacCount set dac
+	set fmCount,fm
+	set psgCount,psg
+	set dacCount,dac
 	elseif (SourceDriver>>16)==$F0E5
 	fatal "Please specify all sound channels (including DACs)"
 	else
-fmCount  set fm-(fm>0)
-psgCount set psg
-dacCount set (fm>0)
+	set fmCount,fm-(fm>0)
+	set psgCount,psg
+	set dacCount,(fm>0)
 	endif
 	endm
 
 ; Header - Set up Tempo
 smpsHeaderTempo macro div,mod
 	if volenvHeader=0
-	dc.w	0
+	!dc.w	0
 	else
 	CheckedChannelPointer volenvHeader
 	endif
 	if modenvHeader=0
-	dc.w	0
+	!dc.w	0
 	else
 	CheckedChannelPointer modenvHeader
 	endif
+	if panenvHeader=0
+	!dc.w	0
+	else
+	CheckedChannelPointer panenvHeader
+	endif
 	convertMainTempoMod mod
-	dc.b	div,dacCount,fmCount,psgCount
+	!dc.b	div,dacCount,fmCount,psgCount
 	endm
 
 ; Header - Set up DAC Channel
@@ -358,19 +367,19 @@ smpsHeaderDAC macro loc,pitch,vol
 	CheckedChannelPointer loc
 	if ("pitch"<>"")
 		if ("vol"<>"")
-		dc.b	pitch,vol
+		!dc.b	pitch,vol
 		else
-		dc.b	pitch,$00
+		!dc.b	pitch,$00
 		endif
 	else
-	dc.w	$00
+	!dc.w	$00
 	endif
 	endm
 
 ; Header - Set up FM Channel
 smpsHeaderFM macro loc,pitch,vol
 	CheckedChannelPointer loc
-	dc.b	pitch,vol
+	!dc.b	pitch,vol
 	endm
 
 ; Header - Set up PSG Channel
@@ -386,9 +395,9 @@ vcTemp	set mod
 	endif
 	CheckedChannelPointer loc
 	if sourcePsgVolBits==7
-	dc.b	(pitch+psgdelta)&$FF,vol,mod,voice
+	!dc.b	(pitch+psgdelta)&$FF,vol,mod,voice
 	elseif sourcePsgVolBits==4
-	dc.b	(pitch+psgdelta)&$FF,((vol&$F)<<3)|((vol)&$80),vcTemp,voice
+	!dc.b	(pitch+psgdelta)&$FF,((vol&$F)<<3)|((vol)&$80),vcTemp,voice
 	else
 	fatal "Unknown PSG volume bit length \{sourcePsgVolBits}"
 	endif
@@ -397,28 +406,33 @@ vcTemp	set mod
 ; Header - Set up PWM Channel
 smpsHeaderPWM macro loc,vol
 	CheckedChannelPointer loc
-	dc.b	0,vol
+	!dc.b	0,vol
 	endm
 
 ; Header macros for SFX (not for music)
 ; Header - Set up Tempo
 smpsHeaderTempoSFX macro div
 	if volenvHeader=0
-	dc.w	0
+	!dc.w	0
 	else
 	CheckedChannelPointer volenvHeader
 	endif
 	if modenvHeader=0
-	dc.w	0
+	!dc.w	0
 	else
 	CheckedChannelPointer modenvHeader
 	endif
-	dc.b	div
+	if panenvHeader=0
+	!dc.w	0
+	else
+	CheckedChannelPointer panenvHeader
+	endif
+	!dc.b	div
 	endm
 
 ; Header - Set up Channel Usage
 smpsHeaderChanSFX macro chan
-	dc.b	chan
+	!dc.b	chan
 	endm
 
 ; Header - Set up SFX Channel
@@ -430,11 +444,11 @@ smpsHeaderSFXChannel macro chanid,loc,pitch,vol
 ;		warning "SFX channel offset too large for u8: 0x\{loc-((*)+1)}"
 ;		endif
 	elseif chanid<$80
-	dc.b	chanid,pitch,vol,loc-((*)+1+3)
+	!dc.b	chanid,pitch,vol,loc-((*)+1+3)
 	elseif sourcePsgVolBits==7
-	dc.b	chanid,(pitch+psgdelta)&$FF,vol,loc-((*)+1+3)
+	!dc.b	chanid,(pitch+psgdelta)&$FF,vol,loc-((*)+1+3)
 	elseif sourcePsgVolBits==4
-	dc.b	chanid,(pitch+psgdelta)&$FF,((vol&$F)<<3)|((vol)&$80),loc-((*)+1+3)
+	!dc.b	chanid,(pitch+psgdelta)&$FF,((vol&$F)<<3)|((vol)&$80),loc-((*)+1+3)
 	else
 	fatal "Unknown PSG volume bit length \{sourcePsgVolBits}"
 	endif
@@ -448,64 +462,77 @@ panCentre	equ $C0
 panCenter	equ $C0
 ; Set Panning/AMS/FMS
 smpsPan macro direction,amsfms
-	if (direction+amsfms)=panLeft
+	if (amsfms+direction)=panLeft
 	smpsPanLeft
-	elseif (direction+amsfms)=panRight
+	elseif (amsfms+direction)=panRight
 	smpsPanRight
-	elseif (direction+amsfms)=panCentre
+	elseif (amsfms+direction)=panCentre
 	smpsPanCenter
 	else
-	dc.b cExtCmd,cxPanAMSFMS,direction+amsfms
+	!dc.b cExtCmd,cxPanAMSFMS,amsfms+direction
 	endif
 	endm
 smpsPanCenter macro
-	dc.b cPanCentre
+	!dc.b cPanCentre
 	endm
 smpsPanCentre macro
-	dc.b cPanCenter
+	!dc.b cPanCenter
 	endm
 smpsPanLeft macro
-	dc.b cPanLeft
+	!dc.b cPanLeft
 	endm
 smpsPanRight macro
-	dc.b cPanRight
+	!dc.b cPanRight
 	endm
-;smpsPanAuto macro val1,val2,val3,val4,val5
-;	dc.b cExtCmd,cxPanAuto,val1,val2,val3,val4,val5
-;	endm
-;smpsPanAutoOff macro
-;	dc.b cExtCmd,cxPanAuto,$00
-;	endm
+smpsPanAni macro indexend,delay,id,type
+	if indexend=="OFF"
+		set vcTemp,0
+	elseif type=="UPD-REPEAT"
+		set vcTemp,1
+	elseif type=="TICK-HOLD"
+		set vcTemp,2
+	elseif type=="TICK-REPEAT"
+		set vcTemp,3
+	else
+		fatal "smpsPanAni: Pan animation variant (type) doesn't exist."
+	endif
+	if vcTemp==0
+	!dc.b	cExtCmd,cxPanManual
+	else
+	!dc.b	cExtCmd,cxPanAuto,id<<3|vcTemp&7,indexend,delay
+	endif
+	endm
+
 smpsSetLFORate macro rate
-	dc.b	cExtCmd,cxSetLFORate,rate
+	!dc.b	cExtCmd,cxSetLFORate,rate
 	endm
 
 ; Set channel detune to val
 smpsDetune macro val
-	dc.b	cDetune,val
+	!dc.b	cDetune,val
 	endm
 
 ; Set communication byte, using index 0 if it isn't defined
 smpsComm macro val,index
-	dc.b	cCommunicate,index+0,val
+	!dc.b	cCommunicate,index+0,val
 	endm
 ; Jump if the condition is zero
 smpsCommJump macro loc,index
-	dc.b	cExtCmd,cxCommJump,index+0
+	!dc.b	cExtCmd,cxCommJump,index+0
 	CheckedChannelJump loc
 	endm
 
 ; Set channel tempo divider
 smpsChanTempoDiv macro val
-	dc.b	cTempoDiv,val
+	!dc.b	cExtCmd,cxTempoDiv,val
 	endm
 ; Set music tempo divider
 smpsSetTempoDiv macro val
-	dc.b	cExtCmd,cxTempoDivAll,val
+	!dc.b	cExtCmd,cxTempoDivAll,val
 	endm
 ; Set music tempo modifier
 smpsSetTempoMod macro mod
-	dc.b	cExtCmd,cxTempoMod
+	!dc.b	cExtCmd,cxTempoMod
 	convertMainTempoMod mod
 	endm
 
@@ -513,27 +540,27 @@ smpsSetTempoMod macro mod
 ; DUSTED bases this in attenuation like AlterVol, S3K bases it on volume-ish
 smpsSetVol macro vol
 	if sourceSetVol==1
-	dc.b	cVolSet,vol
+	!dc.b	cVolSet,vol
 	elseif sourceSetVol==0
-	dc.b	cVolSet,(vol&$7F)!$7F
+	!dc.b	cVolSet,(vol&$7F)!$7F
 	else
 	fatal "This doesn't exist."
 	endif
 	endm
 smpsFMSetVol macro vol
 	if sourceSetVol==1
-	dc.b	cVolSet,vol
+	!dc.b	cVolSet,vol
 	elseif sourceSetVol==0
-	dc.b	cVolSet,(vol&$7F)!$7F
+	!dc.b	cVolSet,(vol&$7F)!$7F
 	else
 	fatal "This doesn't exist."
 	endif
 	endm
 smpsPSGSetVol macro vol
 	if sourceSetVol==1
-	dc.b	cVolSetPSG,vol
+	!dc.b	cVolSetPSG,vol
 	elseif sourceSetVol==0
-	dc.b	cVolSetPSG,((vol&$F)!&$F)<<3
+	!dc.b	cVolSetPSG,((vol&$F)!&$F)<<3
 	else
 	fatal "This doesn't exist."
 	endif
@@ -543,7 +570,7 @@ smpsAlterVol macro vol
 	if (vol=0) && (MOMPASS=1)
 	warning "eh?"
 	endif
-	dc.b	cVolAdd,vol
+	!dc.b	cVolAdd,vol
 	endm
 smpsFMAlterVol macro vol,vol2
 	if ("vol2"<>"")
@@ -553,12 +580,12 @@ smpsFMAlterVol macro vol,vol2
 		if (vol2=0) && (MOMPASS=1)
 		warning "eh?"
 		endif
-	dc.b	cVolAddFM,vol2
+	!dc.b	cVolAddFM,vol2
 	else
 		if (vol=0) && (MOMPASS=1)
 		warning "eh?"
 		endif
-	dc.b	cVolAddFM,vol
+	!dc.b	cVolAddFM,vol
 	endif
 	endm
 smpsPSGAlterVol macro vol
@@ -566,19 +593,19 @@ smpsPSGAlterVol macro vol
 	warning "eh?"
 	endif
 	if sourcePsgVolBits==7
-	dc.b	cVolAddPSG,vol
+	!dc.b	cVolAddPSG,vol
 	else
-	dc.b	cVolAddPSG,((vol&$F)<<3)|((vol)&$80)
+	!dc.b	cVolAddPSG,((vol&$F)<<3)|((vol)&$80)
 	endif
 	endm
 
 ; Prevent attack of next note
 smpsHoldNote	equ cDontAttack
 smpsHoldNotes macro
-	dc.b	cExtCmd,cxHoldNoteIndefinitely
+	!dc.b	cExtCmd,cxHoldNoteIndefinitely
 	endm
 smpsReleaseNotes macro
-	dc.b	cExtCmd,cxReleaseNote
+	!dc.b	cExtCmd,cxReleaseNote
 	endm
 
 ; Set note fill to xx
@@ -592,9 +619,9 @@ vcTemp	set type
 vcTemp	set sourceNoteFill
 	endif
 	if vcTemp==0
-	dc.b	cNoteFill,val
+	!dc.b	cNoteFill,val
 	elseif vcTemp==1
-	dc.b	cNoteFillZ80,val
+	!dc.b	cNoteFillZ80,val
 	else
 	fatal "smpsNoteFill: Invalid smpsNoteFill type (0x\{vcTemp})"
 	endif
@@ -604,13 +631,13 @@ smpsAddTranspose macro val
 	if (val=0) && (MOMPASS=1)
 	warning "eh?"
 	endif
-	dc.b	cAddTranspose,val
+	!dc.b	cAddTranspose,val
 	endm
 smpsSetTranspose macro val
-	dc.b	cSetTranspose,val
+	!dc.b	cSetTranspose,val
 	endm
 smpsRandPitch macro valto,valfrom
-	dc.b	cExtCmd,cxRandPitch,(valfrom-(valto))+1,valto
+	!dc.b	cExtCmd,cxRandPitch,(valfrom-(valto))+1,valto
 	endm
 
 ; initialize modulation algorithm
@@ -623,11 +650,11 @@ vcTemp	set type
 vcTemp	set sourceModAlgo
 	endif
 	if (vcTemp==0)
-	dc.b	cModSet68K,wait,speed,change,step
+	!dc.b	cModSet68K,wait,speed,change,step
 	elseif vcTemp==1
-	dc.b	cModSetZ80,wait,speed,change,step
+	!dc.b	cModSetZ80,wait,speed,change,step
 	elseif (vcTemp==2)
-	dc.b	cModSet68K2,wait,speed,change,step
+	!dc.b	cModSet68K2,wait,speed,change,step
 	else
 	fatal "smpsModSet: Invalid smpsModSet type (0x\{vcTemp})"
 	endif
@@ -636,35 +663,35 @@ smpsModOn macro type
 	if ("type"=="") && (sourceModAlgo==-1)
 	fatal "smpsModOn: Please specify the modulation algorithm version"
 	elseif ("type"=="")
-	dc.b	cModChg,1<<7|sourceModAlgo
+	!dc.b	cModChg,1<<7|sourceModAlgo
 	else
-	dc.b	cModChg,1<<7|type
+	!dc.b	cModChg,1<<7|type
 	endif
 	endm
 smpsModOff macro
-	dc.b	cModChg,0
+	!dc.b	cModChg,0
 	endm
 smpsModChange macro mod
-	dc.b	cModChg,(mod)&$7F
+	!dc.b	cModChg,(mod)&$7F
 	endm
 smpsModChange2 macro fmmod,psgmod
-	dc.b	cExtCmd,cxModChg2,fmmod,psgmod
+	!dc.b	cExtCmd,cxModChg2,fmmod,psgmod
 	endm
 
 ; Play sample ID (for samples outside of 81-DF range)
 smpsPlayDACSample macro smpID
-	dc.b	cExtCmd,cxSample,smpID
+	!dc.b	cSample,smpID
 	endm
 ; Set FM voice
 smpsFMvoice macro voice,soundID
 	if "soundID"<>""
 	fatal "This driver does not support smpsFMvoice checking for voices in different sound IDs."
 	endif
-	dc.b	cVoiceFM,voice
+	!dc.b	cVoiceFM,voice
 	endm
 ; Set FM operator mask for key on, %1111 is all on
 smpsFmKeyOnMask macro mask
-	dc.b	cExtCmd,cxFmKeyOnMask,mask<<4
+	!dc.b	cExtCmd,cxFmKeyOnMask,mask<<4
 	endm
 ; Set FM volume envelope
 ; smps-z80 includes the ability to mask the effects of the envelope per-operator.
@@ -673,19 +700,19 @@ smpsFMVolEnv macro voice,mask
 	if (mask<>$F)&&(MOMPASS==1)
 	warning "this driver doesn't support smpsFMVolEnv per-operator enveloping, it'll act as if the mask was set to $F"
 	endif
-	dc.b	cVolEnv,voice
+	!dc.b	cVolEnv,voice
 	endm
 ; Set PSG voice... which is just the volume envelope
 smpsPSGvoice macro voice
-	dc.b	cVolEnv,voice
+	!dc.b	cVolEnv,voice
 	endm
 ; Set PSG3/PSG4 waveform
 ; 0 makes it return to PSG3, 0xE0-0xE7 are PSG noise settings, anything else is invalid
 smpsPSGform macro form,type
 	if form=0
-	dc.b	cExtCmd,cxSetPSG3
+	!dc.b	cExtCmd,cxSetPSG3
 	elseif (form>=$E0)&&(form<=$E7)
-	dc.b	cNoisePSG,form!((type+0)<<7)
+	!dc.b	cNoisePSG,form!((type+0)<<7)
 	else
 	fatal "smpsPSGform only accepts parameter values of 0 or between $E0-$E7"
 	endif
@@ -695,13 +722,13 @@ smpsPSGform macro form,type
 smpsJump macro loc
 	if (DEFINED(loc))					; ensure that the label is already defined
 		if ((loc-(*)) < 0) && ((loc-(*)) >= -$FF)	; check if offset is within n8 (TODO: stress test)
-		dc.b	cJumpN8,(loc-(*))&$FF
+		!dc.b	cJumpN8,(loc-(*))&$FF
 		else
-		dc.b	cJump
+		!dc.b	cJump
 		CheckedChannelJump loc
 		endif
 	else
-		dc.b	cJump
+		!dc.b	cJump
 		CheckedChannelJump loc
 	endif
 	endm
@@ -712,7 +739,7 @@ smpsLoop macro index,loops,loc
 	elseif (index>3) && (MOMPASS=1)
 	warning "it's not advised to have more then 4 loop indexes"
 	endif
-	dc.b	cRept,index,loops
+	!dc.b	cRept,index,loops
 	CheckedChannelJump loc
 	endm
 ; set 'index' to 'loop'
@@ -722,7 +749,7 @@ smpsLoopSet macro index,loops
 	elseif (index>3) && (MOMPASS=1)
 	warning "it's not advised to have more then 4 loop indexes"
 	endif
-	dc.b	cSetRept,index,loops
+	!dc.b	cSetRept,index,loops
 	endm
 ; If loop index is on its last loop (loop counter equals 1), perform a jump
 smpsLoopExit macro index,loc
@@ -731,45 +758,52 @@ smpsLoopExit macro index,loc
 	elseif (index>3) && (MOMPASS=1)
 	warning "it's not advised to have more then 4 loop indexes"
 	endif
-	dc.b	cExtCmd,cxConditionalJump,index
+	!dc.b	cExtCmd,cxConditionalJump,index
 	CheckedChannelJump loc
 	endm
 ; If the same sound ID gets queued multiple times, perform a jump
 smpsContinuousLoop macro loc
-	dc.b	cExtCmd,cxLoopCSFX
+	!dc.b	cExtCmd,cxLoopCSFX
 	CheckedChannelJump loc
 	endm
 
 ; Jump to loc, save location after the call into channel stack
 smpsCall macro loc
-	dc.b	cCall
+	!dc.b	cCall
 	CheckedChannelJump loc
 	endm
 ; Return to saved location from smpsCall
 smpsReturn macro val
-	dc.b	cReturn
+	!dc.b	cReturn
 	endm
 
 ; End of channel
 smpsStop macro
-	dc.b	cStop
+	!dc.b	cStop
 	endm
 ; Silences FM channel then stops
 smpsStopFM macro
-	dc.b	cExtCmd,cxStopFM
+	!dc.b	cExtCmd,cxStopFM
+	endm
+; Fade in previous song from a jingle (1up). In smps-dusted, this got merged with cStop
+smpsFade macro val
+	if (MOMPASS==1)&&(ARGCOUNT<>0)
+	warning "smpsFade doesn't have parameters. This is an erroneous call, likely from Sonic 3."
+	endif
+	!dc.b	cStop
 	endm
 
 ; enable and disable a channels respective drum modes
 smpsEnableDrumMode macro
-	dc.b	cExtCmd,cxDrumModeOn
+	!dc.b	cExtCmd,cxDrumModeOn
 	endm
 smpsDisableDrumMode macro
-	dc.b	cExtCmd,cxDrumModeOff
+	!dc.b	cExtCmd,cxDrumModeOff
 	endm
 
 ; sets speed for portamento
 smpsPortamento macro speed
-	dc.b	cExtCmd,cxPortamentoSpeed,speed
+	!dc.b	cExtCmd,cxPortamentoSpeed,speed
 	endm
 ; ---------------------------------------------------------------------------
 ; Sonic game specific features, don't expect these to be commonplace elsewhere
@@ -779,49 +813,27 @@ smpsMaxRelRate macro
 	smpsFMICommand $88,$0F
 	smpsFMICommand $8C,$0F
 	endm
-; Fade in previous song from a jingle (1up)
-; in smps-dusted, val defines the fadein counter, if not defined then it uses the default value
-; in smps-68000, val doesn't exist and it always uses the default value, simple
-; in smps-z80... nobody has even the slightest clue what they were on, but it was evidently some good shit
-; - val $FF is the fade-in
-; - val $29 (the hardcoded 1up ID -1) acts as the 1up signifier flag, prevent sfx playback and such
-; - anything aside for that, uhh, nothing?
-; smps-z80s cxSongFadeIn uses the same byte as smps-68000s cxCommunicate
-; essentially, all of S3Ks useless fades were erroneously unchanged communication leftovers from Sonic 1 and 2
-; TODO: further validation to control the type of fade-in further if need be
-smpsFade macro val,valid
-	if ("val"=="")
-	dc.b	cExtCmd,cxSongFadeIn,$50
-	elseif ("valid"<>"")
-	dc.b	cExtCmd,cxSongFadeIn,val
-	elseif (MOMPASS=1)
-	warning "smpsFade with defined value (val) and undefined id detected. This is an erroneous call, likely from Sonic 3."
-	endif
-	endm
 ; increase pitch and add to channel
 smpsRevUp macro
-	dc.b	cExtCmd,cxRevUp
+	!dc.b	cExtCmd,cxRevUp
 	endm
 ; add current revving pitch to channel, don't increase pitch
 smpsRevAddCurr macro
-	dc.b	cExtCmd,cxRevAddCur
+	!dc.b	cExtCmd,cxRevAddCur
 	endm
 ; reset revving pitch
 smpsRevStop macro
-	dc.b	cExtCmd,cxRevReset
+	!dc.b	cExtCmd,cxRevReset
 	endm
 ; ---------------------------------------------------------------------------
 ; unsupported with interest to support
 smpsModVoice macro voice,type
 	fatal "smpsModVoice is unsupported"
 	endm
-smpsPanAni macro
-	fatal "smpsPanAni is unsupported"
-	endm
 smpsFM3SpecialMode macro ind1,ind2,ind3,ind4
 	fatal "smpsFM3SpecialMode is unsupported"
 	endm
-;	dc.b	cExtCmd,0,ind1,ind2,ind3,ind4
+;	!dc.b	cExtCmd,0,ind1,ind2,ind3,ind4
 smpsPitchSlideSpeed macro
 	if MOMPASS==1
 	warning "smpsPitchSlideSpeed (Chaotix' portamento) is unsupported"
@@ -832,22 +844,22 @@ smpsPitchSlideSpeed macro
 
 ; queue new sounds
 smpsPlayMusic macro index
-	dc.b	cExtCmd,cxPlayID,index>>8,index&$FF
+	!dc.b	cExtCmd,cxPlayID,index>>8,index&$FF
 	endm
 smpsPlaySound macro index
-	dc.b	cExtCmd,cxPlayID,index>>8,index&$FF
+	!dc.b	cExtCmd,cxPlayID,index>>8,index&$FF
 	endm
 ; write unprotected command to YmA0, does not care about SFXs
 smpsFMICommand macro reg,val
-	dc.b	cExtCmd,cxWriteFM1,reg,val
+	!dc.b	cExtCmd,cxWriteFM1,reg,val
 	endm
 ; write unprotected command to YmA1, does not care about SFXs
 smpsFMIICommand macro reg,val
-	dc.b	cExtCmd,cxWriteFM2,reg,val
+	!dc.b	cExtCmd,cxWriteFM2,reg,val
 	endm
 ; write command to the current FM channel, if not overridden by SFX
 smpsChanFMCommand macro reg,val
-	dc.b	cExtCmd,cxWriteReg,reg,val
+	!dc.b	cExtCmd,cxWriteReg,reg,val
 	endm
 ; ---------------------------------------------------------------------------
 ; Backwards compatibility
@@ -893,7 +905,7 @@ smpsResetSpindashRev macro
 	smpsRevStop
 	endm
 smpsSetNote macro val
-	dc.b	cSetTranspose,(val-$40)&$FF
+	!dc.b	cSetTranspose,(val-$40)&$FF
 	endm
 smpsPSGpulse macro
 	if MOMPASS==1
@@ -922,13 +934,13 @@ smpsRingSwap macro
 smpsCopyData macro data,len
 	fatal "smpsCopyData is unsupported"
 	endm
-;	dc.b	cExtCmd,$03
-;	dc.w	little_endian(data)
-;	dc.b	len
+;	!dc.b	cExtCmd,$03
+;	!dc.w	little_endian(data)
+;	!dc.b	len
 smpsHaltMusic macro flag
 	fatal "smpsHaltMusic is unsupported"
 	endm
-;	dc.b	cExtCmd,$02,flag
+;	!dc.b	cExtCmd,$02,flag
 smpsSSGEG macro op1,op2,op3,op4
 	fatal "smpsSSGEG is unsupported. In this variant of SMPS, SSG-EG is usually expected to be set via the FM instruments."
 	endm
@@ -943,15 +955,15 @@ smpsAlternateSMPS macro flag
 	fatal "smpsAlternateSMPS is unsupported"
 	endm
 ;	if flag=0
-;	dc.b	cExtCmd,cxSetFreqMode1
+;	!dc.b	cExtCmd,cxSetFreqMode1
 ;	else
-;	dc.b	cExtCmd,cxSetFreqMode2
+;	!dc.b	cExtCmd,cxSetFreqMode2
 ;	endif
 ;	endm
 smpsPitchSlide macro enable
 	fatal "smpsPitchSlide is unsupported"
 	endm
-;	dc.b	cExtCmd,0,enable
+;	!dc.b	cExtCmd,0,enable
 ; ---------------------------------------------------------------------------
 smpsFooterEndSong macro
 	if MOMPASS==1
@@ -960,12 +972,17 @@ smpsFooterEndSong macro
 	endm
 ; ---------------------------------------------------------------------------
 ; syntax:
-; smpsEnvTable START,$00
+; smpsEnvTable START,$00,1
 ; smpsEnvTable END,$FF
 ; smpsEnvTable Label_Uhh,id_Uhh
 envtableoff := -1
-smpsEnvTable macro off,idcmp
+smpsEnvTable macro off,idcmp,basedriver
 	if "off"=="START"
+		if "basedriver"==""
+		smpsHeaderStartSong 1,1
+		else
+		smpsHeaderStartSong basedriver,1
+		endif
 		if envtableoff<>-1
 		fatal "Envelope table tried to start while another already started"
 		elseif "idcmp"==""
@@ -989,7 +1006,7 @@ envtableoff := -1
 		elseif "idcmp"<>""
 idcmp		equ envtableid
 		endif
-	dc.w off-envtableoff
+	!dc.w off-envtableoff
 envtableid := envtableid+envtableinc
 	endif
 	endm
@@ -997,23 +1014,23 @@ envtableid := envtableid+envtableinc
 smpsEnvVol macro data,data2
 	if "data"==""
 	elseif "data"=="REPEAT"
-	dc.b	$80
+	!dc.b	$80
 	elseif "data"=="HOLD"
-	dc.b	$81
+	!dc.b	$81
 	elseif "data"=="INDEX"
 		if "data2"==""
 		fatal "Where's the index?"
 		endif
-	dc.b	$82,data2
+	!dc.b	$82,data2
 	elseif "data"=="REST"
-	dc.b	$83
+	!dc.b	$83
 	else
 		if data>$7F
-		dc.b	$7F
+		!dc.b	$7F
 		elseif data<0
 		fatal "negative volume envelopes aren't supported"
 		else
-		dc.b	data
+		!dc.b	data
 		endif
 	shift
 	smpsEnvVol ALLARGS
@@ -1022,23 +1039,23 @@ smpsEnvVol macro data,data2
 smpsEnvVolPsg macro data,data2
 	if "data"==""
 	elseif "data"=="REPEAT"
-	dc.b	$80
+	!dc.b	$80
 	elseif "data"=="HOLD"
-	dc.b	$81
+	!dc.b	$81
 	elseif "data"=="INDEX"
 		if "data2"==""
 		fatal "Where's the index?"
 		endif
-	dc.b	$82,data2
+	!dc.b	$82,data2
 	elseif "data"=="REST"
-	dc.b	$83
+	!dc.b	$83
 	else
 		if data>$F
-		dc.b	$7F
+		!dc.b	$7F
 		elseif data<0
 		fatal "negative volume envelopes aren't supported"
 		else
-		dc.b	data<<3
+		!dc.b	data<<3
 		endif
 	shift
 	smpsEnvVolPsg ALLARGS
@@ -1048,28 +1065,36 @@ smpsEnvVolPsg macro data,data2
 smpsEnvMod macro data,data2
 	if "data"==""
 	elseif "data"=="REPEAT"
-	dc.b	$80,$10
+	!dc.b	$80,$10
 	elseif "data"=="HOLD"
-	dc.b	$80,$11
+	!dc.b	$80,$11
 	elseif "data"=="INDEX"
 		if "data2"==""
 		fatal "Where's the index?"
 		endif
-	dc.b	$80,$12,data2
+	!dc.b	$80,$12,data2
 	elseif "data"=="REST"
-	dc.b	$80,$13
+	!dc.b	$80,$13
 	else
 		if (data>$7FFF)||(data<~$7FFF)
 		warning "bruh zone"
 		elseif (data>$7FF)||(data<~$7FF)
-		dc.b	$80,$14,(data>>8)&$FF,(data)&$FF
+		!dc.b	$80,$14,(data>>8)&$FF,(data)&$FF
 		elseif (data>$7F)||(data<-$7F)
-		dc.b	$80,$00|(data>>8)&$F,(data)&$FF
+		!dc.b	$80,$00|(data>>8)&$F,(data)&$FF
 		else
-		dc.b	data
+		!dc.b	data
 		endif
 	shift
 	smpsEnvMod ALLARGS
+	endif
+	endm
+
+smpsEnvPan macro data
+	if "data"<>""
+	!dc.b	data
+	shift
+	smpsEnvPan ALLARGS
 	endif
 	endm
 ; ---------------------------------------------------------------------------
@@ -1300,15 +1325,15 @@ smpsVcTotalLevel macro op1,op2,op3,op4
 		smpsVcMuffleWrapper vcTLM4,vcTL4,$08
 	endcase
 	endif
-		dc.b	(vcAMS<<4)+vcPMS	,(vcFeedback<<3)+vcAlgorithm
-		dc.b	(vcDT4<<4)+vcCF4	,(vcDT3<<4)+vcCF3	,(vcDT2<<4)+vcCF2	,(vcDT1<<4)+vcCF1
-		dc.b	(vcRS4<<6)+vcAR4	,(vcRS3<<6)+vcAR3	,(vcRS2<<6)+vcAR2	,(vcRS1<<6)+vcAR1
-		dc.b	vcAM4|vcD1R4		,vcAM3|vcD1R3		,vcAM2|vcD1R2		,vcAM1|vcD1R1
-		dc.b	vcD2R4			,vcD2R3			,vcD2R2			,vcD2R1
-		dc.b	(vcDL4<<4)+vcRR4	,(vcDL3<<4)+vcRR3	,(vcDL2<<4)+vcRR2	,(vcDL1<<4)+vcRR1
-		dc.b	(vcSSG4<<4)|vcSSG2	,(vcSSG3<<4)|vcSSG1
-		dc.b	vcTL4			,vcTL2			,vcTL3			,vcTL1
-		dc.b	vcTLM4			,vcTLM2			,vcTLM3			,vcTLM1
+		!dc.b	(vcAMS<<4)+vcPMS	,(vcFeedback<<3)+vcAlgorithm
+		!dc.b	(vcDT4<<4)+vcCF4	,(vcDT3<<4)+vcCF3	,(vcDT2<<4)+vcCF2	,(vcDT1<<4)+vcCF1
+		!dc.b	(vcRS4<<6)+vcAR4	,(vcRS3<<6)+vcAR3	,(vcRS2<<6)+vcAR2	,(vcRS1<<6)+vcAR1
+		!dc.b	vcAM4|vcD1R4		,vcAM3|vcD1R3		,vcAM2|vcD1R2		,vcAM1|vcD1R1
+		!dc.b	vcD2R4			,vcD2R3			,vcD2R2			,vcD2R1
+		!dc.b	(vcDL4<<4)+vcRR4	,(vcDL3<<4)+vcRR3	,(vcDL2<<4)+vcRR2	,(vcDL1<<4)+vcRR1
+		!dc.b	(vcSSG4<<4)|vcSSG2	,(vcSSG3<<4)|vcSSG1
+		!dc.b	vcTL4			,vcTL2			,vcTL3			,vcTL1
+		!dc.b	vcTLM4			,vcTLM2			,vcTLM3			,vcTLM1
 	endm
 
 ; caps muffle volume to a maximum of $7F

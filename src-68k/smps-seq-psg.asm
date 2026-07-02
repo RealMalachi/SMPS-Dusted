@@ -83,8 +83,8 @@ PSGSetFreq:
 		move.b	(a0)+,TrackVolume(a5)
 		move.b	(a0)+,TrackVolEnvCtrl(a5)
 		rts
-	endif
 .notemode:
+	endif
 		add.b	TrackTranspose(a5),d5
 	if __smpsRevFreq
 		neg.w	d5

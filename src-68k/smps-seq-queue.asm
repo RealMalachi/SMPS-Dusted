@@ -274,6 +274,9 @@ PSGInitBytes:
 ; TODO: enums?
 -
 	phase 0
+	if __smpsPanEnv
+queue_panenvptr	ds.l 1
+	endif
 	if __smpsModEnv
 queue_modenvptr	ds.l 1
 	endif
@@ -386,6 +389,15 @@ Sound_PlayBGM:
 .modenvuvb:	add.l	d0,a0
 		move.l	a0,-(sp)
 	endif
+		move.w	(a3)+,d0	; panning animations
+	if __smpsPanEnv
+		move.l	a3,a0		; doesn't effect ccr
+		bne.s	.panenvuvb
+		move.l	a6,a0
+		move.w	drvdata.uvbpan(a0),d0
+.panenvuvb:	add.l	d0,a0
+		move.l	a0,-(sp)
+	endif
 		move.l	sp,a6
 
 		move.w	(a3)+,v_main_tempo(a1)
@@ -443,10 +455,18 @@ Sound_PlayBGM:
 		clr.b	TrackVolEnvCtrl(a5)
 		move.b	queue_volenvptr+1(a6),TrackVolEnvPtr+1(a5)
 		move.w	queue_volenvptr+2(a6),TrackVolEnvPtr+2(a5)
+	if __smpsPanEnv
+		move.b	queue_panenvptr+1(a6),TrackPanEnvPtr+1(a5)
+		move.w	queue_panenvptr+2(a6),TrackPanEnvPtr+2(a5)
+	endif
 		move.b	#$C0,TrackAMSFMSPan(a5)			; Set AMS/FMS/Panning
 		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
 		bsr.w	DACStopSample
+		moveq	#$3F,d0
+		and.b	TrackVoiceControl(a5),d0
+		moveq_	$C0,d1
+		bsr.w	DACSetPan
 		add.w	#TrackDacSz,a5
 		dbf	d7,.dacloadloop
 	if __smpsPCM<>"MegaPCM2"
@@ -519,6 +539,10 @@ Sound_PlayBGM:
 		move.b	queue_modenvptr+1(a6),TrackModEnvPtr+1(a5)
 		move.w	queue_modenvptr+2(a6),TrackModEnvPtr+2(a5)
 	endif
+	if __smpsPanEnv
+		move.b	queue_panenvptr+1(a6),TrackPanEnvPtr+1(a5)
+		move.w	queue_panenvptr+2(a6),TrackPanEnvPtr+2(a5)
+	endif
 		move.b	queue_fminstptr+1(a6),TrackFmVoicePtr+1(a5)
 		move.w	queue_fminstptr+2(a6),TrackFmVoicePtr+2(a5)
 		move.b	#$F0,TrackFmOperators(a5)
@@ -567,7 +591,11 @@ Sound_PlayBGM:
 	endif
 
 		move.b	d5,TrackTempoDivider(a5)
+	if (__smpsTarget=="md68k")&&(__smpsPCM=="DualPCM-FlexEd")
+		move.b	#2,TrackDurationTimeout(a5)		; Set duration of first "note"
+	else
 		move.b	#1,TrackDurationTimeout(a5)		; Set duration of first "note"
+	endif
 		move.b	#TrackGoSubStack,TrackStackPointer(a5)
 	if __smpsDefaultFreq=0
 		move.w	#0,TrackFreq(a5)	; max
@@ -684,6 +712,15 @@ Sound_PlaySFX:
 .modenvuvb:	add.l	d0,a0
 		move.l	a0,-(sp)
 	endif
+		move.w	(a3)+,d0	; panning animations
+	if __smpsPanEnv
+		move.l	a3,a0		; doesn't effect ccr
+		bne.s	.panenvuvb
+		move.l	a6,a0
+		move.w	drvdata.uvbpan(a0),d0
+.panenvuvb:	add.l	d0,a0
+		move.l	a0,-(sp)
+	endif
 		move.l	sp,a6
 
 		btst	#5,d1
@@ -774,6 +811,10 @@ Sound_PlaySFX_Setup:
 		moveq	#(TrackFmSz/2)-1,d1
 		bsr.s	.do
 		move.b	#$C0,TrackAMSFMSPan(a5)
+	if __smpsPanEnv
+		move.b	queue_panenvptr+1(a6),TrackPanEnvPtr+1(a5)
+		move.w	queue_panenvptr+2(a6),TrackPanEnvPtr+2(a5)
+	endif
 		move.b	queue_fminstptr+1(a6),TrackFmVoicePtr+1(a5)
 		move.w	queue_fminstptr+2(a6),TrackFmVoicePtr+2(a5)
 		move.b	#$F0,TrackFmOperators(a5)
@@ -783,6 +824,10 @@ Sound_PlaySFX_Setup:
 		moveq	#(TrackDacSz/2)-1,d1
 		bsr.s	.do
 		move.b	#$C0,TrackAMSFMSPan(a5)
+	if __smpsPanEnv
+		move.b	queue_panenvptr+1(a6),TrackPanEnvPtr+1(a5)
+		move.w	queue_panenvptr+2(a6),TrackPanEnvPtr+2(a5)
+	endif
 		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
 		bra.w	DACStopSample
@@ -791,6 +836,9 @@ Sound_PlaySFX_Setup:
 		bsr.s	.do
 	if __smpsDefaultFreq=0
 		move.w	#0,TrackFreq(a5)	; max
+	endif
+	if (__smpsTarget=="md68k")&&(__smpsPCM=="DualPCM-FlexEd")
+		move.b	#2,TrackDurationTimeout(a5)		; Set duration of first "note"
 	endif
 ;		bra.w	PSGSilence
 		cmp.b	#$C0,d2

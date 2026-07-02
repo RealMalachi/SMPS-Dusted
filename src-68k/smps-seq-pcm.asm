@@ -6,7 +6,7 @@ PCMUpdateTrack:
 		btst	#_resting,TrackPlaybackControl(a5)
 		bne.s	.locret
 		bsr.w	DoVolEnv				; bsr is necessary for stack reasons, see `VolEnvCommands`
-		bsr.w	DoPanEnv				; bsr is necessary for stack reasons
+		bsr.w	DoPanEnv
 ;PCMPlaySample:
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	.locret
@@ -19,7 +19,7 @@ PCMUpdateTrack:
 .sampleongoing:
 		bsr.w	NoteTimeoutUpdate			; bsr is necessary for stack reasons
 		bsr.w	UpdateVolume				; bsr is necessary for stack reasons, see `VolEnvCommands`
-		bsr.w	UpdatePanning				; bsr is necessary for stack reasons
+		bra.w	UpdatePanning
 .locret:	rts
 ; ===========================================================================
 PCMDoNext:
