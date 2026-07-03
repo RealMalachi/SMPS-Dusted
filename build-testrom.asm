@@ -229,7 +229,7 @@ EntryPoint:
 		btst	#1,d1					; wait until potential DMA is over
 		bne.s	.wdma1
 
-		moveq	#(.initvdpend-.initvdp)/2-1,d1	; run the following loop $18 times
+		moveq	#(.initvdpend-.initvdp)-1,d1	; run the following loop $18 times
 		move.w	#$8000,d2
 .ivdp:		move.b	(a6)+,d2
 		move.w	d2,(a4)
