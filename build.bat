@@ -28,7 +28,7 @@ echo Compressing MegaPCM1
 tools\zx0\salvador.exe "_out/mpcm1.bin" "_out/mpcm1.zx0"
 echo ============================================
 echo Building MegaPCM2
-tools\sjasmplus\sjasmplus.exe src-z80/mpcm2/megapcm.asm -DOUTPATH=\"_out/mpcm2.bin\" -DTRACEPATH=\"_out/mpcm2.tracedata.txt\" --exp=_out/mpcm2.exp.sym --sym=_out/mpcm2.sym --lst=_out/mpcm2.lst >_out/mpcm2.txt
+tools\sjasmplus\sjasmplus.exe src-z80/mpcm2/megapcm.asm -DOUTPATH=\"_out/mpcm2.bin\" -DTRACEPATH=\"_out/mpcm2.tracedata.txt\" --exp=_out/mpcm2.exp --sym=_out/mpcm2.sym --lst=_out/mpcm2.lst >_out/mpcm2.txt
 echo Compressing MegaPCM2
 tools\zx0\salvador.exe "_out/mpcm2.bin" "_out/mpcm2.zx0"
 REM // echo ============================================

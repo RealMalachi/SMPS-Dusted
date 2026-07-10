@@ -3,8 +3,7 @@ Due to the nature of refusing to add hard-coded IDs and extending IDs to word-si
 This guide will help sort out all these issues without touching the sound driver itself
 
 # General
-The base sonic games use a version of QueueSound that only uses the d0 register, allowing a1 to be used for anything
-Since smps-dusted requires a1 to point to driver ram for the vast majority of its API, including QueueSound, we're going to use a wrapper subroutine to change and restore a1 as such:
+The base sonic games use a version of QueueSound that only uses the d0 register, allowing a1 to be used for anything. Since smps-dusted requires a1 to point to driver ram for the vast majority of its API, including QueueSound, we're going to use a wrapper subroutine to change and restore a1 as such:
 ```
 QueueSound:
 		move.l	a1,-(sp)
@@ -31,8 +30,7 @@ Sonic 1s driver had a nasty bug with how it handles stack for note timeouts, whi
 The spike move sound has an out-of-bounds note which sounds odd outside of Sonic 1s driver. The debug driver binary will throw an error when that note is played.
 
 ## Sonic 1/2/3 ring panning
-How the rings work is that when the left panning ring sound is played, it'll flip an internal bit and use the right panning ring ID if that bit was set prior to the flip.
-Notably, this same logic doesn't apply if you queued the right panning ring ID. It also carries over the sound effect priority of the left pan ID, assuming that they're different.
+How the rings work is that when the left panning ring sound is played, it'll flip an internal bit and use the right panning ring ID if that bit was set prior to the flip. Notably, this same logic doesn't apply if you queued the right panning ring ID. It'll use the sound effect priority of the left pan ID even if the right pan is different.
 
 First, let's add a new byte-sized variable in ram, for this example I'll call it `v_specsoundbitfield`
 
@@ -60,19 +58,19 @@ PlayGloopSound:
 
 ## Sonic 2 spindash rev
 Sonic 2 and Clone Driver hardcodes the pitch increase for subsequent spindash rev to its ID, whereas Sonic 3 and smps-dusted use a control flag.
-Locate ".asm"
-then simply add `smpsRevUp` to the start of `[name]_FM5` as such:
+
+Locate "E0 - Spin Dash Rev.asm", then simply add `smpsRevUp` to the start of `[name]_FM5`:
 ```
-[name]_FM5:
+Sound60_SpindashRev_FM5:
 		smpsRevUp
 ```
 
 ## Sonic 1 pushable block sound
-Sonic 1 introduced a flag for the MZ pushable block sound.
-When the sound ID gets queued it will check if the flag is already set and not queue the sound if it's set. The flag is then cleared at the end of the sound using a control flag
-Instead of preventing playback on a driver level, we will instead introduce a timer to the pushable object, which prevents playing the sound when we don't want it to
+Sonic 1 introduced a flag for the MZ pushable block sound. When the sound ID gets queued it will check a flag and not queue the sound if it's set, then when queued set the flag. The flag is then cleared at the end of the sound using a control flag.
 
-In "_incObj/33 - MZ Pushable Block.asm", add the following to the start:
+Instead of implementing this flag on a driver level, we will instead introduce a timer to the pushable object, which prevents playing the sound when we don't want it to
+
+In "_incObj/33 - MZ Pushable Block.asm", add the following above `PushBlock`:
 ```
 pushb_sfxtimer = objoff_2F
 
@@ -88,15 +86,14 @@ loc_C218:
 .nodec:
 ```
 
-Locate `sfx_Push`, replace this:
-
-with this:
+Locate `sfx_Push`, replace it with this:
 ```
 		tst.b	pushb_sfxtimer(a0)
 		bne.s	.nosfx
 		move.b	#30,pushb_sfxtimer(a0)
 		move.w	d0,-(sp)
-		sfx	sfx_Push
+		move.w	#sfx_Push,d0
+		jsr		QueueSound
 		move.w	(sp)+,d0
 .nosfx:
 ```

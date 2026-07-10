@@ -76,6 +76,7 @@ v_soundram:		ds.b smpsramsize
 v_pianoram:		ds.b smpspianoramsize
 			ds.b $FF1000-(*)
 
+			ds.b (*)&1
 v_stackend:		ds.b $100
 v_stack:		ds.b 0
 
@@ -92,6 +93,7 @@ v_commindex:		ds.b 1
 v_commval:		ds.b 1
 v_runinvint:		ds.b 1
 v_dmalen:		ds.w 1
+v_hint:			ds.b 1
 
 			ds.b (*)&1
 v_jpad:			ds.b 0
@@ -171,18 +173,31 @@ InitIntError:	bra.s	*
 SpuriousError:	bra.s	*
 ErrorTrap:	bra.s	*
 ; ---------------------------------------------------------------------------
-H_int:		rte
-Ad_int:		rte
-Fm_int:		rte
-
+H_int:
+; type 1 - waste time
+		movem.l	d0-d7,-(sp)
+		movem.l	(sp)+,d0-d7
+		rte
 V_int:
 		movem.l	d0-a6,-(sp)
-		jsr	JoypadRead
+
 		lea	vdpctrl,a5
+;.invblank:	move.w	(a5),d0
+;		and.w	#1<<3,d0
+;		beq.s	.invblank
+		move.w	#$8A00,d0
+		move.b	v_hint,d0
+		move.w	d0,(a5)
+
+		move.l	#$C0000000,(a5)				; cram visualiser
+		move.w	#$0E0,vdpdata-vdpctrl(a5)
+		jsr	JoypadRead
+
+;		lea	vdpctrl,a5
 .dmasrc = *
 		moveq	#0,d0
 		move.w	v_dmalen,d0		; ..12
-		beq.s	.vint_dmano
+		beq.s	.nodma
 		lsl.l	#8,d0			; .12.
 		lsr.w	#8,d0			; .1.2
 		or.l	#$94009300,d0
@@ -195,18 +210,26 @@ V_int:
 		move.w	#vdpComm(vram_length<<5,VRAM_DMA)&$FFFF,-(sp)
 		move.w	(sp)+,(a5)
 		move.w	#$8F02,(a5)	; auto-inc = 2
-.vint_dmano:
+.nodma:
 		tst.b	v_runinvint
 		beq.s	.norun
+		move.w	#$2000,sr
 		move.l	#$C0000000,(a5)				; cram visualiser
-		move.w	#$00E,vdpdata-vdpctrl(a5)
+		move.w	#$00C,vdpdata-vdpctrl(a5)
 		jsr	CallAPI.rundriver
+		cmp.b	#2,v_runinvint
+		blo.s	.norun
+		move.l	#$C0000000,vdpctrl			; cram visualiser
+		move.w	#$A00,vdpdata
+		bsr.w	CallAPI.setuppianoroll
 .norun:
 		move.l	#$C0000000,vdpctrl			; cram visualiser
-		move.w	#$000,vdpdata
-		st.b	v_vsync
+		move.w	#$E0E,vdpdata
+		move.b	#1,v_vsync
 		movem.l	(sp)+,d0-a6
-		rte
+		;rte
+Ad_int:		;rte
+Fm_int:		rte
 ; ---------------------------------------------------------------------------
 EntryPoint:
 .ramstallclear	equ $400
@@ -327,6 +350,8 @@ EntryPoint:
 GameProgram:
 		bsr.w	CallAPI.initdriver
 		bsr.w	JoypadInit
+		move.w	#$E00,v_dmalen
+		move.b	#-1,v_hint
 		move.b	#1,v_runinvint	; run
 		move.w	#2,v_select	; Sound ID
 		move.w	v_select,v_prevselect
@@ -334,22 +359,20 @@ GameProgram:
 		bsr.w	InitRender
 		bsr.w	HandleRender
 		move.w	#$8174,vdpctrl
-		move	#$2000,sr
+		move.w	#$2000,sr
 .mainloop:
 		stop	#$2000
 		tst.b	v_vsync
 		beq.s	.mainloop
-		sf.b	v_vsync
-		bsr.s	HandleControl
-		bsr.w	HandleRender
-		cmp.b	#2,v_runinvint
-		blo.s	.norun
+		clr.b	v_vsync
 		move.l	#$C0000000,vdpctrl			; cram visualiser
-		move.w	#$A00,vdpdata
-		bsr.w	CallAPI.setuppianoroll
+		move.w	#$EE0,vdpdata
+		bsr.s	HandleControl
+		move.l	#$C0000000,vdpctrl			; cram visualiser
+		move.w	#$E80,vdpdata
+		bsr.w	HandleRender
 		move.l	#$C0000000,vdpctrl			; cram visualiser
 		move.w	#$000,vdpdata
-.norun:
 		bra.s	.mainloop
 
 HandleControl:
@@ -679,6 +702,7 @@ HandleRender:
 		renhex.b v_commval
 		renhex.b v_commindex
 		renhex.w v_dmalen
+		renhex.b v_hint
 		rentext.b ScreenText.vintrun,v_runinvint
 		rts
 PrintCursor:
@@ -734,20 +758,20 @@ ErrorFontTable:
 		dc.w $1000, $1001, $1010, $1011
 		dc.w $1100, $1101, $1110, $1111
 ErrorVDP:
-		dc.b %00000100					; $80, 8-colour mode
+		dc.b %00010100					; $80, 8-colour mode, enable H-Int
 		dc.b %00000100					; $81, MD mode, screen disabled, DMA disabled, VInt disabled
-		dc.b (vram_plane)>>5			; $82, foreground nametable address
-		dc.b (vram_plane)>>5			; $83, window nametable address
-		dc.b (vram_plane)>>8			; $84, background nametable address
-		dc.b (vram_null)>>4			; $85, sprite table address
+		dc.b (vram_plane)>>5				; $82, foreground nametable address
+		dc.b (vram_plane)>>5				; $83, window nametable address
+		dc.b (vram_plane)>>8				; $84, background nametable address
+		dc.b (vram_null)>>4				; $85, sprite table address
 		dc.b 0						; $86
 		dc.b 0						; $87, overscan colour
 		dc.b 0						; $88
 		dc.b 0						; $89
-		dc.b 255					; $8A, HBlank register
+		dc.b 255					; $8A, H-Int scanline register, fire every line
 		dc.b %00000000					; $8B, full screen scroll
 		dc.b %10000001					; $8C, Slow H40, progressive scan, s/h disabled
-		dc.b (vram_null)>>5			; $8D, hscroll table address
+		dc.b (vram_null)>>5				; $8D, hscroll table address
 		dc.b 0						; $8E
 		dc.b 2						; $8F, VDP auto-inc 2
 		dc.b 1						; $90, 64x32 plane size
@@ -759,22 +783,31 @@ ErrorFont:	binclude "src-68k/smps-renassert-font.1bpp"
 	even
 
 
-ctrllist macro ramtype,ramloc,endval
-		dc.l (ramtype*2)<<24|ramloc&$FFFFFF
+ctrllist macro ramloc,endval
+	switch "ATTRIBUTE"
+	case "b"
+		set .t,0
+	case "w"
+		set .t,2
+	elsecase
+		fatal "bruh"
+	endcase
+		dc.l (.t)<<24|ramloc&$FFFFFF
 		dc.l endval
 		endm
 ControlList:
 		dc.w (.e-.s)/8
-.s:		ctrllist 1,v_apiindex,	(CallAPI.lute-CallAPI.lut)/4-1
-		ctrllist 1,v_shortcut,	(CallShortcut.lute-CallShortcut.lut)/4-1
-		ctrllist 1,v_soundid,	$FFFF
-		ctrllist 1,v_misccmd,	2
-		ctrllist 1,v_miscparam,	$FFFF
-		ctrllist 0,v_cddaid,	(99*2)
-		ctrllist 0,v_commval,	$FF
-		ctrllist 0,v_commindex,	1
-		ctrllist 1,v_dmalen,	$1000
-		ctrllist 0,v_runinvint,	2
+.s:		ctrllist.w	v_apiindex,	(CallAPI.lute-CallAPI.lut)/4-1
+		ctrllist.w	v_shortcut,	(CallShortcut.lute-CallShortcut.lut)/4-1
+		ctrllist.w	v_soundid,	$FFFF
+		ctrllist.w	v_misccmd,	2
+		ctrllist.w	v_miscparam,	$FFFF
+		ctrllist.b	v_cddaid,	(99*2)
+		ctrllist.b	v_commval,	$FF
+		ctrllist.b	v_commindex,	1
+		ctrllist.w	v_dmalen,	$1000
+		ctrllist.b	v_hint,		$FF
+		ctrllist.b	v_runinvint,	2
 .e:
 
 dctxt macro padto,byteval
@@ -828,6 +861,7 @@ ScreenText:
 		dc.b " Comm Value:",1
 		dc.b " Comm Index:",1
 		dc.b " DMA Size:",1
+		dc.b " H-Int Line:",1
 		dc.b " Vint Run:",1
 		dc.b "====================================",1
 		dc.b 0
@@ -911,18 +945,18 @@ JoypadRead:
 	org $8000
 ;	org $3F800	; MSD bank test 1
 ;	org $40000	; MSD bank test 2
-SMPS_InitDriver			equ *+00
-SMPS_RunDriver			equ *+04
-SMPS_QueueSound			equ *+08
-SMPS_UpdateFIFO			equ *+12
-SMPS_ReadComm			equ *+16
-SMPS_WriteComm			equ *+20
-SMPS_GuardDriver		equ *+24
-SMPS_UnguardDriver		equ *+28
-SMPS_SetupPianoRoll		equ *+32
-SMPS_RunMiscCommand		equ *+36
-SMPS_PlayCDDA			equ *+40
-SMPS_Signature			equ *+64	; ASCII with zero-terminator
+SMPS_InitDriver		equ *+00
+SMPS_RunDriver		equ *+04
+SMPS_QueueSound		equ *+08
+SMPS_UpdateFIFO		equ *+12
+SMPS_ReadComm		equ *+16
+SMPS_WriteComm		equ *+20
+SMPS_GuardDriver	equ *+24
+SMPS_UnguardDriver	equ *+28
+SMPS_SetupPianoRoll	equ *+32
+SMPS_RunMiscCommand	equ *+36
+SMPS_PlayCDDA		equ *+40
+SMPS_Signature		equ *+64	; ASCII with zero-terminator
 	if __smpsDebug==0
 	binclude "smps-drv.bin"
 	else

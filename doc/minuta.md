@@ -133,6 +133,14 @@ SMPS-Dusted lacks support for s8 modenv multipliers, but adds support for s12 an
 | yep;todo | yep;todo | yep;can select between either of the aforementioned |
 Sonic 2s modalgo is slightly different in that it runs when the sequence updates, like smps-z80 but unlike smps-68k. It's otherwise identical to smps-68k
 
+Sonic 1s modalgo doesn't update during sequences. Despite having modulation, this will play a flat note
+```
+		smpsModSet $36, $01, $0E, $7E, 0
+Loop:
+		dc.b nC1,$01,smpsNoAttack
+		smpsJump Loop
+```
+
 ### pananim
 | smps-68k | smps-z80 | smps-dusted |
 |:-:|:-:|:-:|

@@ -25,7 +25,6 @@ Excludes:
 - [flamewings asl macro assembler fork](https://github.com/flamewing/asl-releases), labelled as asw for... some reason
 - [clownacys p2bin](https://github.com/Clownacy/p2bin)
 - [sjasmplus](https://github.com/z00m128/sjasmplus)
-- [clownlzss](https://github.com/NaotoNTP/clownlzss)
 - [ZX0 salvador](https://github.com/emmanuel-marty/salvador)
 
 ## Related tools
@@ -43,7 +42,7 @@ Excludes:
 | Alex Field | Disassembling Sonic 2 Simon Wai |
 | Devon | Disassembling Sonic CD |
 | Flamewing | Disassembling/compiling Sonic 3D Blasts OST, asl |
-| Clownacy | Clone Driver V2, p2bin, clownlzss |
+| Clownacy | Clone Driver V2, p2bin |
 | Undying-Star | Flicky sounds |
 | Tomatowave | Beta testing |
 
