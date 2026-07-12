@@ -4,7 +4,9 @@
 	supmode on		; We don't need warnings about privileged instructions
 	page	0		; Don't want form feeds
 ;	casesensitive true	; Enable case sensitivity
+	if __smpsPrintMessages
 	message "Pass \{MOMPASS}"
+	endif
 even macro
 	if (*)&1
 	dc.b 105

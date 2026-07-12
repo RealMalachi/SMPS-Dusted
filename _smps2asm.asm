@@ -966,7 +966,7 @@ smpsPitchSlide macro enable
 ;	!dc.b	cExtCmd,0,enable
 ; ---------------------------------------------------------------------------
 smpsFooterEndSong macro
-	if MOMPASS==1
+	if (MOMPASS==1)&&(__smpsPrintMessages)
 	message "Ah, a GHM4 song. Death sentence."
 	endif
 	endm

@@ -4,7 +4,9 @@
 	supmode on		; We don't need warnings about privileged instructions
 	page	0		; Don't want form feeds
 ;	casesensitive true	; Enable case sensitivity
+	if __smpsPrintMessages
 	message "Pass \{MOMPASS}"
+	endif
 even macro
 	if (*)&1
 	dc.b 105
@@ -52,7 +54,7 @@ command equ cmpid
 	cmddef smpsmisc_Resume,		$0001
 	cmddef smpsmisc_SetTempo,	$0002
 ; ---------------------------------------------------------------------------
-	if MOMPASS=1
+	if (MOMPASS=2)&&(__smpsPrintMessages)
 	message "Driver requires $\{v_endofram} bytes of ram"
 	endif
 	end
