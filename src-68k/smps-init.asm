@@ -2,12 +2,15 @@
 ; INPUT
 ; a0 = driver data
 ; a1 = driver ram
-; d0.l = desired add-ons bitfield
-; ........ ........ ........ .....MDP
-; P = MDplus: CDDA
-; D = MegaCD: CDDA, PCM
-; M = 32X:    PWM
-; TRASHES: d0-a6
+; d0.l = desired add-ons bitfield (see below)
+; OUTPUT
+; d0.l = enabled add-ons bitfield (see below)
+; bitfield:
+; ........ ........ ........ ....CXDP
+; P = (MD) MDplus: CDDA
+; D = (MD) MegaCD: CDDA, PCM
+; X = (MD) 32X:    PWM
+; C = (Pico) Yamaha Copera: FM, PCM
 ; ---------------------------------------------------------------------------
 InitDriver:
 		cmp.w	#__smpsDataVer,drvdata.version(a0)
@@ -36,13 +39,69 @@ InitDriver:
 		move.b	d1,v_dataptr+1(a1)
 		move.w	#$7AD4,v_random(a1)
 
-		bsr.w	DetectCDDA
+; detect and init external hardware
+; detect MDPlus (needs to be nearby the other MDP code)
+		btst	#0,d0
+		beq.s	.nomdp
+		bsr.w	DetectMDPlus
+		tst.b	d2
+		bne.s	.nomdp
+		or.b	#1<<v_driverflags2.mdplus,v_driverflags2(a1)
+.nomdp:
+; detect Mega CD
+		btst	#1,d0
+		beq.w	.nomcd
+		btst	#5,$A10001				; check if the MegaCD is attached
+		beq.s	.yamcd					; if it is, continue
+		cmpi.l	#"SEGA",$400100				; check for 'SEGA' in CD bios
+		bne.w	.nomcd					; if not, end routine
+.yamcd:
+		lea     CdSubCtrl+1,a2
+		move.w  #$FF00,CdMemCtrl			; sub-cpu gate array reset sequence
+		move.b  #$03,(a2)				; seems random, I know.
+		move.b  #$02,(a2)
+		move.b  #$00,(a2)
+		moveq   #$7F,d1
+		dbf     d1,*
+
+		move.b  #$00,(a2)				; Reset the Sub-CPU
+.Reset:		move.b  (a2),d1
+		and.b   #$01,d1
+		cmp.b   #$00,d1
+		bne.s   .Reset
+
+		move.b  #$03,(a2)				; Request the Sub-CPU bus
+.BusReq:	move.b  (a2),d1
+		and.b   #$03,d1
+		cmp.b   #$03,d1
+		bne.s   .BusReq
+; load program into Sub-CPU PRG-RAM
+; TODO: look into bank switching for above 128KB, and compression.
+		move.w  #$0000,CdMemCtrl			; disable write protection
+		lea	MCDProgram(pc),a5
+		lea     CdPrgRam,a6
+		include "src-68k/cmp-zx0.asm"
+
+		move.b  #$00,(a2)				; Reset the Sub-CPU, again!
+.Reset2:	move.b  (a2),d1
+		and.b   #$01,d1
+		cmp.b   #$00,d1
+		bne.s   .Reset2
+
+		move.b  #$01,(a2)				; Let it run now
+.StartUp:	move.b  (a2),d1
+		and.b   #$01,d1
+		cmp.b   #$01,d1
+		bne.s   .StartUp
+
+		or.b	#1<<v_driverflags2.mcd,v_driverflags2(a1)
+.nomcd:
 		bsr.s	DetectFirecore
 		seq	d1
 		and.w	#1<<v_driverflags.firecore|1<<v_driverflags.ssgoff,d1
-		moveq	#1,d2			; 0 = NTSC, 1 = PAL
+		moveq	#1,d2					; 0 = NTSC, 1 = PAL
 		and.w	(vdpctrl).l,d2
-		ror.b	#8-v_driverflags.pal,d2		; move to appropriate bit (should be 7)
+		ror.b	#8-v_driverflags.pal,d2			; move to appropriate bit (should be 7)
 		or.b	d2,d1
 		or.b	d1,v_driverflags(a1)
 
@@ -53,7 +112,11 @@ InitDriver:
 		add.l	d1,a0
 		bsr.w	DACLoadBank
 
-		bra.w	StopAllSound
+		bsr.w	StopAllSound
+
+		moveq	#1<<v_driverflags2.mdplus|1<<v_driverflags2.mcd|1<<v_driverflags2.mars,d0
+		and.b	v_driverflags2(a1),d0
+		rts
 ; -------------------------------------------------------------------------
 ; Detects Firecore and actually enhances game if detected. I know, shocking.
 ; Credit is due to Devon, BigEvilCorporation and Neto
@@ -84,22 +147,22 @@ DetectFirecore:
 ; Detect improper ABCD emulation (where the results are not as they should be)
 ; This is a known issue in the AtGames Firecore system.
 ; if it succeeds, also init some firecore registers
-	lea	.FirecoreABCDTbl(pc),a0		; Get test table ready for AtGames Firecore
+	lea	.FirecoreABCDTbl(pc),a0				; Get test table ready for AtGames Firecore
 	moveq	#(.FirecoreABCDTblEnd-.FirecoreABCDTbl)/5-1,d7
 .TestLp:
-	move.b	(a0)+,d1			; Source operand
-	move.b	(a0)+,d2			; Destination operand
-	move.b	(a0)+,d3			; CCR
+	move.b	(a0)+,d1					; Source operand
+	move.b	(a0)+,d2					; Destination operand
+	move.b	(a0)+,d3					; CCR
 
-	move	d3,ccr				; Set CCR
-	abcd	d1,d2				; Do ABCD
-	move	sr,d6				; Get CCR via SR (NOTE: priviledged opcode on 68010+)
+	move	d3,ccr						; Set CCR
+	abcd	d1,d2						; Do ABCD
+	move	sr,d6						; Get CCR via SR (NOTE: priviledged opcode on 68010+)
 
-	move.b	(a0)+,d4			; Get expected result
-	move.b	(a0)+,d5			; Get expected SR
+	move.b	(a0)+,d4					; Get expected result
+	move.b	(a0)+,d5					; Get expected SR
 
-	cmp.b	d2,d4				; Are the results the same?
-	bne.s	.ABCDFail			; If not, branch
+	cmp.b	d2,d4						; Are the results the same?
+	bne.s	.ABCDFail					; If not, branch
 	cmp.b	d6,d5
 	dbne	d7,.TestLp
 	bne.s	.ABCDFail
@@ -111,8 +174,8 @@ DetectFirecore:
 	move.w	#3,.k68Clock-.PSGFreq(a0)			; 3 for 68K clock divider (9MHz)
 	move.w	#$0607,.Z80Clock-.PSGFreq(a0)			; I don't fully understand this, but it clocks the Z80 ~3.5MHz
 	move.w	#$0004,(.DevMode).w				; normal mode
-	moveq	#0,d1				; set ccr zero bit...
-.ABCDFail:					; ...or leave with ccr zero bit cleared
+	moveq	#0,d1						; set ccr zero bit...
+.ABCDFail:							; ...or leave with ccr zero bit cleared
 	rts
 ; -------------------------------------------------------------------------
 ; ABCD test table and expected results from AtGames Firecore system
@@ -126,3 +189,6 @@ DetectFirecore:
 	dc.b	$FF, $FF, %11111, $FF,    %01010
 .FirecoreABCDTblEnd:
 	even
+; -------------------------------------------------------------------------
+MCDProgram:	binclude "_out/build-mcd.zx0"
+		even

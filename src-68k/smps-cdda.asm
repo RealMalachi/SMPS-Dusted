@@ -1,62 +1,10 @@
 ; ---------------------------------------------------------------------------
 ;
 ; ---------------------------------------------------------------------------
+; INPUT
 ; a1 = driver ram
 ; d0 = driver parameters
-DetectCDDA:
-		btst	#0,d0
-		bne.s	.nomdp
-		bsr.w	DetectMDPlus
-.nomdp:
-; detect Mega CD
-		btst	#1,d0
-		bne.w	.nomcd
-		btst	#5,$A10001				; check if the MegaCD is attached
-		beq.s	.yamcd					; if it is, continue
-		cmpi.l	#"SEGA",$400100				; check for 'SEGA' in CD bios
-		bne.w	.nomcd					; if not, end routine
-.yamcd:
-		lea     CdSubCtrl+1,a2
-		move.w  #$FF00,CdMemCtrl			; sub-cpu gate array reset sequence
-		move.b  #$03,(a2)				; seems random, I know.
-		move.b  #$02,(a2)
-		move.b  #$00,(a2)
-		moveq   #$7F,d1
-		dbf     d1,*
-
-		move.b  #$00,(a2)				; Reset the Sub-CPU
-.Reset:		move.b  (a2),d1
-		and.b   #$01,d1
-		cmp.b   #$00,d1
-		bne.s   .Reset
-
-		move.b  #$03,(a2)				; Request the Sub-CPU bus
-.BusReq:	move.b  (a2),d1
-		and.b   #$03,d1
-		cmp.b   #$03,d1
-		bne.s   .BusReq
-; load program into Sub-CPU PRG-RAM
-; TODO: look into bank switching for above 128KB, and compression.
-		move.w  #$0000,CdMemCtrl			; disable write protection
-		lea	MCDProgram(pc),a5
-		lea     CdPrgRam,a6
-		include "src-68k/cmp-zx0.asm"
-
-		move.b  #$00,(a2)				; Reset the Sub-CPU, again!
-.Reset2:	move.b  (a2),d1
-		and.b   #$01,d1
-		cmp.b   #$00,d1
-		bne.s   .Reset2
-
-		move.b  #$01,(a2)				; Let it run now
-.StartUp:	move.b  (a2),d1
-		and.b   #$01,d1
-		cmp.b   #$01,d1
-		bne.s   .StartUp
-
-		or.b	#1<<v_driverflags2.mcd,v_driverflags2(a1)
-.nomcd:
-		rts
+; OUTPUT
 ; d2 = error codes
 DetectMDPlus:
 ; Continue if the code is outside of the overlay bank
@@ -82,7 +30,6 @@ DetectMDPlus:
 		move.w	#0,MSD_OverlayPort
 		cmp.l	#"BATE",d1				; $42415445, it wasn't "RATE"
 		bne.s	.nomsd
-		or.b	#1<<v_driverflags2.mdplus,v_driverflags2(a1)
 		moveq	#0,d2					; error code: success
 		move.w	#msd_comm_volume<<8|$FF,d1		; full volume
 		;bra.s	WriteToMDPlus
@@ -137,6 +84,3 @@ PlayCDDA:
 .invalid:
 		SMPS_assert "PlayCDDA: Invalid cdda id, TODO: print id"
 	endif
-; -------------------------------------------------------------------------
-MCDProgram:	binclude "_out/build-mcd.zx0"
-		even

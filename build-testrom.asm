@@ -4,6 +4,14 @@
 	supmode on		; We don't need warnings about privileged instructions
 	page	0		; Don't want form feeds
 ;	casesensitive true	; Enable case sensitivity
+; ---------------------------------------------------------------------------
+__smpsDebug		equ 1
+__smpsRamLoc		equ $FF8000
+__smpsRamPad		equ $0002
+__smpsEnableMDP		equ 1
+__smpsEnableMCD		equ 1
+__smpsEnable32X		equ 1
+; ---------------------------------------------------------------------------
 	if __smpsPrintMessages
 	message "Pass \{MOMPASS}"
 	endif
@@ -29,6 +37,7 @@ waitZ80 macro
 $$w:	btst	#0,io_z80bus
 	bne.s	$$w
 	endm
+; pad text
 dcpad macro padto,padval,byteval
 $$p:	dc.ATTRIBUTE	byteval
 	dc.b	[padto-((*)-$$p)]padval
@@ -73,10 +82,12 @@ vram_length	equ $200
 ; ram def
 	phase $FF0000
 v_start:		ds.b 0
+			ds.b __smpsRamLoc-(*)
 v_soundram:		ds.b smpsramsize
-			ds.b $FF0800-(*)
+			align __smpsRamPad
 v_pianoram:		ds.b smpspianoramsize
-			ds.b $FF1000-(*)
+			align __smpsRamPad
+v_externalsound:	ds.l 1
 
 			ds.b (*)&1
 v_stackend:		ds.b $100
@@ -106,8 +117,9 @@ v_jpad2press:		ds.b 1
 
 v_vsync:		ds.b 1
 
-			align 4	; this works
+			align 4
 v_hardresetend:		ds.b 0
+			align 4
 v_softresetend:		ds.b 0
 v_end:			ds.b 0
 	dephase
@@ -349,6 +361,45 @@ EntryPoint:
 .initz80end:
 	even
 ; ---------------------------------------------------------------------------
+JoypadInit:
+		stopZ80
+		lea	io_jpad1ctrl,a1
+		moveq	#1<<6,d0
+		move.b	d0,io_jpad1ctrl-io_jpad1ctrl(a1)
+		move.b	d0,io_jpad2ctrl-io_jpad1ctrl(a1)
+		move.b	d0,io_jpad3ctrl-io_jpad1ctrl(a1)
+		startZ80
+		rts
+JoypadRead:
+		stopZ80
+		lea	v_jpad,a0			; address where joypad states are written
+		lea	io_jpad1data,a1			; first joypad port
+; from every input request, delay by 8 cycles.
+; US docs say 16, JP say 8, a safe bet is 12, Sonic does 8.
+	rept 2
+		move.b	#0<<6,(a1)			; AS request
+		moveq	#%00110000,d0			; 4 ; Start, A
+		moveq	#%00111111,d1			; 4 ; B, C, Directionals
+		and.b	(a1),d0				; retrieve only the input bits we need
+
+		move.b	#1<<6,(a1)			; BCD request
+		add.b	d0,d0				; 4 ; move A and start to the higher 2 bits
+		add.b	d0,d0				; 4 ; ditto
+		and.b	(a1),d1				; retrive useful bits, inc to second joypad port
+
+		or.b	d1,d0				; combine them together
+		not.b	d0
+		move.b	(a0),d1
+		eor.b	d0,d1
+		and.b	d0,d1
+		move.b	d0,(a0)+			; held
+		move.b	d1,(a0)+			; pressed
+
+		addq.w	#io_jpad2data-io_jpad1data,a1
+	endr
+		startZ80
+		rts
+; ---------------------------------------------------------------------------
 GameProgram:
 		bsr.w	CallAPI.initdriver
 		bsr.w	JoypadInit
@@ -478,8 +529,10 @@ CallAPI:
 .initdriver:
 		lea	(SMPS_DriverData).l,a0
 		lea	v_soundram,a1
-		moveq	#0,d0
-		jmp	(SMPS_InitDriver).l
+		moveq	#__smpsEnableMDP<<0|__smpsEnableMCD<<1|__smpsEnable32X<<2,d0
+		jsr	(SMPS_InitDriver).l
+		move.l	d0,v_externalsound
+		rts
 .rundriver:
 		lea	v_soundram,a1
 		jmp	(SMPS_RunDriver).l
@@ -646,7 +699,25 @@ InitRender:
 ; load text plane
 		lea	ScreenText.main(pc),a0
 		move.l	#vdpComm(vram_plane<<5+planeLoc(64,2,1),VRAM_WRITE),d0
-		bra.w	PrintText
+		bsr.w	PrintText
+; load additional text
+		move.l	v_externalsound,d7
+		btst	#0,d7
+		beq.s	.nomdp
+		lea	ScreenText.enabled_mdp(pc),a0
+		bsr.w	PrintText
+.nomdp:
+		btst	#1,d7
+		beq.s	.nomcd
+		lea	ScreenText.enabled_mcd(pc),a0
+		bsr.w	PrintText
+.nomcd:
+		btst	#2,d7
+		beq.s	.no32x
+		lea	ScreenText.enabled_32x(pc),a0
+		bsr.w	PrintText
+.no32x:
+		rts
 
 rentext macro list,index
 		moveq	#0,d0
@@ -750,6 +821,7 @@ PrintText:
 		bra.s	.cmd_nextline				; $01 ; ASCII 0A, line feed/newline/next line
 .cmdlute:
 .cmd_exit:
+		add.l	#vdpCommDelta(64*2),d0
 		rts
 .cmd_nextline:
 		add.l	#vdpCommDelta(64*2),d0
@@ -866,7 +938,15 @@ ScreenText:
 		dc.b " H-Int Line:",1
 		dc.b " Vint Run:",1
 		dc.b "====================================",1
-		dc.b 0
+		dc.b " RED: Driver run",1
+		dc.b " BLUE:Piano run",1
+		dc.b " GRAY:DMA",1
+		dc.b " CYAN:Test rom code (mostly render)",1
+		dc.b " LIME:IO read",1
+		dc.b "====================================",0
+.enabled_mdp:	dc.b " MD-Plus Enabled",0
+.enabled_mcd:	dc.b " MegaCD Mode 1 Enabled",0
+.enabled_32x:	dc.b " 32X PWM Enabled",0
 
 .amax		equ 14
 .a_init:	dctxt .amax,"InitDriver"
@@ -904,45 +984,6 @@ ScreenText:
 .v_on:		dctxt .vmax,"On"
 .v_piano:	dctxt .vmax,"Piano"
 		even
-; ---------------------------------------------------------------------------
-JoypadInit:
-		stopZ80
-		lea	io_jpad1ctrl,a1
-		moveq	#1<<6,d0
-		move.b	d0,io_jpad1ctrl-io_jpad1ctrl(a1)
-		move.b	d0,io_jpad2ctrl-io_jpad1ctrl(a1)
-		move.b	d0,io_jpad3ctrl-io_jpad1ctrl(a1)
-		startZ80
-		rts
-JoypadRead:
-		stopZ80
-		lea	v_jpad,a0			; address where joypad states are written
-		lea	io_jpad1data,a1			; first joypad port
-; from every input request, delay by 8 cycles.
-; US docs say 16, JP say 8, a safe bet is 12, Sonic does 8.
-	rept 2
-		move.b	#0<<6,(a1)			; AS request
-		moveq	#%00110000,d0			; 4 ; Start, A
-		moveq	#%00111111,d1			; 4 ; B, C, Directionals
-		and.b	(a1),d0				; retrieve only the input bits we need
-
-		move.b	#1<<6,(a1)			; BCD request
-		add.b	d0,d0				; 4 ; move A and start to the higher 2 bits
-		add.b	d0,d0				; 4 ; ditto
-		and.b	(a1),d1				; retrive useful bits, inc to second joypad port
-
-		or.b	d1,d0				; combine them together
-		not.b	d0
-		move.b	(a0),d1
-		eor.b	d0,d1
-		and.b	d0,d1
-		move.b	d0,(a0)+			; held
-		move.b	d1,(a0)+			; pressed
-
-		addq.w	#io_jpad2data-io_jpad1data,a1
-	endr
-		startZ80
-		rts
 ; ---------------------------------------------------------------------------
 	org $8000
 ;	org $3F800	; MSD bank test 1

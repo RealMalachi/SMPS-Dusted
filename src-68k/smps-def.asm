@@ -290,8 +290,9 @@ v_dataptr:			ds.l 1
 
 v_driverflags2:			ds.b 1
 .muffle				equ 7	; must be 7
-.mdplus				equ 0
-.mcd				equ 1
+.mdplus				equ 0	; corresponds with bitfield in smps-init
+.mcd				equ 1	; ^
+.mars				equ 2	; ^	; because 32x isn't a valid label and x32 is cringe
 
 v_communication:		ds.b __smpsCommBytes	; generally used for syncing gameplay with music
 v_communication_end:

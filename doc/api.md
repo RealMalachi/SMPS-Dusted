@@ -7,18 +7,33 @@ At the start of the blob is a LUT for subroutines and data that the user should 
 relative address: +0
 
 input:
+- a0 = driver data
 - a1 = driver ram
-- d0.w = driver ram size
-
+- d0.l = desired external hardware bitfield
+output
+- d0.l = enabled external hardware bitfield
 trashes: d0-d7,a0-a6
 
 description:
 Initialises ram and sound hardware
 
+Both the input and output of d0 share a bitfield, corresponding to additional sound hardware
+- The input denotes what hardware the game wishes the driver to utilize
+- The output communicates what the driver could access
+- Many of the bits are unmapped, they should be initialised to 0 and avoided past initiation
+```
+........ ........ ........ ....CXDP
+P = (MD) MDplus: CDDA
+D = (MD) MegaCD: CDDA, PCM
+X = (MD) 32X:    PWM
+C = (Pico) Yamaha Copera: FM, PCM
+```
+
 example:
 ```
 	lea	(SMPS_DriverData).l,a0
 	lea	(v_soundram).w,a1
+	moveq	#0,d0
 	jsr	(SMPS_InitDriver).l
 ```
 

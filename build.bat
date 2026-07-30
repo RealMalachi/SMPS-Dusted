@@ -102,7 +102,7 @@ tools\sjasmplus\sjasmplus.exe src-z80/entry.a80 --raw=_out/entry-z80.bin --lst=_
 
 if %PrintText% == 1 echo ============================================
 if %PrintText% == 1 echo Building SMPS test rom
-tools\asw\asw.exe -xx -n -A -L -U -g map -i . -olist _out\build-testrom.lst -E _out\build-testrom.log build-testrom.asm -D __smpsDebug=1 %PrintTextAS%
+tools\asw\asw.exe -xx -n -A -L -U -g map -i . -olist _out\build-testrom.lst -E _out\build-testrom.log build-testrom.asm %PrintTextAS%
 if not exist build-testrom.p goto _BUILDTYPE_ERROR_ROM
 tools\asw\p2bin.exe "build-testrom.p" "smps-testrom.gen" ""
 > NUL move build-testrom.p _out
