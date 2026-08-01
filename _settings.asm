@@ -7,6 +7,7 @@ __smpsSeqStack		equ 10		; defines the amount of stack given for each sequence ch
 __smpsCommBytes		equ 8		; defines the amount of driver communication bytes
 
 __smpsDefaultFreq	equ 0		; 0 maxes PSG and mutes the others, 1 mutes all
+__smpsSeqTimeSize	equ 0		; 0 uses u8 sequence timers, 1 uses u16
 __smpsRestTimeTime	equ 1		; 0 will crash, 1 will act like SMPS-68K
 __smpsRestPCM		equ 0		; 0 holds (including when the track stops), 1 rests
 __smpsFMTable		equ 0		; 0 is SMPS-68K, 1 is SMPS-Z80

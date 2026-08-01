@@ -39,7 +39,7 @@ sequence data is organised as follows: flag,note/rest,time
         dc.b        nBb7,nRst                       ; play new note for previous time, then rest for previous time
 ```
 
-time is multiplied by the tempo "divider" then ANDed by $FF
+time is multiplied by the tempo "divider" then stored as a u8 value, effectively ANDed by $FF
 ```
         smpsChanTempoDiv $02                        ; this sequence results in ($40x$02)&$FF = $80
 		dc.b        nRst,$40
@@ -49,8 +49,8 @@ time is multiplied by the tempo "divider" then ANDed by $FF
 		dc.b        nRst,$40
 ```
 A time of $00, be it from $00 directly or via multiplication, will result in waiting for 256 ticks, unless it's a bgm and the bgm tempo updates when it's $00, where it will increment to $01 updating immediately. To my knowledge, no SMPS sequences rely on a time of $00 or the bgm tempo logic
-
-Debug builds of SMPS-Dusted will throw an error when the multiplication is $00 or exceeds $FF
+- SMPS-Dusted features the `__smpsSeqTimeSize` setting, which extends the timers to u16 (effectively ANDed by $FFFF)
+- Debug builds of SMPS-Dusted will throw an error when the multiplication is $00, or exceeds $FF when `__smpsSeqTimeSize` is disabled
 
 ### drum mode
 drum mode is a feature that's semi-exclusive to SMPS-Dusted

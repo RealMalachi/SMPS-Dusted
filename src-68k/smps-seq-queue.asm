@@ -441,7 +441,11 @@ Sound_PlayBGM:
 	endif
 
 		move.b	d5,TrackTempoDivider(a5)
+	if __smpsSeqTimeSize
+		move.w	#1,TrackDurationTimeout(a5)		; Set duration of first "note"
+	else
 		move.b	#1,TrackDurationTimeout(a5)		; Set duration of first "note"
+	endif
 		move.b	#TrackGoSubStack,TrackStackPointer(a5)
 		move.w	#-1,TrackFreq(a5)
 		moveq	#0,d0
@@ -521,7 +525,11 @@ Sound_PlayBGM:
 	endif
 
 		move.b	d5,TrackTempoDivider(a5)
+	if __smpsSeqTimeSize
+		move.w	#1,TrackDurationTimeout(a5)		; Set duration of first "note"
+	else
 		move.b	#1,TrackDurationTimeout(a5)		; Set duration of first "note"
+	endif
 		move.b	#TrackGoSubStack,TrackStackPointer(a5)
 		move.w	#-1,TrackFreq(a5)
 		moveq	#0,d0
@@ -592,9 +600,14 @@ Sound_PlayBGM:
 
 		move.b	d5,TrackTempoDivider(a5)
 	if (__smpsTarget=="md68k")&&(__smpsPCM=="DualPCM-FlexEd")
-		move.b	#2,TrackDurationTimeout(a5)		; Set duration of first "note"
+		equ .std,2
 	else
-		move.b	#1,TrackDurationTimeout(a5)		; Set duration of first "note"
+		equ .std,1
+	endif
+	if __smpsSeqTimeSize
+		move.w	#.std,TrackDurationTimeout(a5)		; Set duration of first "note"
+	else
+		move.b	#.std,TrackDurationTimeout(a5)		; Set duration of first "note"
 	endif
 		move.b	#TrackGoSubStack,TrackStackPointer(a5)
 	if __smpsDefaultFreq=0
@@ -838,7 +851,12 @@ Sound_PlaySFX_Setup:
 		move.w	#0,TrackFreq(a5)	; max
 	endif
 	if (__smpsTarget=="md68k")&&(__smpsPCM=="DualPCM-FlexEd")
-		move.b	#2,TrackDurationTimeout(a5)		; Set duration of first "note"
+		equ .std,2
+		if __smpsSeqTimeSize
+		move.w	#.std,TrackDurationTimeout(a5)		; Set duration of first "note"
+		else
+		move.b	#.std,TrackDurationTimeout(a5)		; Set duration of first "note"
+		endif
 	endif
 ;		bra.w	PSGSilence
 		cmp.b	#$C0,d2
@@ -865,7 +883,11 @@ Sound_PlaySFX_Setup:
 		swap	d0
 		move.b	d0,TrackDataPointer+1(a5)
 		move.b	d5,TrackTempoDivider(a5)		; Initial voice control bits
+	if __smpsSeqTimeSize
+		move.w	#1,TrackDurationTimeout(a5)		; Set duration of first "note"
+	else
 		move.b	#1,TrackDurationTimeout(a5)		; Set duration of first "note"
+	endif
 		move.b	#TrackGoSubStack,TrackStackPointer(a5)
 		move.w	#-1,TrackFreq(a5)
 		move.b	queue_volenvptr+1(a6),TrackVolEnvPtr+1(a5)

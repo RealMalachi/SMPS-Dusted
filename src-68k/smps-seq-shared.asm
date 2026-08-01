@@ -309,16 +309,21 @@ SetDuration:
 .mulisntzero:
 	endif
 		mulu.w	d1,d5
-	if __smpsDebug
+	if __smpsSeqTimeSize
+		move.w	d5,TrackSavedDuration(a5)			; Save duration
+		move.w	d5,TrackDurationTimeout(a5)			; Save duration timeout
+	else
+		if __smpsDebug
 		move.w	d5,d1
 		clr.b	d1
 		tst.w	d1
 		beq.s	.mulgood
 		SMPS_assert "SetDuration: Time x Multiplier exceeds $FF, TODO print extra data"
 .mulgood:
-	endif
+		endif
 		move.b	d5,TrackSavedDuration(a5)			; Save duration
 		move.b	d5,TrackDurationTimeout(a5)			; Save duration timeout
+	endif
 		rts
 ; ===========================================================================
 PCMFinishTrackUpdate:
@@ -326,7 +331,11 @@ PCMFinishTrackUpdate:
 		move.w	d0,TrackDataPointer+2(a5)
 		swap	d0
 		move.b	d0,TrackDataPointer+1(a5)
-		move.b	TrackSavedDuration(a5),TrackDurationTimeout(a5)	; Reset note timeout
+	if __smpsSeqTimeSize
+		move.w	TrackSavedDuration(a5),TrackDurationTimeout(a5)	; Reset note timer
+	else
+		move.b	TrackSavedDuration(a5),TrackDurationTimeout(a5)	; Reset note timer
+	endif
 		moveq	#1<<_noattack,d0
 		and.b	TrackPlaybackControl(a5),d0
 		bne.s	.exit
@@ -339,7 +348,11 @@ FMFinishTrackUpdate:
 		move.w	d0,TrackDataPointer+2(a5)
 		swap	d0
 		move.b	d0,TrackDataPointer+1(a5)
-		move.b	TrackSavedDuration(a5),TrackDurationTimeout(a5)	; Reset note timeout
+	if __smpsSeqTimeSize
+		move.w	TrackSavedDuration(a5),TrackDurationTimeout(a5)	; Reset note timer
+	else
+		move.b	TrackSavedDuration(a5),TrackDurationTimeout(a5)	; Reset note timer
+	endif
 		moveq	#1<<_noattack,d0
 		and.b	TrackPlaybackControl(a5),d0
 		bne.s	.exit

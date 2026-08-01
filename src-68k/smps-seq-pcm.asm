@@ -1,6 +1,10 @@
 ; ---------------------------------------------------------------------------
 PCMUpdateTrack:
-		subq.b	#1,TrackDurationTimeout(a5)		; Has DAC sample timeout expired?
+	if __smpsSeqTimeSize
+		subq.w	#1,TrackDurationTimeout(a5)
+	else
+		subq.b	#1,TrackDurationTimeout(a5)
+	endif
 		bne.s	.sampleongoing				; Return if not
 		bsr.s	PCMDoNext
 		btst	#_resting,TrackPlaybackControl(a5)

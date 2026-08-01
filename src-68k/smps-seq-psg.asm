@@ -1,6 +1,10 @@
 ; ---------------------------------------------------------------------------
 PSGUpdateTrack:
+	if __smpsSeqTimeSize
+		subq.w	#1,TrackDurationTimeout(a5)
+	else
 		subq.b	#1,TrackDurationTimeout(a5)
+	endif
 		bne.s	.notegoing
 		bsr.s	PSGDoNext
 		btst	#_resting,TrackPlaybackControl(a5)

@@ -11,8 +11,8 @@
 ; - ffffffff - frequency/sample LSB
 ; - 0VVVVVVV - volume
 ; - RRRRLLLL - pan
-; - TTTTTTTT - duration time
-; - 00000000 - reserved
+; - TTTTTTTT - duration time MSB
+; - tttttttt - duration time LSB
 ; ---------------------------------------------------------------------------
 SetupPianoRoll:
 		moveq	#0,d7
@@ -57,8 +57,12 @@ SetupPianoRoll:
 		moveq	#$7F,d2
 .vol:		move.b	d2,(a6)+
 		move.b	d1,(a6)+
-		move.b	TrackDurationTimeout(a5),(a6)+
+	if __smpsSeqTimeSize
+		move.w	TrackDurationTimeout(a5),(a6)+
+	else
 		clr.b	(a6)+
+		move.b	TrackDurationTimeout(a5),(a6)+
+	endif
 ; loop
 .doloop:
 		addq.w	#2,d7

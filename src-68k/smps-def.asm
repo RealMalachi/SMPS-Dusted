@@ -199,8 +199,13 @@ TrackVoiceControl:		ds.b 1			; All	; expected to be 1
 
 TrackTempoDivider:		ds.b 1			; All
 TrackStackPointer:		ds.b 1			; All
+	if __smpsSeqTimeSize
+TrackDurationTimeout:		ds.w 1			; All
+TrackSavedDuration:		ds.w 1			; All
+	else
 TrackDurationTimeout:		ds.b 1			; All
 TrackSavedDuration:		ds.b 1			; All
+	endif
 
 TrackFreq:			ds.w 1			; FM/PSG	; sign bit indicates rest ; TODO: change to 0 for MCD PCM support
 TrackTranspose:			ds.b 1			; All		; pitch ; word writes include TrackVolume
