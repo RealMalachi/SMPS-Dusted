@@ -13,16 +13,33 @@ StopAllSound:
 	if (.clrLen)&1
 		move.b	d0,(a2)+
 	endif
-		moveq_	$FF!(1<<v_driverflags.speedsong|1<<v_driverflags.jingle),d0
-		and.b	v_driverflags(a1),d0
-		move.b	d0,v_driverflags(a1)
+		bclr	#v_driverflags.jingle,v_driverflags(a1)
+		bsr.s	StopSoundFlags
 .skipram:
 		bsr.w	StopCDDA
 		bsr.w	DACStopSample			; TODO: DACStopAll
 		bsr.w	FMSilenceAll
 		bra.w	PSGSilenceAll
 ; ===========================================================================
+StopSoundFlags:
+		and.b	#$FF!(1<<v_driverflags.speedsong|1<<v_driverflags.muffle),v_driverflags(a1)
+		rts
+; ===========================================================================
 StopBGM:
+; clear saved jingle song
+		bclr	#v_driverflags.jingle,v_driverflags(a1)
+		beq.s	.nojingle
+		lea	v_1up_ram_copy(a1),a0
+		moveq	#0,d0
+		move.w	#((v_1up_ram_copy_end-v_1up_ram_copy)/4)-1,d1
+.prior:		move.l	d0,(a0)+
+		dbf	d1,.prior
+	if (v_1up_ram_copy_end-v_1up_ram_copy)&2
+		move.w	d0,(a0)+
+	endif
+.nojingle:
+
+
 		lea	v_music_pcm_tracks(a1),a5
 		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d6
 .dacloop:	tst.b	TrackPlaybackControl(a5)
@@ -35,27 +52,27 @@ StopBGM:
 		move.b	TrackVoiceControl(a5),d3
 		add.b	d3,d3
 		add.w	#((30/2)-$40)*2,d3
-		lea	RAM_SFXChannel(pc),a3
+		lea	RAM_SFXChannel(pc),a4
 	if __smpsBSFX
-		move.w	(a3,d3.w),d0
+		move.w	(a4,d3.w),d0
 		beq.s	.dacgetptr
-		move.l	a1,a3
-		add.w	d0,a3
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
-		tst.b	TrackPlaybackControl(a3)
+		move.l	a1,a4
+		add.w	d0,a4
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a4)
+		tst.b	TrackPlaybackControl(a4)
 		bmi.s	.dacgotptr
 .dacgetptr:
-		lea	RAM_BSFXChannel(pc),a3
+		lea	RAM_BSFXChannel(pc),a4
 	endif
-		move.w	(a3,d3.w),d0
+		move.w	(a4,d3.w),d0
 		beq.s	.dacnext
-		move.l	a1,a3
-		add.w	d0,a3
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
-		tst.b	TrackPlaybackControl(a3)
+		move.l	a1,a4
+		add.w	d0,a4
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a4)
+		tst.b	TrackPlaybackControl(a4)
 		bpl.s	.dacnext
 .dacgotptr:
-		or.b	#1<<_resting,TrackPlaybackControl(a3)
+		or.b	#1<<_resting,TrackPlaybackControl(a4)
 .dacnext:
 		dbf	d6,.dacloop
 
@@ -69,30 +86,30 @@ StopBGM:
 		moveq	#0,d3
 		move.b	TrackVoiceControl(a5),d3
 		add.b	d3,d3
-		lea	RAM_SFXChannel(pc),a3
+		lea	RAM_SFXChannel(pc),a4
 	if __smpsBSFX
-		move.w	(a3,d3.w),d0
+		move.w	(a4,d3.w),d0
 		beq.s	.fmgetptr
-		move.l	a1,a3
-		add.w	d0,a3
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
-		tst.b	TrackPlaybackControl(a3)
-		bpl.s	.fmgotptr
+		move.l	a1,a4
+		add.w	d0,a4
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a4)
+		tst.b	TrackPlaybackControl(a4)
+		bmi.s	.fmgotptr
 .fmgetptr:
-		lea	RAM_BSFXChannel(pc),a3
+		lea	RAM_BSFXChannel(pc),a4
 	endif
-		move.w	(a3,d3.w),d0
+		move.w	(a4,d3.w),d0
 		beq.s	.fmnext
-		move.l	a1,a3
-		add.w	d0,a3
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
-		tst.b	TrackPlaybackControl(a3)
+		move.l	a1,a4
+		add.w	d0,a4
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a4)
+		tst.b	TrackPlaybackControl(a4)
 		bpl.s	.fmnext
 .fmgotptr:
-		or.b	#1<<_resting,TrackPlaybackControl(a3)
-		exg.l	a3,a5
+		or.b	#1<<_resting,TrackPlaybackControl(a4)
+		exg.l	a4,a5
 		bsr.w	SetVoice
-		move.l	a3,a5
+		move.l	a4,a5
 .fmnext:
 		add.w	#TrackFmSz,a5
 		dbf	d6,.fmloop
@@ -107,27 +124,27 @@ StopBGM:
 		moveq	#0,d3
 		move.b	TrackVoiceControl(a5),d3
 		lsr.b	#3,d3
-		lea	RAM_SFXChannel(pc),a3
+		lea	RAM_SFXChannel(pc),a4
 	if __smpsBSFX
-		move.w	(a3,d3.w),d0
+		move.w	(a4,d3.w),d0
 		beq.s	.psggetptr
-		move.l	a1,a3
-		add.w	d0,a3
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
-		tst.b	TrackPlaybackControl(a3)
+		move.l	a1,a4
+		add.w	d0,a4
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a4)
+		tst.b	TrackPlaybackControl(a4)
 		bmi.s	.psggotptr
 .psggetptr:
-		lea	RAM_BSFXChannel(pc),a3
+		lea	RAM_BSFXChannel(pc),a4
 	endif
-		move.w	(a3,d3.w),d0
+		move.w	(a4,d3.w),d0
 		beq.s	.psgnext
-		move.l	a1,a3
-		add.w	d0,a3
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
-		tst.b	TrackPlaybackControl(a3)
+		move.l	a1,a4
+		add.w	d0,a4
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a4)
+		tst.b	TrackPlaybackControl(a4)
 		bpl.s	.psgnext
 .psggotptr:
-		or.b	#1<<_resting,TrackPlaybackControl(a3)
+		or.b	#1<<_resting,TrackPlaybackControl(a4)
 .psgnext:
 		add.w	#TrackPsgSz,a5
 		dbf	d6,.psgloop
@@ -149,29 +166,29 @@ StopSFX:
 		move.b	TrackVoiceControl(a5),d3
 		add.b	d3,d3
 	if __smpsBSFX
-		lea	RAM_BSFXChannel(pc),a3
-		move.w	(a3,d3.w),d0
+		lea	RAM_BSFXChannel(pc),a4
+		move.w	(a4,d3.w),d0
 		beq.s	.fmgetptr
-		move.l	a1,a3
-		add.w	d0,a3
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
-		tst.b	TrackPlaybackControl(a3)
+		move.l	a1,a4
+		add.w	d0,a4
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a4)
+		tst.b	TrackPlaybackControl(a4)
 	 	bmi.s	.fmgotptr
 .fmgetptr:
 	endif
-		lea	RAM_BGMChannel(pc),a3
-		move.w	(a3,d3.w),d0
+		lea	RAM_BGMChannel(pc),a4
+		move.w	(a4,d3.w),d0
 	 	beq.s	.fmnext
-		move.l	a1,a3
-		add.w	d0,a3
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
-		tst.b	TrackPlaybackControl(a3)
+		move.l	a1,a4
+		add.w	d0,a4
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a4)
+		tst.b	TrackPlaybackControl(a4)
 	 	bpl.s	.fmnext
 .fmgotptr:
-		or.b	#1<<_resting,TrackPlaybackControl(a3)
-		exg.l	a3,a5
+		or.b	#1<<_resting,TrackPlaybackControl(a4)
+		exg.l	a4,a5
 		bsr.w	SetVoice
-		move.l	a3,a5
+		move.l	a4,a5
 .fmnext:
 		add.w	#TrackFmSz,a5
 		dbf	d6,.fmloop
@@ -187,26 +204,26 @@ StopSFX:
 		move.b	TrackVoiceControl(a5),d3
 		lsr.b	#3,d3
 	if __smpsBSFX
-		lea	RAM_BSFXChannel(pc),a3
-		move.w	(a3,d3.w),d0
+		lea	RAM_BSFXChannel(pc),a4
+		move.w	(a4,d3.w),d0
 		beq.s	.psggetptr
-		move.l	a1,a3
-		add.w	d0,a3
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
-		tst.b	TrackPlaybackControl(a3)
+		move.l	a1,a4
+		add.w	d0,a4
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a4)
+		tst.b	TrackPlaybackControl(a4)
 		bmi.s	.psggotptr
 .psggetptr:
 	endif
-		lea	RAM_BGMChannel(pc),a3
-		move.w	(a3,d3.w),d0
+		lea	RAM_BGMChannel(pc),a4
+		move.w	(a4,d3.w),d0
 		beq.s	.psgnext
-		move.l	a1,a3
-		add.w	d0,a3
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
-		tst.b	TrackPlaybackControl(a3)
+		move.l	a1,a4
+		add.w	d0,a4
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a4)
+		tst.b	TrackPlaybackControl(a4)
 		bpl.s	.psgnext
 .psggotptr:
-		or.b	#1<<_resting,TrackPlaybackControl(a3)
+		or.b	#1<<_resting,TrackPlaybackControl(a4)
 .psgnext:
 		add.w	#TrackPsgSz,a5
 		dbf	d6,.psgloop
@@ -226,28 +243,28 @@ StopBSFX:
 		moveq	#0,d3
 		move.b	TrackVoiceControl(a5),d3
 		add.b	d3,d3
-		lea	RAM_SFXChannel(pc),a3
-		move.w	(a3,d3.w),d0
+		lea	RAM_SFXChannel(pc),a4
+		move.w	(a4,d3.w),d0
 		beq.s	.fmgetptr
-		move.l	a1,a3
-		add.w	d0,a3
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
-		tst.b	TrackPlaybackControl(a3)
+		move.l	a1,a4
+		add.w	d0,a4
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a4)
+		tst.b	TrackPlaybackControl(a4)
 	 	bmi.s	.fmgotptr
 .fmgetptr:
-		lea	RAM_BGMChannel(pc),a3
-		move.w	(a3,d3.w),d0
+		lea	RAM_BGMChannel(pc),a4
+		move.w	(a4,d3.w),d0
 	 	beq.s	.fmnext
-		move.l	a1,a3
-		add.w	d0,a3
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
-		tst.b	TrackPlaybackControl(a3)
+		move.l	a1,a4
+		add.w	d0,a4
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a4)
+		tst.b	TrackPlaybackControl(a4)
 	 	bpl.s	.fmnext
 .fmgotptr:
-		or.b	#1<<_resting,TrackPlaybackControl(a3)
-		exg.l	a3,a5
+		or.b	#1<<_resting,TrackPlaybackControl(a4)
+		exg.l	a4,a5
 		bsr.w	SetVoice
-		move.l	a3,a5
+		move.l	a4,a5
 .fmnext:
 		add.w	#TrackFmSz,a5
 		dbf	d6,.fmloop
@@ -262,25 +279,25 @@ StopBSFX:
 		moveq	#0,d3
 		move.b	TrackVoiceControl(a5),d3
 		lsr.b	#3,d3
-		lea	RAM_SFXChannel(pc),a3
-		move.w	(a3,d3.w),d0
+		lea	RAM_SFXChannel(pc),a4
+		move.w	(a4,d3.w),d0
 		beq.s	.psggetptr
-		move.l	a1,a3
-		add.w	d0,a3
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
-		tst.b	TrackPlaybackControl(a3)
+		move.l	a1,a4
+		add.w	d0,a4
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a4)
+		tst.b	TrackPlaybackControl(a4)
 		bmi.s	.psggotptr
 .psggetptr:
-		lea	RAM_BGMChannel(pc),a3
-		move.w	(a3,d3.w),d0
+		lea	RAM_BGMChannel(pc),a4
+		move.w	(a4,d3.w),d0
 		beq.s	.psgnext
-		move.l	a1,a3
-		add.w	d0,a3
-		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a3)
-		tst.b	TrackPlaybackControl(a3)
+		move.l	a1,a4
+		add.w	d0,a4
+		and.b	#$FF!(1<<_sfxoverride),TrackPlaybackControl(a4)
+		tst.b	TrackPlaybackControl(a4)
 		bpl.s	.psgnext
 .psggotptr:
-		or.b	#1<<_resting,TrackPlaybackControl(a3)
+		or.b	#1<<_resting,TrackPlaybackControl(a4)
 .psgnext:
 		add.w	#TrackPsgSz,a5
 		dbf	d6,.psgloop
@@ -830,17 +847,22 @@ GetVolume:
 .envcmd:	add.w	d1,d0
 .noenv:
 		move.b	TrackVoiceControl(a5),d3
-		tst.b	v_driverflags2(a1)			; is underwater muffle enabled?
-		bpl.s	.nouservol
+	if v_driverflags.muffle=7
+		tst.b	v_driverflags(a1)			; is underwater muffle enabled?
+		bpl.s	.nomuffle
+	else
+		btst	#v_driverflags.muffle,v_driverflags(a1)
+		beq.s	.nomuffle
+	endif
 		btst	#_nomuffle,TrackPlaybackControl(a5)
-		bne.s	.nouservol
+		bne.s	.nomuffle
 		cmp.b	#$40,d3					; SendVoiceTL handles it for FM
-		blo.s	.nouservol
+		blo.s	.nomuffle
 		add.w	#$10,d0					; PSG volume
 		tst.b	d3
-		bmi.s	.nouservol
+		bmi.s	.nomuffle
 		add.w	#$38-$10,d0				; PCM volume ; TODO: if supported, specific muffling flag on the PCM driver side
-.nouservol:
+.nomuffle:
 		smpsMakeChannelRamIndex d1,d3
 		lea	RAM_BGMChannel(pc),a0
 		move.w	d1,d2

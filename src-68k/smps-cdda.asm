@@ -41,21 +41,21 @@ WriteToMDPlus:
 mdpcoderange_end:
 
 PauseCDDA:
-		btst	#v_driverflags2.mdplus,v_driverflags2(a1)
+		btst	#v_hardware.mdplus,v_hardware(a1)
 		bne.s	.mdp
 		rts
 .mdp:		move.w	#msd_comm_pause<<8,d1
 		bra.s	WriteToMDPlus
 
 ResumeCDDA:
-		btst	#v_driverflags2.mdplus,v_driverflags2(a1)
+		btst	#v_hardware.mdplus,v_hardware(a1)
 		bne.s	.mdp
 		rts
 .mdp:		move.w	#msd_comm_resume<<8,d1
 		bra.s	WriteToMDPlus
 
 StopCDDA:
-		btst	#v_driverflags2.mdplus,v_driverflags2(a1)
+		btst	#v_hardware.mdplus,v_hardware(a1)
 		bne.s	.mdp
 		rts
 .mdp:		move.w	#msd_comm_pause<<8,d1
@@ -70,7 +70,7 @@ PlayCDDA:
 		cmp.b	#99<<1,d0
 		bhi.s	.invalid
 	endif
-		btst	#v_driverflags2.mdplus,v_driverflags2(a1)
+		btst	#v_hardware.mdplus,v_hardware(a1)
 		bne.s	.mdp
 		rts
 .mdp:

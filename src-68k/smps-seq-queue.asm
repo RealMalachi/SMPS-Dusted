@@ -79,11 +79,12 @@ Cmd_FadeIn:
 ; bit 1 set stops SFX
 ; bit 2 set stops Background SFX (BSFX)
 ; bit 3 set stops PCM SFX (PSFX)
+; bit 7 set clears various sound-altering flags
 Cmd_StopSound:
 	if __smpsBSFX
-		moveq_	~%00001111,d0
+		moveq_	$FF!%10001111,d0
 	else
-		moveq_	~%00001011,d0
+		moveq_	$FF!%10001011,d0
 	endif
 		and.b	d7,d0
 		beq.s	.valid
@@ -91,6 +92,10 @@ Cmd_StopSound:
 .valid:
 		tst.b	d7
 		beq.w	StopAllSound
+;		tst.b	d7
+		bpl.s	.notflags
+		bsr.w	StopSoundFlags
+.notflags:
 		btst	#3,d7
 		beq.s	.notpsfx
 		moveq	#-1,d0
@@ -137,9 +142,9 @@ Cmd_SetBitFlag:
 		jmp	.table(pc,d0.w)
 .table:
 		dc.w (v_driverflags.speedsong)<<13|v_driverflags,Cmd_SetBitFlag_Speed-.table	; 0 ; tempo speedup
-		dc.w (v_driverflags.mono)<<13|v_driverflags,Cmd_SetBitFlag_Mono-.table		; 2 ; stereo/mono
-		dc.w (v_driverflags.ssgoff)<<13|v_driverflags,Cmd_SetBitFlag_SSG-.table		; 4 ; SSG-EG
-		dc.w 7<<13|v_driverflags2,Cmd_SetBitFlag_Muffle-.table				; 6 ; water muffle
+		dc.w (v_driverflags.mono)<<13     |v_driverflags,Cmd_SetBitFlag_Mono-.table	; 2 ; stereo/mono
+		dc.w (v_driverflags.ssgoff)<<13   |v_driverflags,Cmd_SetBitFlag_SSG-.table	; 4 ; SSG-EG
+		dc.w (v_driverflags.muffle)<<13   |v_driverflags,Cmd_SetBitFlag_Muffle-.table	; 6 ; water muffle
 .tend:
 
 Cmd_SetBitFlag_Speed:

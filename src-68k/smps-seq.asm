@@ -160,13 +160,13 @@ HandleSequencer:
 
 ; I fucking hate this
 HandleCheapPalFix:
-		move.b	v_driverflags(a1),d0	; check if it's PAL
-		bpl.s	.pal_notyet
-		tst.b	v_paltimer(a1)		; check if the song wants to update slowly
+		btst	#v_driverflags.pal,v_driverflags(a1)	; check if it's PAL
+		beq.s	.pal_notyet
+		tst.b	v_paltimer(a1)				; check if the song wants to update slowly
 		bmi.s	.pal_notyet
-		subq.b	#1,v_paltimer(a1)	; count down 5 frames
+		subq.b	#1,v_paltimer(a1)			; count down 5 frames
 		bcc.s	.pal_notyet
-		move.b	#5,v_paltimer(a1)	; update BGM again
+		move.b	#5,v_paltimer(a1)			; update BGM again
 		bra.w	HandleSequencer
 .pal_notyet:
 

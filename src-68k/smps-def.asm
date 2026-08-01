@@ -282,8 +282,8 @@ TrackFmSz:			ds.b 0
 v_startofram:			ds.b 0
 
 v_driverflags:			;ds.b 1
-.pal				equ 7	; must be 7
-.firecore			equ 6
+.muffle				equ 7	; should be 7
+.pal				equ 6
 .mono				equ 5
 .ssgoff				equ 4
 .paused				equ 3	; must be 3
@@ -293,11 +293,11 @@ v_driverflags:			;ds.b 1
 
 v_dataptr:			ds.l 1
 
-v_driverflags2:			ds.b 1
-.muffle				equ 7	; must be 7
+v_hardware:			ds.b 1
 .mdplus				equ 0	; corresponds with bitfield in smps-init
 .mcd				equ 1	; ^
 .mars				equ 2	; ^	; because 32x isn't a valid label and x32 is cringe
+.firecore			equ 3
 
 v_communication:		ds.b __smpsCommBytes	; generally used for syncing gameplay with music
 v_communication_end:

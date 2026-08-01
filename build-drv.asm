@@ -40,6 +40,7 @@ command equ cmpid
 	cmddef cmd_StopSFX,		$F302
 	cmddef cmd_StopBSFX,		$F304
 	cmddef cmd_StopPSFX,		$F308
+	cmddef cmd_StopFlags,		$F380
 	cmddef cmd_SpeedOff,		$F400
 	cmddef cmd_SpeedOn,		$F401
 	cmddef cmd_PanStereo,		$F402

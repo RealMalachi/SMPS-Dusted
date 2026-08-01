@@ -4,13 +4,15 @@
 ; a1 = driver ram
 ; d0.l = desired add-ons bitfield (see below)
 ; OUTPUT
-; d0.l = enabled add-ons bitfield (see below)
+; d0.l = enabled/acknowledged add-ons bitfield (see below)
 ; bitfield:
-; ........ ........ ........ ....CXDP
-; P = (MD) MDplus: CDDA
-; D = (MD) MegaCD: CDDA, PCM
-; X = (MD) 32X:    PWM
-; C = (Pico) Yamaha Copera: FM, PCM
+; ........ ........ ......MC ....FXDP
+; P = (MD) MDplus
+; D = (MD) MegaCD
+; X = (MD) 32X
+; F = (MD) Firecore
+; C = (Pico) Yamaha Copera
+; M = (Pico) MegaPico
 ; ---------------------------------------------------------------------------
 InitDriver:
 		cmp.w	#__smpsDataVer,drvdata.version(a0)
@@ -46,7 +48,7 @@ InitDriver:
 		bsr.w	DetectMDPlus
 		tst.b	d2
 		bne.s	.nomdp
-		or.b	#1<<v_driverflags2.mdplus,v_driverflags2(a1)
+		or.b	#1<<v_hardware.mdplus,v_hardware(a1)
 .nomdp:
 ; detect Mega CD
 		btst	#1,d0
@@ -94,15 +96,18 @@ InitDriver:
 		cmp.b   #$01,d1
 		bne.s   .StartUp
 
-		or.b	#1<<v_driverflags2.mcd,v_driverflags2(a1)
+		or.b	#1<<v_hardware.mcd,v_hardware(a1)
 .nomcd:
+		btst	#3,d0
+		beq.s	.nofire
 		bsr.s	DetectFirecore
-		seq	d1
-		and.w	#1<<v_driverflags.firecore|1<<v_driverflags.ssgoff,d1
-		moveq	#1,d2					; 0 = NTSC, 1 = PAL
-		and.w	(vdpctrl).l,d2
-		ror.b	#8-v_driverflags.pal,d2			; move to appropriate bit (should be 7)
-		or.b	d2,d1
+		bne.s	.nofire
+		or.b	#1<<v_driverflags.ssgoff,v_driverflags(a1)
+		or.b	#1<<v_hardware.firecore,v_hardware(a1)
+.nofire:
+		moveq	#1,d1					; 0 = NTSC, 1 = PAL
+		and.w	(vdpctrl).l,d1
+		ror.b	#8-v_driverflags.pal,d1			; move to appropriate bit (should be 7)
 		or.b	d1,v_driverflags(a1)
 
 		bsr.w	DACInitDriver
@@ -114,8 +119,8 @@ InitDriver:
 
 		bsr.w	StopAllSound
 
-		moveq	#1<<v_driverflags2.mdplus|1<<v_driverflags2.mcd|1<<v_driverflags2.mars,d0
-		and.b	v_driverflags2(a1),d0
+		moveq	#1<<v_hardware.mdplus|1<<v_hardware.mcd|1<<v_hardware.mars,d0
+		and.b	v_hardware(a1),d0
 		rts
 ; -------------------------------------------------------------------------
 ; Detects Firecore and actually enhances game if detected. I know, shocking.

@@ -11,22 +11,31 @@ input:
 - a1 = driver ram
 - d0.l = desired external hardware bitfield
 output
-- d0.l = enabled external hardware bitfield
+- d0.l = enabled/acknowledged external hardware bitfield
 trashes: d0-d7,a0-a6
 
 description:
 Initialises ram and sound hardware
 
-Both the input and output of d0 share a bitfield, corresponding to additional sound hardware
-- The input denotes what hardware the game wishes the driver to utilize
+Both the input and output of d0 share a bitfield, corresponding to additional/different sound hardware from the base target
+- The input denotes what hardware the game wishes the driver to support
 - The output communicates what the driver could access
 - Many of the bits are unmapped, they should be initialised to 0 and avoided past initiation
+- Any bits that aren't used by the drivers target (pico bits for md, etc) should also be init to 0 and avoided
 ```
-........ ........ ........ ....CXDP
-P = (MD) MDplus: CDDA
-D = (MD) MegaCD: CDDA, PCM
-X = (MD) 32X:    PWM
-C = (Pico) Yamaha Copera: FM, PCM
+........ ........ ......MC ....FXDP
+P = (MD) MDplus
+    - Adds CDDA support
+D = (MD) MegaCD
+    - Adds CDDA and PCM support
+X = (MD) 32X
+    - Adds PWM support
+F = (MD) Firecore
+    - Adds compatibility
+C = (Pico) Yamaha Copera
+    - Adds FM (YMF262) and PCM support
+M = (Pico) MegaPico
+    - Adds FM and PCM (YM2612) support
 ```
 
 example:

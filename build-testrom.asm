@@ -11,6 +11,7 @@ __smpsRamPad		equ $0002
 __smpsEnableMDP		equ 1
 __smpsEnableMCD		equ 1
 __smpsEnable32X		equ 1
+__smpsAckFirecore	equ 1
 ; ---------------------------------------------------------------------------
 	if __smpsPrintMessages
 	message "Pass \{MOMPASS}"
@@ -529,7 +530,7 @@ CallAPI:
 .initdriver:
 		lea	(SMPS_DriverData).l,a0
 		lea	v_soundram,a1
-		moveq	#__smpsEnableMDP<<0|__smpsEnableMCD<<1|__smpsEnable32X<<2,d0
+		moveq	#__smpsEnableMDP<<0|__smpsEnableMCD<<1|__smpsEnable32X<<2|__smpsAckFirecore<<3,d0
 		jsr	(SMPS_InitDriver).l
 		move.l	d0,v_externalsound
 		rts
@@ -581,13 +582,17 @@ CallShortcut:
 .lut:
 		bra.w	.stopall
 		bra.w	.stopbgm
+		bra.w	.stopbgmandflags
 		bra.w	.stopsfx
 		bra.w	.stopbsfm
 		bra.w	.stoppcmsfx
+		bra.w	.stopflags
 		bra.w	.stereo
 		bra.w	.mono
 		bra.w	.ssgon
 		bra.w	.ssgoff
+		bra.w	.speedoff
+		bra.w	.speedon
 		bra.w	.muffleoff
 		bra.w	.muffleon
 		bra.w	.fadeout
@@ -611,6 +616,12 @@ CallShortcut:
 .stoppcmsfx:
 		move.w	#cmd_StopPSFX,d0
 		bra.w	.queuesound
+.stopflags:
+		move.w	#cmd_StopFlags,d0
+		bra.w	.queuesound
+.stopbgmandflags:
+		move.w	#cmd_StopBGM|cmd_StopFlags,d0
+		bra.w	.queuesound
 .stereo:
 		move.w	#cmd_PanStereo,d0
 		bra.w	.queuesound
@@ -622,6 +633,12 @@ CallShortcut:
 		bra.w	.queuesound
 .ssgoff:
 		move.w	#cmd_SsgOff,d0
+		bra.w	.queuesound
+.speedon:
+		move.w	#cmd_SpeedOn,d0
+		bra.w	.queuesound
+.speedoff:
+		move.w	#cmd_SpeedOff,d0
 		bra.w	.queuesound
 .muffleoff:
 		move.w	#cmd_MuffleOff,d0
@@ -717,6 +734,11 @@ InitRender:
 		lea	ScreenText.enabled_32x(pc),a0
 		bsr.w	PrintText
 .no32x:
+		btst	#3,d7
+		beq.s	.nofire
+		lea	ScreenText.ack_firecore(pc),a0
+		bsr.w	PrintText
+.nofire:
 		rts
 
 rentext macro list,index
@@ -905,13 +927,17 @@ ScreenText:
 .shortcut:
 		dc.l .s_stopall
 		dc.l .s_stopbgm
+		dc.l .s_stopbgmflag
 		dc.l .s_stopsfx
 		dc.l .s_stopbsfm
 		dc.l .s_stoppcmsfx
+		dc.l .s_stopflags
 		dc.l .s_stereo
 		dc.l .s_mono
 		dc.l .s_ssgon
 		dc.l .s_ssgoff
+		dc.l .s_speedoff
+		dc.l .s_speedon
 		dc.l .s_muffleoff
 		dc.l .s_muffleon
 		dc.l .s_fadeout
@@ -947,6 +973,7 @@ ScreenText:
 .enabled_mdp:	dc.b " MD-Plus Enabled",0
 .enabled_mcd:	dc.b " MegaCD Mode 1 Enabled",0
 .enabled_32x:	dc.b " 32X PWM Enabled",0
+.ack_firecore:	dc.b " Firecore Acknowledged",0
 
 .amax		equ 14
 .a_init:	dctxt .amax,"InitDriver"
@@ -961,16 +988,20 @@ ScreenText:
 .a_misc:	dctxt .amax,"RunMiscCommand"
 .a_cdda:	dctxt .amax,"PlayCDDA"
 
-.smax		equ 13
+.smax		equ 15
 .s_stopall:	dctxt .smax,"Stop All"
 .s_stopbgm:	dctxt .smax,"Stop BGM"
+.s_stopbgmflag:	dctxt .smax,"Stop BGM+Flags"
 .s_stopsfx:	dctxt .smax,"Stop SFX"
 .s_stopbsfm:	dctxt .smax,"Stop BSFX"
 .s_stoppcmsfx:	dctxt .smax,"Stop PCM SFX"
+.s_stopflags:	dctxt .smax,"Stop Flags"
 .s_stereo:	dctxt .smax,"Stereo pan"
 .s_mono:	dctxt .smax,"Mono pan"
 .s_ssgon:	dctxt .smax,"SSG on"
 .s_ssgoff:	dctxt .smax,"SSG off"
+.s_speedoff:	dctxt .smax,"Speedup off"
+.s_speedon:	dctxt .smax,"Speedup on"
 .s_muffleoff:	dctxt .smax,"Muffle off"
 .s_muffleon:	dctxt .smax,"Muffle on"
 .s_fadeout:	dctxt .smax,"Fadeout"

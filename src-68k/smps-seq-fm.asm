@@ -244,7 +244,6 @@ FMSilenceAll:
 		subi.b	#$10-1,d0			; Move to TL operator 1 of next channel
 		swap	d3
 		dbf	d3,.chloop
-WriteFMchannel_exit:
 		rts
 ; ---------------------------------------------------------------------------
 SetVoicePan:
@@ -351,8 +350,13 @@ SendVoiceTL:
 		adda.w	d1,a3		; x32
 		adda.w	#24,a3		; Wants TL
 
-		tst.b	v_driverflags2(a1)			; is underwater muffle enabled?
+	if v_driverflags.muffle=7
+		tst.b	v_driverflags(a1)			; is underwater muffle enabled?
 		bpl.s	.nomuffle
+	else
+		btst	#v_driverflags.muffle,v_driverflags(a1)
+		beq.s	.nomuffle
+	endif
 		btst	#_nomuffle,TrackPlaybackControl(a5)	; is song going "nuh uh"?
 		bne.s	.nomuffle
 		addq.w	#4,a3		; Wants TL muffle
