@@ -119,7 +119,7 @@ InitDriver:
 
 		bsr.w	StopAllSound
 
-		moveq	#1<<v_hardware.mdplus|1<<v_hardware.mcd|1<<v_hardware.mars,d0
+		moveq	#1<<v_hardware.mdplus|1<<v_hardware.mcd|1<<v_hardware.mars|1<<v_hardware.firecore,d0
 		and.b	v_hardware(a1),d0
 		rts
 ; -------------------------------------------------------------------------
