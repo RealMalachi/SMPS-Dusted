@@ -1,0 +1,17 @@
+	if __smpsTarget=="fuckFM"
+	include "src-68k/fuckfm/pcm-def.asm"
+	elseif __smpsPCM=="null"
+	include "src-68k/null/pcm-def.asm"
+	elseif __smpsPCM=="MegaPCM1"
+	include "src-68k/mpcm1/pcm-def.asm"
+	elseif __smpsPCM=="MegaPCM2"
+	include "src-68k/mpcm2/pcm-def.asm"
+;	elseif __smpsPCM=="DualPCM"
+;	include "src-68k/dualpcm/pcm-def.asm"
+;	elseif __smpsPCM=="DualPCM-FlexEd"
+;	include "src-68k/dualpcm-flexed/pcm-def.asm"
+;	elseif __smpsPCM=="DualClown"
+;	include "src-68k/dualclown/pcm-def.asm"
+	else
+	fatal "Unknown PCM type"
+	endif

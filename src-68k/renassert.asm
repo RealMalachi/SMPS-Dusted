@@ -203,6 +203,6 @@ ErrorVDP:
 	dc.b 0							; $91, window h position
 	dc.b 0							; $92, window v position
 .end:
-ErrorFont:	binclude "src-68k/smps-renassert-font.1bpp"
+ErrorFont:	binclude "src-68k/renassert-font.1bpp"
 .end:
 	even

@@ -18,10 +18,10 @@ moveq_ macro val,reg
 	endm
 ; ---------------------------------------------------------------------------
 	include "_settings.asm"
-	include "src-68k/smps-def-pcm.asm"
-	include "src-68k/smps-def.asm"
+	include "src-68k/def-pcm.asm"
+	include "src-68k/def.asm"
 	org 0
-	include "src-68k/smps-main.asm"
+	include "src-68k/main.asm"
 ; ---------------------------------------------------------------------------
 cmddef macro command,cmpid
 	if "cmpid"<>""

@@ -57,7 +57,7 @@ musidtrack set musidtrack+1
 	endm
 ; ---------------------------------------------------------------------------
 	include "_settings.asm"
-	include "src-68k/smps-def-pcm.asm"
+	include "src-68k/def-pcm.asm"
 	include "_smps2asm.asm"
 	org 0
 	include "_sndbank1.asm"
