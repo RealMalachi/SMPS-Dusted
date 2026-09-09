@@ -167,7 +167,11 @@ RomStart:
 		dcpad.b	48," ","SMPS DUSTED TEST ROM"
 		dc.b	$43,$F9,$00,$20,$01,$80,$72,$0A,$10,$11,$04,$00,$00,"x"	; full blue spheres
 		dc.w	0
-		dcpad.b	16," ","JC"
+		dc.b	"J"
+		if __smpsEnableMCD
+		dc.b	"C"
+		endif
+		dc.b	[$1A0-(*)]" "
 		dc.l	RomStart,RomEnd-1,$FF0000,$FFFFFF
 		dc.b	[$1F0-(*)]" "
 		dcpad.b	16," ","JUE"
