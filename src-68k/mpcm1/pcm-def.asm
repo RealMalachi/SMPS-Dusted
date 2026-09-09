@@ -5,6 +5,8 @@ fmstart macro ymstatreg
 	SMPS_waitZ80
 	endm
 fmstop macro ymstatreg
+	or.l	d0,d0				; 8
+	or.l	d0,d0				; 8
 -	tst.b	(ymstatreg)
 	bmi.s	-
 	move.b	#$2A,yma0-ymstat(ymstatreg)

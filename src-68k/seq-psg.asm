@@ -143,20 +143,20 @@ PSGPrepareNote:
 		bhs.s	.noise
 		moveq_	$E0,d0
 		and.b	d2,d0					; Get channel bits
-		andi.w	#$3FF,d6
-		moveq	#$F,d1
-		and.w	d6,d1					; Low nibble of frequency
-		or.b	d0,d1					; Latch tone data to channel
-		lsr.w	#4,d6					; Get upper 6 bits of frequency
 		btst	#_special,TrackPlaybackControl(a5)
 		beq.s	.notpsg3noise
 		or.b	#$E0,d2
 		cmp.b	v_lastpsg4(a1),d2
 		beq.s	.notpsg3noise
-		move.b	d2,v_lastpsg4(a1)
 		move.b	d2,(a0)					; 1110.nnn
+		move.b	d2,v_lastpsg4(a1)
 .notpsg3noise:
+		moveq	#$F,d1
+		and.w	d6,d1					; Low nibble of frequency
+		or.b	d0,d1					; Latch tone data to channel
 		move.b	d1,(a0)					; 1cc0ffff
+		and.w	#$3FF,d6
+		lsr.w	#4,d6					; Upper 6 bits of frequency
 		move.b	d6,(a0)					; 0.ffffff
 		rts
 .noise:

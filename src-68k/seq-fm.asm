@@ -166,14 +166,18 @@ FMPrepareNote:
 .fm1:
 		add.b	#$A4,d0
 		fmwrite	a0,d0,d1,0
-		subq.w	#4,d0
+		subq.w	#4,d0				; 4
+		or.l	d0,d0				; 8
+		nop					; 4
 		fmwrite	a0,d0,d6,0
 		fmstop	a0
 		rts
 .fm2:
 		add.b	#$A4,d0
 		fmwrite	a0,d0,d1,1
-		subq.w	#4,d0
+		subq.w	#4,d0				; 4
+		or.l	d0,d0				; 8
+		nop					; 4
 		fmwrite	a0,d0,d6,1
 		fmstop	a0
 		;rts

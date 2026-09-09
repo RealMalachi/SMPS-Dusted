@@ -4,19 +4,21 @@ fmstart macro ymstatreg
 	lea	ymstat,ymstatreg
 .chk_ready:
 	SMPS_waitZ80
-;	tst.b	MPCM_Z80_RAM+Z_MPCM_DriverReady-ymstat(a0)
-;	bne.s	.ready
-;	SMPS_startZ80
-;	swap	d2				; 4
-;	move.w	#11-1,d2			; 8
-;	dbf	d2,*				; 14*11-4
-;	nop					; 4
-;	swap	d2				; 4
-;	SMPS_stopZ80				; ^170 cycles!
-;	bra.s	.chk_ready			; 10 (between stop and wait you should wait 12 cycles)
-;.ready:
+	tst.b	MPCM_Z80_RAM+Z_MPCM_DriverReady-ymstat(a0)
+	bne.s	.ready
+	SMPS_startZ80
+	swap	d2				; 4
+	move.w	#11-1,d2			; 8
+	dbf	d2,*				; 14*11-4
+	nop					; 4
+	swap	d2				; 4
+	SMPS_stopZ80				; ^170 cycles!
+	bra.s	.chk_ready			; 10 (between stop and wait you should wait 12 cycles)
+.ready:
 	endm
 fmstop macro ymstatreg
+	or.l	d0,d0				; 8
+	or.l	d0,d0				; 8
 -	tst.b	(ymstatreg)
 	bmi.s	-
 	move.b	#$2A,yma0-ymstat(ymstatreg)
