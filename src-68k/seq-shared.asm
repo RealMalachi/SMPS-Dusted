@@ -26,6 +26,7 @@ StopSoundFlags:
 		rts
 ; ===========================================================================
 StopBGM:
+	if __smpsJingle
 ; clear saved jingle song
 		bclr	#v_driverflags.jingle,v_driverflags(a1)
 		beq.s	.nojingle
@@ -34,11 +35,11 @@ StopBGM:
 		move.w	#((v_1up_ram_copy_end-v_1up_ram_copy)/4)-1,d1
 .prior:		move.l	d0,(a0)+
 		dbf	d1,.prior
-	if (v_1up_ram_copy_end-v_1up_ram_copy)&2
+		if (v_1up_ram_copy_end-v_1up_ram_copy)&2
 		move.w	d0,(a0)+
-	endif
+		endif
 .nojingle:
-
+	endif
 
 		lea	v_music_pcm_tracks(a1),a5
 		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d6
@@ -576,11 +577,11 @@ GetFrequency:
 		bra.s	.nomodenv
 .nomodalgo:
 ; modulation envelopes
+	if __smpsModEnv
 		;moveq	#0,d0
 		;move.b	TrackModulationCtrl(a5),d0
 		add.b	d0,d0			; remove sign bit
 		beq.s	.nomodenv
-	if __smpsModEnv
 		move.l	TrackModEnvPtr(a5),a0
 		move.b	-2(a0,d0.w),-(sp)
 		move.w	(sp)+,d1
@@ -612,15 +613,19 @@ GetFrequency:
 		endif
 		ext.w	d1
 .gotmodenv2:
-	if __smpsRevFreq<2
+		if __smpsRevFreq<2
 		add.w	d1,d6
-	else
+		else
 		sub.w	d1,d6
-	endif
+		endif
 		tst.b	d2					; we're just updating the frequency dont change the index
 		bmi.s	.nomodenv
 		move.b	d0,TrackModEnvIndex(a5)
 	elseif __smpsWarnDisabledUsage
+		;moveq	#0,d0
+		;move.b	TrackModulationCtrl(a5),d0
+		add.b	d0,d0			; remove sign bit
+		beq.s	.nomodenv
 		SMPS_assert "GetFrequency: __smpsModEnv is disabled"
 	endif
 .nomodenv:
