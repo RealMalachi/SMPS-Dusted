@@ -808,12 +808,13 @@ SMPS_PcmDrumTable:
 ; FM Drums
 ; ---------------------------------------------------------------------------
 SMPS_FmDrumTable:
-;	smpsEnvTable START,$81
-;	smpsEnvTable END,$E0
+	smpsEnvTable START,$81
+	smpsEnvTable FmDrum_01,fdTest1
+	smpsEnvTable END,$E0
+FmDrum_01:	smpsFmDrum $125E,pSlapBass2,$00,fTone_02,mEnv_04,panCentre
 ; ---------------------------------------------------------------------------
 ; PSG Drums
 ; ---------------------------------------------------------------------------
-; noise,volume,volenv
 SMPS_PsgDrumTable:
 	smpsEnvTable START,$81
 ;	smpsEnvTable PsgDrum_01
@@ -828,17 +829,17 @@ SMPS_PsgDrumTable:
 	smpsEnvTable PsgDrum_S2Bbit_bit4,pdS28bit_04
 	smpsEnvTable PsgDrum_S2Bbit_bit5,pdS28bit_05
 	smpsEnvTable END,$E0
-;PsgDrum_01:	dc.b  $E5,1<<3,fTone_02
-;PsgDrum_02:	dc.b  $E4,1<<3,fTone_03
-;PsgDrum_03:	dc.b  $E4,1<<3,fTone_02
-;PsgDrum_04:	dc.b  $E4,2<<3,fTone_01
-;PsgDrum_05:	dc.b  $E4,2<<3,fTone_02
-PsgDrum_S2Bbit_bit0:	dc.b $E4,2<<3,fS28bit_01
-PsgDrum_S2Bbit_bit1:	dc.b $E4,2<<3,fS28bit_03
-PsgDrum_S2Bbit_bit2:	dc.b $E5,2<<3,fS28bit_02
-PsgDrum_S2Bbit_bit3:	dc.b $E4,2<<3,fS28bit_03
-PsgDrum_S2Bbit_bit4:	dc.b $E6,3<<3,fS28bit_03
-PsgDrum_S2Bbit_bit5:	dc.b $E4,4<<3,fS28bit_04
+;PsgDrum_01:		smpsPsgDrum nnN20,1,fTone_02
+;PsgDrum_02:		smpsPsgDrum nnN10,1,fTone_03
+;PsgDrum_03:		smpsPsgDrum nnN10,1,fTone_02
+;PsgDrum_04:		smpsPsgDrum nnN10,2,fTone_01
+;PsgDrum_05:		smpsPsgDrum nnN10,2,fTone_02
+PsgDrum_S2Bbit_bit0:	smpsPsgDrum nnN10,2,fS28bit_01
+PsgDrum_S2Bbit_bit1:	smpsPsgDrum nnN10,2,fS28bit_03
+PsgDrum_S2Bbit_bit2:	smpsPsgDrum nnN20,2,fS28bit_02
+PsgDrum_S2Bbit_bit3:	smpsPsgDrum nnN10,2,fS28bit_03
+PsgDrum_S2Bbit_bit4:	smpsPsgDrum nnN40,3,fS28bit_03
+PsgDrum_S2Bbit_bit5:	smpsPsgDrum nnN10,4,fS28bit_04
 
 ; ---------------------------------------------------------------------------
 ; Music	index

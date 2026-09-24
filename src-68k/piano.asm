@@ -9,7 +9,7 @@
 ; - RNNNNNNN - note(approx), rest
 ; - FFFFFFFF - frequency/sample MSB
 ; - ffffffff - frequency/sample LSB
-; - 0VVVVVVV - volume
+; - VVVVVVVV - volume
 ; - RRRRLLLL - pan
 ; - TTTTTTTT - duration time MSB
 ; - tttttttt - duration time LSB
@@ -53,8 +53,9 @@ SetupPianoRoll:
 		move.b	d0,(a6)+
 		move.w	d6,(a6)+
 		move.b	TrackVolume(a5),d2
-		bpl.s	.vol
-		moveq	#$7F,d2
+		add.b	d2,d2
+		bcc.s	.vol
+		moveq_	$FF,d2
 .vol:		move.b	d2,(a6)+
 		move.b	d1,(a6)+
 	if __smpsSeqTimeSize
@@ -96,14 +97,22 @@ SetupPianoRoll:
 ; ---------------------------------------------------------------------------
 ; PSG frequencies range from $3FF-$000 (higher is lower pitch)
 ; Margin of error is necessary due to detune/modulation/portamento
+.psgnt:		dc.b (7*12)+10,(6*12)+10,(5*12)+10,0		; nA7,nA6,nA5,psg3
+		dc.b (7*12)+10,(6*12)+10,(5*12)+10,0		; ditto
 .psg3:
+		move.b	TrackVoiceControl(a5),d0
+		cmp.b	#$C0,d0
+		beq.s	.psg
+		and.w	#7,d0
+		move.b	.psgnt(pc,d0.w),d0
+		bne.s	.psgnc
 .psg:		moveq	#-1,d2
 		bsr.w	GetFrequency
 		bmi.s	.psg_rest
 		and.w	#$3FF,d6
 		lea	PSGFrequencies(pc),a0
 		move.w	(a0)+,d2
-		moveq	#$5F,d0
+		moveq	#((PSGFrequenciesEnd-PSGFrequencies)/2)-1-1,d0
 .psgl:		move.w	d2,d3
 		move.w	(a0)+,d2
 		sub.w	d2,d3
@@ -111,14 +120,9 @@ SetupPianoRoll:
 		add.w	d2,d3
 		cmp.w	d6,d3
 		dble	d0,.psgl
-		if __smpsDebug
-		bgt.s	.psger1
-		lea	PSGFrequenciesEnd(pc),a3
-		cmp.l	a3,a0
-		bhi.s	.psger2
-		endif
 		neg.w	d0
-		add.w	#$5F,d0
+		add.w	#((PSGFrequenciesEnd-PSGFrequencies)/2)-1,d0
+.psgnc:
 		moveq	#-1,d1
 		rts
 .psger1:	SMPS_assert "Piano PSG error 1"
@@ -133,7 +137,7 @@ SetupPianoRoll:
 .pcm:
 		moveq	#0,d6
 		move.b	TrackSavedDAC(a5),d6
-		moveq	#-1,d0
+		moveq	#4*12,d0		; assuming pcm is tuned to nC4
 		move.b	TrackAMSFMSPan(a5),d1	; ........ RL......
 		ext.w	d1			; RRRRRRRR RL......
 		add.b	d1,d1			; RRRRRRRR L......0
@@ -144,21 +148,23 @@ SetupPianoRoll:
 .fm_rest:
 		moveq	#-1,d0
 		moveq	#-1,d6
-		move.b	TrackAMSFMSPan(a5),d1	; ........ RL......
-		ext.w	d1			; RRRRRRRR RL......
-		add.b	d1,d1			; RRRRRRRR L......0
-		smi.b	d1			; RRRRRRRR LLLLLLLL
-		lsr.w	#4,d1			; ....RRRR RRRRLLLL
-		rts
+		bra.w	.fmpcm_pan
 ; ---------------------------------------------------------------------------
-; FM frequencies range from $0000-$3FFF (lower is lower pitch)
+; FM frequencies range from $000-$7FF and octaves from $0000-$3800 (lower is lower pitch)
 ; Margin of error is necessary due to detune/modulation/portamento
 .fm:		moveq	#-1,d2
 		bsr.w	GetFrequency
 		bmi.s	.fm_rest
-		and.w	#$3FFF,d6
+		move.w	d6,-(sp)
+		move.w	d6,d1			; d1 = octave x12
+		and.w	#7<<11,d1		; get octave
+		rol.w	#(16-11)+2,d1		; <<2 == x4
+		move.w	d1,d0
+		add.w	d1,d1			; x8
+		add.w	d0,d1			; x8 + x4 = x12
+		and.w	#$7FF,d6		; d6 = note
 		lea	FMFrequencies(pc),a0
-		moveq	#$5F,d0
+		moveq	#(12-1)-1,d0
 .fml:		move.w	(a0)+,d2
 		move.w	(a0),d3
 		sub.w	d2,d3
@@ -166,19 +172,19 @@ SetupPianoRoll:
 		add.w	d2,d3
 		cmp.w	d6,d3
 		dbge	d0,.fml
-		if __smpsDebug
-		blt.s	.fmer1
-		lea	FMFrequenciesEnd-2(pc),a3
-		cmp.l	a3,a0
-		bhi.s	.fmer2
-		endif
 		neg.w	d0
-		add.w	#$5F,d0
+	if __smpsFMTable=0
+		add.w	#12-1-1,d0
+	else
+		add.w	#12-1,d0
+	endif
+		add.w	d1,d0
+		move.w	(sp)+,d6
+; TODO: panenv
+.fmpcm_pan:
 		move.b	TrackAMSFMSPan(a5),d1	; ........ RL......
 		ext.w	d1			; RRRRRRRR RL......
 		add.b	d1,d1			; RRRRRRRR L......0
 		smi.b	d1			; RRRRRRRR LLLLLLLL
 		lsr.w	#4,d1			; ....RRRR RRRRLLLL
 		rts
-.fmer1:		SMPS_assert "Piano FM error 1"
-.fmer2:		SMPS_assert "Piano FM error 2"

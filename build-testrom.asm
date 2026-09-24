@@ -7,7 +7,7 @@
 ; ---------------------------------------------------------------------------
 __smpsDebug		equ 1
 __smpsRamLoc		equ $FF8000
-__smpsRamPad		equ $0002
+__smpsRamPad		equ $10
 __smpsEnableMDP		equ 1
 __smpsEnableMCD		equ 1
 __smpsEnable32X		equ 1

@@ -65,6 +65,10 @@ SMPSCPUVer	equ "68K"	; 68K, Z80
 	nextenum	nFs6,nGb6=nFs6,nG6,nGs6,nAb6=nGs6,nA6,nAs6,nBb6=nAs6,nB6,nCb7=nB6,nBs6
 	nextenum	nC7=nBs6,nCs7,nDb7=nCs7,nD7,nDs7,nEb7=nDs7,nE7,nFb7=nE7,nEs7,nF7=nEs7
 	nextenum	nFs7,nGb7=nFs7,nG7,nGs7,nAb7=nGs7,nA7,nAs7,nBb7=nAs7
+; PSG4 Noise Note Equates
+	enum		nnRst=$80
+	nextenum	nnP10,nnP20,nnP40,nnPPSG3
+	nextenum	nnN10,nnN20,nnN40,nnNPSG3
 
 ; SMPS2ASM uses nMaxPSG for songs from S1/S2 drivers.
 ; nMaxPSG1 and nMaxPSG2 are used only for songs from S3/S&K/S3D drivers.
@@ -1096,6 +1100,14 @@ smpsEnvPan macro data
 	shift
 	smpsEnvPan ALLARGS
 	endif
+	endm
+; ---------------------------------------------------------------------------
+; you can also configure ams and pms via panval
+smpsFmDrum macro freq,voiceid,volval,volenv,modenv,panval
+	dc.b (freq)>>8,(freq)&$FF,voiceid,volval,volenv,modenv&$7F,panval
+	endm
+smpsPsgDrum macro noisenote,volval,volenv
+	dc.b $E0+(noisenote-nnP10),volval,volenv
 	endm
 ; ---------------------------------------------------------------------------
 ; Macros for FM instruments

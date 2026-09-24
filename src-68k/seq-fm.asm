@@ -44,6 +44,7 @@ FMDoNext:
 		bra.w	CoordFlag				; manipulates stack
 ; ---------------------------------------------------------------------------
 .gotnote:	bsr.s	FMSetFreq
+		moveq	#0,d5
 		move.b	(a4)+,d5
 		bpl.s	.gotnotetime
 		subq.w	#1,a4
@@ -68,30 +69,87 @@ FMDoNext:
 ; ===========================================================================
 FMSetFreq:
 	if __smpsFMTable=0
+.drumdiff	equ -2
 ; Unlike PSGSetFreq, this uses a 1-based index. This is a long standing oddity with SMPS-68K
 ; If note nC0 is played and transpose is -1, it can reach the hidden nB-1
 		subi.b	#$80,d5					; Make it a 1-based index
 		beq.s	.rest
 	else
+.drumdiff	equ 0
 		subi.b	#$81,d5
 		bcs.s	.rest
+	endif
+	if __smpsDrum
+		btst	#_drummode,TrackPlaybackControl(a5)
+		beq.s	.notemode
+
+		move.l	v_dataptr(a1),a0
+		moveq	#0,d0
+		move.w	drvdata.fmdrum(a0),d0
+		add.l	d0,a0
+		add.b	d5,d5
+		move.b	.drumdiff(a0,d5.w),-(sp)
+		move.w	(sp)+,d0
+		move.b	.drumdiff+1(a0,d5.w),d0
+		adda.w	d0,a0
+
+		move.b	(a0)+,TrackFreq(a5)
+		move.b	(a0)+,TrackFreq+1(a5)
+		move.b	(a0)+,TrackFmVoiceIndex(a5)
+		move.b	(a0)+,TrackVolume(a5)
+		move.b	(a0)+,TrackVolEnvCtrl(a5)
+		if __smpsModEnv
+		move.b	(a0)+,TrackModulationCtrl(a5)
+		else
+		clr.b	TrackModulationCtrl(a5)
+		addq.w	#1,a0
+		endif
+		move.b	(a0)+,TrackAMSFMSPan(a5)
+		bsr.w	FMNoteOff
+		bra.w	SetVoice
+.rest:		or.b	#1<<_resting,TrackPlaybackControl(a5)
+		move.w	#-1,TrackFreq(a5)
+		bra.w	FMNoteOff
+.notemode:
 	endif
 		add.b	TrackTranspose(a5),d5			; Add track transposition
 	if __smpsRevFreq
 		neg.w	d5
 		add.w	#12*8,d5
 	endif
-	if __smpsDebug
+
+	if __smpsFMClamp=0
+		if __smpsWarnDisabledUsage
 		cmp.w	#12*8,d5
-		bhi.s	.assert
+		bls.s	.valid
+		SMPS_assert "FMSetFreq: invalid frequency, TODO: print freq id"
+.valid:
+		endif
+		add.b	d5,d5
+		move.w	FMFrequencies(pc,d5.w),TrackFreq(a5)
+	else
+		divu.w	#12,d5		; d5 = div (octave)
+		move.l	d5,d0		; d0 = mod (note)
+		swap	d0
+		if __smpsFMClamp=1
+		cmp.w	#7,d5		; cap octave
+		bls.s	.nocap
+		moveq	#7,d5
+.nocap:
+		else
+		and.w	#7,d5		; wrap octave
+		endif
+		ror.w	#16-11,d5	; <<11
+		add.b	d0,d0
+		or.w	FMFrequencies(pc,d0.w),d5
+		move.w	d5,TrackFreq(a5)
 	endif
-		add.b	d5,d5					; Clear high byte and sign bit
-		move.w	FMFrequencies(pc,d5.w),TrackFreq(a5)	; Store new frequency
 		bra.w	FMNoteOff
+	if __smpsDrum=0
 .rest:		or.b	#1<<_resting,TrackPlaybackControl(a5)
 		move.w	#-1,TrackFreq(a5)
 		bra.w	FMNoteOff
-.assert:	SMPS_assert "FMSetFreq: invalid frequency, TODO: print freq id"
+	endif
 ; ===========================================================================
 ; FM Note Values:
 ;
@@ -104,27 +162,20 @@ FMSetFreq:
 ; This is important to keep this in mind when porting buggy songs.
 ; ---------------------------------------------------------------------------
 FMFrequencies:
-	if __smpsFMTable=0
-; b-0 to a#8
-	dc.w $025E,$0284,$02AB,$02D3,$02FE,$032D,$035C,$038F,$03C5,$03FF,$043C,$047C
-	dc.w $0A5E,$0A84,$0AAB,$0AD3,$0AFE,$0B2D,$0B5C,$0B8F,$0BC5,$0BFF,$0C3C,$0C7C
-	dc.w $125E,$1284,$12AB,$12D3,$12FE,$132D,$135C,$138F,$13C5,$13FF,$143C,$147C
-	dc.w $1A5E,$1A84,$1AAB,$1AD3,$1AFE,$1B2D,$1B5C,$1B8F,$1BC5,$1BFF,$1C3C,$1C7C
-	dc.w $225E,$2284,$22AB,$22D3,$22FE,$232D,$235C,$238F,$23C5,$23FF,$243C,$247C
-	dc.w $2A5E,$2A84,$2AAB,$2AD3,$2AFE,$2B2D,$2B5C,$2B8F,$2BC5,$2BFF,$2C3C,$2C7C
-	dc.w $325E,$3284,$32AB,$32D3,$32FE,$332D,$335C,$338F,$33C5,$33FF,$343C,$347C
-	dc.w $3A5E,$3A84,$3AAB,$3AD3,$3AFE,$3B2D,$3B5C,$3B8F,$3BC5,$3BFF,$3C3C,$3C7C
+	if __smpsFMClamp=0
+.r	equ 8
 	else
-; c-0 to a-6
-	dc.w $0284,$02AB,$02D3,$02FE,$032D,$035C,$038F,$03C5,$03FF,$043C,$047C,$04C0
-	dc.w $0A84,$0AAB,$0AD3,$0AFE,$0B2D,$0B5C,$0B8F,$0BC5,$0BFF,$0C3C,$0C7C,$0CC0
-	dc.w $1284,$12AB,$12D3,$12FE,$132D,$135C,$138F,$13C5,$13FF,$143C,$147C,$14C0
-	dc.w $1A84,$1AAB,$1AD3,$1AFE,$1B2D,$1B5C,$1B8F,$1BC5,$1BFF,$1C3C,$1C7C,$1CC0
-	dc.w $2284,$22AB,$22D3,$22FE,$232D,$235C,$238F,$23C5,$23FF,$243C,$247C,$24C0
-	dc.w $2A84,$2AAB,$2AD3,$2AFE,$2B2D,$2B5C,$2B8F,$2BC5,$2BFF,$2C3C,$2C7C,$2CC0
-	dc.w $3284,$32AB,$32D3,$32FE,$332D,$335C,$338F,$33C5,$33FF,$343C,$347C,$34C0
-	dc.w $3A84,$3AAB,$3AD3,$3AFE,$3B2D,$3B5C,$3B8F,$3BC5,$3BFF,$3C3C,$3C7C,$3CC0
+.r	equ 1
 	endif
+.o	set 0
+	rept .r
+	if __smpsFMTable=0	; b-0 to a#6
+	dc.w .o|$25E,.o|$284,.o|$2AB,.o|$2D3,.o|$2FE,.o|$32D,.o|$35C,.o|$38F,.o|$3C5,.o|$3FF,.o|$43C,.o|$47C
+	else			; c-0 to a-6
+	dc.w .o|$284,.o|$2AB,.o|$2D3,.o|$2FE,.o|$32D,.o|$35C,.o|$38F,.o|$3C5,.o|$3FF,.o|$43C,.o|$47C,.o|$4C0
+	endif
+.o	set .o+$800
+	endr
 FMFrequenciesEnd:
 ; ===========================================================================
 FMUpdateFreq:

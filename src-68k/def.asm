@@ -245,8 +245,9 @@ TrackDacSz:			ds.b 0
 
 	phase TrackUniSz
 			ds.b (*)&1
-; bit 7 enables calculated mod, bit 6 is reserved for modulation type flag
-; other bits are the mod envelope index
+; 0 means there's no modulation
+; bit 7 set enables modalgo, the algorithm is based on the remaining bits
+; otherwise enables modenv (...if __smpsModEnv is enabled), the modenv index is based on the remaining bits
 TrackModulationCtrl:		;ds.b 1			; FM/PSG
 TrackModulationPtr:		ds.l 1			; FM/PSG
 TrackModulationWait:		ds.b 1			; FM/PSG

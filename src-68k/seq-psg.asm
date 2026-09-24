@@ -38,6 +38,7 @@ PSGDoNext:
 		bra.w	CoordFlag				; manipulates stack
 ; ---------------------------------------------------------------------------
 .gotnote:	bsr.s	PSGSetFreq
+		moveq	#0,d5
 		move.b	(a4)+,d5
 		bpl.s	.gotnotetime
 		subq.w	#1,a4
@@ -82,13 +83,25 @@ PSGSetFreq:
 		move.b	d0,TrackVoiceControl(a5)
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	.noplay
-		move.b	d0,(psginput).l
+		st.b	v_lastpsg4(a1)
 .noplay:
 		move.b	(a0)+,TrackVolume(a5)
 		move.b	(a0)+,TrackVolEnvCtrl(a5)
 		rts
 .notemode:
 	endif
+		cmp.b	#$E0,TrackVoiceControl(a5)
+		blo.s	.square
+		moveq	#7,d0
+		and.w	d0,d5
+		and.b	#$E0,TrackVoiceControl(a5)
+		or.b	d5,TrackVoiceControl(a5)
+		add.b	d5,d5
+		and.w	d0,d5
+		move.w	.noisefreq(pc,d5.w),TrackFreq(a5)
+		rts
+.noisefreq:	dc.w $010,$020,$040,$000
+.square:
 		add.b	TrackTranspose(a5),d5
 	if __smpsRevFreq
 		neg.w	d5
@@ -139,9 +152,9 @@ PSGPrepareNote:
 		bne.s	.exit
 		lea	(psginput).l,a0
 		move.b	TrackVoiceControl(a5),d2
-		cmp.b	#$E0,d2
-		bhs.s	.noise
 		moveq_	$E0,d0
+		cmp.b	d0,d2
+		bhs.s	.noise
 		and.b	d2,d0					; Get channel bits
 		btst	#_special,TrackPlaybackControl(a5)
 		beq.s	.notpsg3noise

@@ -42,6 +42,7 @@ PCMDoNext:
 		bra.w	CoordFlag				; manipulates stack
 ; ---------------------------------------------------------------------------
 .gotnote:	bsr.w	PCMSetDAC
+		moveq	#0,d5
 		move.b	(a4)+,d5
 		bpl.s	.gotnotetime
 		subq.w	#1,a4

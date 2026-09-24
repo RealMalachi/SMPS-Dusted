@@ -9,6 +9,7 @@ __smpsSeqTimeSize	equ 0		; 0 uses u8 sequence timers, 1 uses u16
 __smpsRestTimeTime	equ 1		; 0 will crash, 1 will act like SMPS-68K
 __smpsRestPCM		equ 0		; 0 holds (including when the track stops), 1 rests
 __smpsFMTable		equ 0		; 0 is SMPS-68K, 1 is SMPS-Z80
+__smpsFMClamp		equ 0		; 0 does no clamping, 1 caps invalid octaves, 2 wraps around invalid octaves
 __smpsRevFreq		equ 0		; 1 reverses the frequency table, 2 reverses some other stuff on top of that. Why? Shits and giggles.
 
 __smpsSeqStack		equ 10		; defines the amount of stack given for each sequence channel, ideally an even number
