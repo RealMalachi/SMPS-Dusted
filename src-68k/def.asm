@@ -221,6 +221,13 @@ TrackDataPointer:		ds.l 1			; All
 TrackNoteTimeout:		ds.b 1			; All
 TrackNoteTimeoutMaster:		ds.b 1			; All
 
+	if __smpsDrum
+		ifndef TrackFmOperators
+TrackFmOperators:		;ds.b 1			; FM
+		endif
+TrackDrumPtr:			ds.l 1			; All, but varies between them
+	endif
+
 	if __smpsPanEnv
 TrackPanSavedDelay:		;ds.b 1			; FM/PCM
 TrackPanEnvPtr:			ds.l 1			; FM/PCM
@@ -263,10 +270,11 @@ TrackModEnvPtr:			ds.l 1			; FM/PSG
 	if __smpsPortamento
 TrackPortamentoFreq:		ds.w 1			; FM/PSG
 TrackPortamentoTime:		ds.b 1			; FM/PSG
-	endif
-	if (*)&1
+		ifndef TrackFmOperators
 TrackFmOperators:		ds.b 1			; FM
+		endif
 	endif
+			ds.b (*)&1
 TrackPsgSz:			ds.b 0
 
 TrackFmVoiceIndex:		;ds.b 1			; FM

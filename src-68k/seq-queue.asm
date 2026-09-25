@@ -279,15 +279,20 @@ PSGInitBytes:
 ; TODO: enums?
 -
 	phase 0
+	if __smpsDrum
+;queue_pcmdrumptr	ds.l 1
+queue_psgdrumptr	ds.l 1
+queue_fmdrumptr		ds.l 1
+	endif
 	if __smpsPanEnv
-queue_panenvptr	ds.l 1
+queue_panenvptr		ds.l 1
 	endif
 	if __smpsModEnv
-queue_modenvptr	ds.l 1
+queue_modenvptr		ds.l 1
 	endif
-queue_volenvptr	ds.l 1
-queue_fminstptr	ds.l 1
-queue_stacksize	ds.l 0
+queue_volenvptr		ds.l 1
+queue_fminstptr		ds.l 1
+queue_stacksize		ds.l 0
 	dephase
 	!org -
 ; ---------------------------------------------------------------------------
@@ -403,6 +408,25 @@ Sound_PlayBGM:
 .panenvuvb:	add.l	d0,a0
 		move.l	a0,-(sp)
 	endif
+	if __smpsDrum
+		move.w	(a3)+,d0	; fm drum
+		move.l	a3,a0		; doesn't effect ccr
+		bne.s	.fmdrumuvb
+		move.l	a6,a0
+		move.w	drvdata.fmdrum(a0),d0
+.fmdrumuvb:	add.l	d0,a0
+		move.l	a0,-(sp)
+
+		move.w	(a3)+,d0	; psg drum
+		move.l	a3,a0		; doesn't effect ccr
+		bne.s	.psgdrumuvb
+		move.l	a6,a0
+		move.w	drvdata.psgdrum(a0),d0
+.psgdrumuvb:	add.l	d0,a0
+		move.l	a0,-(sp)
+	else
+		addq.w	#4,a3
+	endif
 		move.l	sp,a6
 
 		move.w	(a3)+,v_main_tempo(a1)
@@ -468,6 +492,10 @@ Sound_PlayBGM:
 		move.b	queue_panenvptr+1(a6),TrackPanEnvPtr+1(a5)
 		move.w	queue_panenvptr+2(a6),TrackPanEnvPtr+2(a5)
 	endif
+;	if __smpsDrum
+;		move.b	queue_pcmdrumptr+1(a6),TrackDrumPtr+1(a5)
+;		move.w	queue_pcmdrumptr+2(a6),TrackDrumPtr+2(a5)
+;	endif
 		move.b	#$C0,TrackAMSFMSPan(a5)			; Set AMS/FMS/Panning
 		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
@@ -556,6 +584,10 @@ Sound_PlayBGM:
 		move.b	queue_panenvptr+1(a6),TrackPanEnvPtr+1(a5)
 		move.w	queue_panenvptr+2(a6),TrackPanEnvPtr+2(a5)
 	endif
+	if __smpsDrum
+		move.b	queue_fmdrumptr+1(a6),TrackDrumPtr+1(a5)
+		move.w	queue_fmdrumptr+2(a6),TrackDrumPtr+2(a5)
+	endif
 		move.b	queue_fminstptr+1(a6),TrackFmVoicePtr+1(a5)
 		move.w	queue_fminstptr+2(a6),TrackFmVoicePtr+2(a5)
 		move.b	#$F0,TrackFmOperators(a5)
@@ -635,6 +667,10 @@ Sound_PlayBGM:
 	if __smpsModEnv
 		move.b	queue_modenvptr+1(a6),TrackModEnvPtr+1(a5)
 		move.w	queue_modenvptr+2(a6),TrackModEnvPtr+2(a5)
+	endif
+	if __smpsDrum
+		move.b	queue_psgdrumptr+1(a6),TrackDrumPtr+1(a5)
+		move.w	queue_psgdrumptr+2(a6),TrackDrumPtr+2(a5)
 	endif
 		bsr.w	PSGNoteOff
 		add.w	#TrackPsgSz,a5
@@ -739,6 +775,25 @@ Sound_PlaySFX:
 .panenvuvb:	add.l	d0,a0
 		move.l	a0,-(sp)
 	endif
+	if __smpsDrum
+		move.w	(a3)+,d0	; fm drum
+		move.l	a3,a0		; doesn't effect ccr
+		bne.s	.fmdrumuvb
+		move.l	a6,a0
+		move.w	drvdata.fmdrum(a0),d0
+.fmdrumuvb:	add.l	d0,a0
+		move.l	a0,-(sp)
+
+		move.w	(a3)+,d0	; psg drum
+		move.l	a3,a0		; doesn't effect ccr
+		bne.s	.psgdrumuvb
+		move.l	a6,a0
+		move.w	drvdata.psgdrum(a0),d0
+.psgdrumuvb:	add.l	d0,a0
+		move.l	a0,-(sp)
+	else
+		addq.w	#4,a3
+	endif
 		move.l	sp,a6
 
 		btst	#5,d1
@@ -827,11 +882,15 @@ Sound_PlaySFX_Setup:
 		bmi.s	.dodac
 .dofm:
 		moveq	#(TrackFmSz/2)-1,d1
-		bsr.s	.do
+		bsr.w	.do
 		move.b	#$C0,TrackAMSFMSPan(a5)
 	if __smpsPanEnv
 		move.b	queue_panenvptr+1(a6),TrackPanEnvPtr+1(a5)
 		move.w	queue_panenvptr+2(a6),TrackPanEnvPtr+2(a5)
+	endif
+	if __smpsDrum
+		move.b	queue_fmdrumptr+1(a6),TrackDrumPtr+1(a5)
+		move.w	queue_fmdrumptr+2(a6),TrackDrumPtr+2(a5)
 	endif
 		move.b	queue_fminstptr+1(a6),TrackFmVoicePtr+1(a5)
 		move.w	queue_fminstptr+2(a6),TrackFmVoicePtr+2(a5)
@@ -846,6 +905,10 @@ Sound_PlaySFX_Setup:
 		move.b	queue_panenvptr+1(a6),TrackPanEnvPtr+1(a5)
 		move.w	queue_panenvptr+2(a6),TrackPanEnvPtr+2(a5)
 	endif
+;	if __smpsDrum
+;		move.b	queue_pcmdrumptr+1(a6),TrackDrumPtr+1(a5)
+;		move.w	queue_pcmdrumptr+2(a6),TrackDrumPtr+2(a5)
+;	endif
 		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
 		bra.w	DACStopSample
@@ -862,6 +925,10 @@ Sound_PlaySFX_Setup:
 		else
 		move.b	#.std,TrackDurationTimeout(a5)		; Set duration of first "note"
 		endif
+	endif
+	if __smpsDrum
+		move.b	queue_psgdrumptr+1(a6),TrackDrumPtr+1(a5)
+		move.w	queue_psgdrumptr+2(a6),TrackDrumPtr+2(a5)
 	endif
 ;		bra.w	PSGSilence
 		cmp.b	#$C0,d2

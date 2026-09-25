@@ -1,5 +1,5 @@
 ;__smpsDebug		equ 0		; defined during assembler call
-__smpsDataVer		equ 3		; if these don't match between the driver and sound data, it complains
+__smpsDataVer		equ 4		; if these don't match between the driver and sound data, it complains
 __smpsTarget		equ "md68k"	; read below
 __smpsPCM		equ "MegaPCM2"	; read below
 __smpsWarnDisabledUsage	equ __smpsDebug	; 0 ignores or circumvents disabled features, 1 triggers an assert

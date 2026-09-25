@@ -196,11 +196,20 @@ convertMainTempoMod macro mod
 		fatal "Unknown source driver, can't generate tempo"
 	endcase
 	endm
-CheckedChannelPointer macro loc
-	if (MOMPASS=1)&&(DEFINED(loc))
-	fatal "$\{loc-(*)-2} Tracks must come after the header"
+CheckedChannelPointer macro loc,allowzero
+	if MOMPASS==1
+		!dc.w 0
+	else
+	set chanptrtemp,loc
+		if (ARGCOUNT>1)&&(chanptrtemp==0)
+		!dc.w 0
+		else
+			if chanptrtemp<=((*)-2)
+			fatal "$\{chanptrtemp-(*)-2} Tracks must come after the header"
+			endif
+		!dc.w	chanptrtemp-((*)+2)
+		endif
 	endif
-	!dc.w	loc-((*)+2)
 	endm
 CheckedChannelJump macro loc
 	!dc.w	loc-((*)+1)
@@ -211,9 +220,13 @@ smpsHeaderStartSong macro songbasedriver,sourcesmps2asmver
 	set SourceDriver,songbasedriver
 	set SourceSMPS2ASM,sourcesmps2asmver+0
 	set songStart,*
+	set fminstHeader,0
 	set volenvHeader,0
 	set modenvHeader,0
 	set panenvHeader,0
+	set fmdrumHeader,0
+	set psgdrumHeader,0
+	set pcmdrumHeader,0
 	set fmCount,0
 	set psgCount,0
 	set dacCount,0
@@ -295,39 +308,37 @@ smpsHeaderStartSong macro songbasedriver,sourcesmps2asmver
 ; Header - Set up Voice Location
 ; Common to music and SFX
 smpsHeaderVoice macro loc
-	if songStart<>*
-	fatal "Missing smpsHeaderStartSong"
-	endif
-	CheckedChannelPointer loc
+	set fminstHeader,loc
 	endm
 
 smpsHeaderVoiceNull macro
-	if songStart<>*
-	fatal "Missing smpsHeaderStartSong"
-	endif
-	!dc.w	0
+	set fminstHeader,0
 	endm
 
 ; Header - Set up Voice Location as S3's Universal Voice Bank
 ; Common to music and SFX
 smpsHeaderVoiceUVB macro
-	if songStart<>*
-	fatal "Missing smpsHeaderStartSong"
-	endif
-	!dc.w	0
+	set fminstHeader,0
 	endm
 
 smpsHeaderVolEnv macro loc
-volenvHeader set loc
+	set volenvHeader,loc
 	endm
-
 smpsHeaderModEnv macro loc
-modenvHeader set loc
+	set modenvHeader,loc
 	endm
-
 smpsHeaderPanEnv macro loc
-panenvHeader set loc
+	set panenvHeader,loc
 	endm
+smpsHeaderFmDrum macro loc
+	set fmdrumHeader,loc
+	endm
+smpsHeaderPsgDrum macro loc
+	set psgdrumHeader,loc
+	endm
+;smpsHeaderPcmDrum macro loc
+;	set pcmdrumHeader,loc
+;	endm
 
 ; Header macros for music (not for SFX)
 ; Header - Set up Channel Usage
@@ -347,21 +358,16 @@ smpsHeaderChan macro fm,psg,dac
 
 ; Header - Set up Tempo
 smpsHeaderTempo macro div,mod
-	if volenvHeader=0
-	!dc.w	0
-	else
-	CheckedChannelPointer volenvHeader
+	if songStart<>*
+	fatal "Missing smpsHeaderStartSong"
 	endif
-	if modenvHeader=0
-	!dc.w	0
-	else
-	CheckedChannelPointer modenvHeader
-	endif
-	if panenvHeader=0
-	!dc.w	0
-	else
-	CheckedChannelPointer panenvHeader
-	endif
+	CheckedChannelPointer fminstHeader,0
+	CheckedChannelPointer volenvHeader,0
+	CheckedChannelPointer modenvHeader,0
+	CheckedChannelPointer panenvHeader,0
+	CheckedChannelPointer fmdrumHeader,0
+	CheckedChannelPointer psgdrumHeader,0
+;	CheckedChannelPointer pcmdrumHeader,0
 	convertMainTempoMod mod
 	!dc.b	div,dacCount,fmCount,psgCount
 	endm
@@ -416,21 +422,15 @@ smpsHeaderPWM macro loc,vol
 ; Header macros for SFX (not for music)
 ; Header - Set up Tempo
 smpsHeaderTempoSFX macro div
-	if volenvHeader=0
-	!dc.w	0
-	else
-	CheckedChannelPointer volenvHeader
+	if songStart<>*
+	fatal "Missing smpsHeaderStartSong"
 	endif
-	if modenvHeader=0
-	!dc.w	0
-	else
-	CheckedChannelPointer modenvHeader
-	endif
-	if panenvHeader=0
-	!dc.w	0
-	else
-	CheckedChannelPointer panenvHeader
-	endif
+	CheckedChannelPointer fminstHeader,0
+	CheckedChannelPointer volenvHeader,0
+	CheckedChannelPointer modenvHeader,0
+	CheckedChannelPointer panenvHeader,0
+	CheckedChannelPointer fmdrumHeader,0
+	CheckedChannelPointer psgdrumHeader,0
 	!dc.b	div
 	endm
 

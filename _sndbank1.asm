@@ -808,10 +808,10 @@ SMPS_PcmDrumTable:
 ; FM Drums
 ; ---------------------------------------------------------------------------
 SMPS_FmDrumTable:
-	smpsEnvTable START,$81
-	smpsEnvTable FmDrum_01,fdTest1
-	smpsEnvTable END,$E0
-FmDrum_01:	smpsFmDrum $125E,pSlapBass2,$00,fTone_02,mEnv_04,panCentre
+;	smpsEnvTable START,$81
+;	smpsEnvTable FmDrum_01,fdTest1
+;	smpsEnvTable END,$E0
+;FmDrum_01:	smpsFmDrum $125E,pSlapBass2,$00,fTone_02,mEnv_04,panCentre
 ; ---------------------------------------------------------------------------
 ; PSG Drums
 ; ---------------------------------------------------------------------------

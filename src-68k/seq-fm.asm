@@ -83,10 +83,7 @@ FMSetFreq:
 		btst	#_drummode,TrackPlaybackControl(a5)
 		beq.s	.notemode
 
-		move.l	v_dataptr(a1),a0
-		moveq	#0,d0
-		move.w	drvdata.fmdrum(a0),d0
-		add.l	d0,a0
+		move.l	TrackDrumPtr(a5),a0
 		add.b	d5,d5
 		move.b	.drumdiff(a0,d5.w),-(sp)
 		move.w	(sp)+,d0

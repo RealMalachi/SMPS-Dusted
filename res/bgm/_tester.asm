@@ -1,8 +1,11 @@
 Mus_TestBgm_Header:
 	smpsHeaderStartSong	$F0E50000,1
 	smpsHeaderVoiceUVB
-;	smpsHeaderVolEnv	Mus_TestBgm_VolEnv
-;	smpsHeaderModEnv	Mus_TestBgm_ModEnv
+	smpsHeaderVolEnv	Mus_TestBgm_VolEnv
+	smpsHeaderModEnv	Mus_TestBgm_ModEnv
+;	smpsHeaderPanEnv	Mus_TestBgm_PanEnv
+	smpsHeaderFmDrum	Mus_TestBgm_FmDrum
+;	smpsHeaderPsgDrum	Mus_TestBgm_PsgDrum
 	smpsHeaderChan		$02, $04, $01
 	smpsHeaderTempo		$01, $0000
 	smpsHeaderDAC		Mus_TestBgm_DAC,  $00, $00
@@ -20,7 +23,7 @@ Mus_TestBgm_PSG2:
 
 Mus_TestBgm_FM1:
 	smpsFMvoice pTrumpet1
-	smpsFMSetVol $13
+	smpsFMSetVol $2F
 Mus_TestBgm_FM1_Loop:
 	dc.b nC0,1,nCs0,nD0,nEb0,nE0,nF0,nFs0,nG0,nAb0,nA0,nBb0,nB0
 	dc.b nC1,nCs1,nD1,nEb1,nE1,nF1,nFs1,nG1,nAb1,nA1,nBb1,nB1
@@ -36,7 +39,7 @@ Mus_TestBgm_FM1_Loop:
 Mus_TestBgm_FM2:
 	smpsEnableDrumMode
 Mus_TestBgm_FM2_Loop:
-	dc.b fdTest1,32
+	dc.b fd_Test1,32
 	smpsLoop 0,48,Mus_TestBgm_FM2_Loop
 	smpsStop
 
@@ -129,12 +132,24 @@ Mus_TestBgm_DAC_Loop3:
 
 Mus_TestBgm_VolEnv:
 	smpsEnvTable START,1
-	smpsEnvTable Mus_TestBgm_VolEnv_m01
+	smpsEnvTable Mus_TestBgm_VolEnv_m01,vEnv_Test1
+	smpsEnvTable Mus_TestBgm_VolEnv_m02,vEnv_Test2
 	smpsEnvTable END,$100
 Mus_TestBgm_VolEnv_m01:	smpsEnvVol $00,$08,$10,$18,$20,$28,$30,$38,$40,$48,$50,$58,$60,$68,$70,$78,REST
+Mus_TestBgm_VolEnv_m02:	smpsEnvVol $00,$01,$02,$03,$04,$05,$06,$07,REPEAT
 
-;Mus_TestBgm_ModEnv:
-;	smpsEnvTable START
-;	smpsEnvTable Mus_TestBgm_ModEnv_m01
-;	smpsEnvTable END
-;Mus_TestBgm_ModEnv_m01:	smpsEnvMod $00,HOLD
+Mus_TestBgm_ModEnv:
+	smpsEnvTable START,1
+	smpsEnvTable Mus_TestBgm_ModEnv_m01,mEnv_Test1
+	smpsEnvTable END,$80
+Mus_TestBgm_ModEnv_m01:	smpsEnvMod $00,$04,$08,$0C,$10,$14,$18,$14,$10,$0C,$08,$04,$00,REPEAT
+
+;Mus_TestBgm_PanEnv:
+
+Mus_TestBgm_FmDrum:
+	smpsEnvTable START,$81
+	smpsEnvTable Mus_TestBgm_FmDrum_01,fd_Test1
+	smpsEnvTable END,$E0
+Mus_TestBgm_FmDrum_01:	smpsFmDrum $125E,pSlapBass2,$00,vEnv_Test1,mEnv_Test1,panCentre
+
+;Mus_TestBgm_PsgDrum:
