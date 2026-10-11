@@ -4,8 +4,6 @@ SMPS-Dusted 68K is primarily provided in a binary blob, akin to many homebrew dr
 At the start of the blob is a LUT for subroutines and data that the user should have immediate access to.
 
 ## InitDriver
-relative address: +0
-
 input:
 - a0 = driver data
 - a1 = driver ram
@@ -47,8 +45,6 @@ example:
 ```
 
 ## RunDriver
-relative address: +4
-
 input:
 - a1 = driver ram
 
@@ -65,8 +61,6 @@ example:
 ```
 
 ## QueueSound
-relative address: +8
-
 input:
 - a1 = driver ram
 - d0.w = id
@@ -83,8 +77,6 @@ example:
 ```
 
 ## UpdateFIFO
-relative address: +12
-
 input:
 - a1 = driver ram
 
@@ -100,8 +92,6 @@ example:
 ```
 
 ## ReadComm
-relative address: +16
-
 input:
 - a1 = driver ram
 - d1.b = array index
@@ -123,8 +113,6 @@ example:
 ```
 
 ## WriteComm
-relative address: +20
-
 input:
 - a1 = driver ram
 - d0.b = communicating byte
@@ -144,8 +132,6 @@ example:
 ```
 
 ## GuardDriver
-relative address: +24
-
 input:
 - a1 = driver ram
 
@@ -161,8 +147,6 @@ example:
 ```
 
 ## UnguardDriver
-relative address: +28
-
 input:
 - a1 = driver ram
 
@@ -178,8 +162,6 @@ example:
 ```
 
 ## SetupPianoRoll
-relative address: +32
-
 input:
 - a0 = piano ram
 - a1 = driver ram
@@ -201,8 +183,6 @@ v_pianoram:		rs.b smpspianoramsize
 ```
 
 ## RunMiscCommand
-relative address: +36
-
 input:
 - a1 = driver ram
 - d0.w = command
@@ -226,3 +206,32 @@ example:
 	move.w	#$8000,d1
 	jsr	(SMPS_InitDriver).l
 ```
+
+## PauseDriver
+input:
+- a1 = driver ram
+
+description: Pauses the sound driver
+
+## ResumeDriver
+input:
+- a1 = driver ram
+
+description: Resumes the sound driver after a pause
+
+## SetBgmTempo
+input:
+- a1 = driver ram
+- d0.w = new tempo
+
+description: Sets the bgms internal tempo to a new value
+
+## SetBgmSpeed
+input:
+- a1 = driver ram
+- d0.b = new speed
+
+description:
+Sets a timer to update the bgm twice every X frames. Unlike S3K, setting it to 1 is valid.
+
+note for drv68K: NTSC uses the timer directly, whereas PAL uses a LUT

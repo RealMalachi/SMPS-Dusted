@@ -855,6 +855,7 @@ SMPS_MusicIndex:
 	musdef 0,0,0,BgmSoccer,bgm_Soccer
 	musdef 0,0,0,BgmSCDTimeTravel,bgm_SCDTimeTravel
 	musdef 0,0,0,BgmS28bUnused,bgm_S28bUnused
+	musdef 0,0,1,BgmEveningStar,bgm_EveningStar
 	musdef 0,0,1,BgmDestructivePower,bgm_DestructivePower
 	musdef 0,0,1,BgmEraserVS,bgm_EraserVS
 
@@ -1636,6 +1637,7 @@ pSnare	equ dSnareS3
 pTomHi	equ dHighTom
 pTomMid	equ dMidTomS3
 pTomLo	equ dLowTomS3
+pSplash	equ dIntroKick
 
 ; ---------------------------------------------------------------------------
 ; Sound effect data
@@ -2605,7 +2607,9 @@ BgmSCDTimeTravel:	include "res/bgm/CD Time Travel.asm"
 		even
 BgmS28bUnused:	include "res/bgm/sonic2-8bit/Unknown Theme.asm"
 		even
-BgmDestructivePower:	include "res/bgm/destructive_power.asm"
+BgmDestructivePower:	include "res/bgm/chaotix-md/destructive_power.asm"
+		even
+BgmEveningStar:	include "res/bgm/chaotix-md/evening_star.asm"
 		even
 BgmEraserVS:	include "res/bgm/Eraser VS GHM4.asm"
 		even

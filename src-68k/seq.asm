@@ -120,8 +120,119 @@ HandleSoundQueue:
 		bsr.w	CycleSoundQueue
 
 HandleSequencer:
-		bsr.w	TempoWait
+HandleBgmSequence:
+		moveq	#0,d0
+		btst	#v_driverflags.jingle,v_driverflags(a1)
+		bne.s	.jingling
+		move.b	v_userspeed(a1),d0
+.jingling:
+		btst	#v_driverflags.bgmpaladjust,v_driverflags(a1)
+		beq.s	.notpal
+		lea	UserSpeedPalAdjust(pc),a0
+		move.b	(a0,d0.w),d0
+.notpal:
+		tst.b	d0
+		beq.s	.notimer
+		subq.b	#1,v_userspeedtimer(a1)
+		bne.s	.notimer
+		move.b	d0,v_userspeedtimer(a1)
+		bsr.s	UpdateBgmSequence
+.notimer:	bsr.s	UpdateBgmSequence
 
+HandleSfxSequence:
+	if __smpsJingle=1
+		btst	#v_driverflags.jingle,v_driverflags(a1)
+		bne.s	.skipsfxs
+	endif
+		lea	v_sfx_fm_tracks(a1),a5
+
+		moveq	#((v_sfx_fm_tracks_end-v_sfx_fm_tracks)/TrackFmSz)-1,d7
+.sfxfmloop:	tst.b	TrackPlaybackControl(a5)
+		bpl.s	.sfxfmnext
+		bsr.w	FMUpdateTrack
+.sfxfmnext:	adda.w	#TrackFmSz,a5
+		dbf	d7,.sfxfmloop
+
+		moveq	#((v_sfx_psg_tracks_end-v_sfx_psg_tracks)/TrackPsgSz)-1,d7
+.sfxpsgloop:	tst.b	TrackPlaybackControl(a5)
+		bpl.s	.sfxpsgnext
+		bsr.w	PSGUpdateTrack
+.sfxpsgnext:	adda.w	#TrackPsgSz,a5
+		dbf	d7,.sfxpsgloop
+; TODO: flesh out
+		tst.b	TrackPlaybackControl(a5)
+		bpl.s	.specfmdone
+		bsr.w	FMUpdateTrack
+.specfmdone:	adda.w	#TrackFmSz,a5
+
+		tst.b	TrackPlaybackControl(a5)
+		bpl.s	.specpsgdone
+		bsr.w	PSGUpdateTrack
+.specpsgdone:	;adda.w	#TrackPsgSz,a5
+.skipsfxs:
+
+HandleSequencerEnd:
+		rts
+; ===========================================================================
+UpdateBgmSequence:
+; tempo
+; Every time the internal music clock overflows, delay the song.
+; A tempo of $000x will update every frame, 60 times a second
+; A tempo of $800x will update every other frame, 30 times a second.
+		move.w	v_main_tempo(a1),d2
+		moveq_	$FFF0,d0
+		and.w	d2,d0
+		moveq_	$000F,d1
+		and.w	d2,d1
+	if __smpsDebug
+		cmp.b	#2,d1
+		blo.s	.valid
+		SMPS_assert "TempoWait: Improper tempo algorithm type; TODO print algo"
+.valid:
+	endif
+		add.w	d1,d1
+		jmp	.lut(pc,d1.w)
+.lut:		bra.s	.overflow
+		;bra.s	.overflowclear
+.overflowclear:
+		add.w	d0,v_main_tempo_timeout(a1)
+		bcc.s	.nodelay
+		clr.w	v_main_tempo_timeout(a1)
+		bra.s	.delay
+.overflow:
+		add.w	d0,v_main_tempo_timeout(a1)
+		bcc.s	.nodelay
+		;bra.s	.delay
+.delay:
+	set .val,v_music_pcm_tracks+TrackDurationTimeout
+	rept (v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz
+		if  __smpsSeqTimeSize
+		addq.w	#1,.val(a1)
+		else
+		addq.b	#1,.val(a1)
+		endif
+	set .val,.val+TrackDacSz
+	endr
+	set .val,v_music_fm_tracks+TrackDurationTimeout
+	rept (v_music_fm_tracks_end-v_music_fm_tracks)/TrackFmSz
+		if  __smpsSeqTimeSize
+		addq.w	#1,.val(a1)
+		else
+		addq.b	#1,.val(a1)
+		endif
+	set .val,.val+TrackFmSz
+	endr
+	set .val,v_music_psg_tracks+TrackDurationTimeout
+	rept (v_music_psg_tracks_end-v_music_psg_tracks)/TrackPsgSz
+		if  __smpsSeqTimeSize
+		addq.w	#1,.val(a1)
+		else
+		addq.b	#1,.val(a1)
+		endif
+	set .val,.val+TrackPsgSz
+	endr
+.nodelay:
+; actual sequence update
 		lea	v_music_pcm_tracks(a1),a5
 		moveq	#((v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz)-1,d7
 .bgmdacloop:	tst.b	TrackPlaybackControl(a5)
@@ -157,123 +268,6 @@ HandleSequencer:
 		bsr.w	PSGUpdateTrack
 .bgmpsgnext:	add.w	#TrackPsgSz,a5
 		dbf	d7,.bgmpsgloop
-
-; I fucking hate this
-HandleCheapPalFix:
-		btst	#v_driverflags.pal,v_driverflags(a1)	; check if it's PAL
-		beq.s	.pal_notyet
-		tst.b	v_paltimer(a1)				; check if the song wants to update slowly
-		bmi.s	.pal_notyet
-		subq.b	#1,v_paltimer(a1)			; count down 5 frames
-		bcc.s	.pal_notyet
-		move.b	#5,v_paltimer(a1)			; update BGM again
-		bra.w	HandleSequencer
-.pal_notyet:
-
-; when a BGM is initiated, tempo and playback are skipped on that frame to avoid murdering CPU time
-; SFXs are not skipped so they don't sound off
-HandleSoundQueueEnd:
-	if __smpsJingle=1
-		btst	#v_driverflags.jingle,v_driverflags(a1)
-		bne.s	.skipsfxs
-	endif
-		lea	v_sfx_fm_tracks(a1),a5
-
-		moveq	#((v_sfx_fm_tracks_end-v_sfx_fm_tracks)/TrackFmSz)-1,d7
-.sfxfmloop:	tst.b	TrackPlaybackControl(a5)
-		bpl.s	.sfxfmnext
-		bsr.w	FMUpdateTrack
-.sfxfmnext:	adda.w	#TrackFmSz,a5
-		dbf	d7,.sfxfmloop
-
-		moveq	#((v_sfx_psg_tracks_end-v_sfx_psg_tracks)/TrackPsgSz)-1,d7
-.sfxpsgloop:	tst.b	TrackPlaybackControl(a5)
-		bpl.s	.sfxpsgnext
-		bsr.w	PSGUpdateTrack
-.sfxpsgnext:	adda.w	#TrackPsgSz,a5
-		dbf	d7,.sfxpsgloop
-; TODO: flesh out
-		tst.b	TrackPlaybackControl(a5)
-		bpl.s	.specfmdone
-		bsr.w	FMUpdateTrack
-.specfmdone:	adda.w	#TrackFmSz,a5
-
-		tst.b	TrackPlaybackControl(a5)
-		bpl.s	.specpsgdone
-		bsr.w	PSGUpdateTrack
-.specpsgdone:	;adda.w	#TrackPsgSz,a5
-.skipsfxs:
-
-HandleSequencerEnd:
-		rts
-; ===========================================================================
-; Every time the internal music clock overflows, delay the song.
-; A tempo of $000x will update every frame, 60 times a second
-; A tempo of $800x will update every other frame, 30 times a second.
-; ---------------------------------------------------------------------------
-TempoWait:
-		move.w	v_main_tempo(a1),d2
-		moveq_	$FFF0,d0
-		and.w	d2,d0
-		moveq_	$000F,d1
-		and.w	d2,d1
-	if __smpsDebug
-		cmp.b	#2,d1
-		blo.s	.valid
-		SMPS_assert "TempoWait: Improper tempo algorithm type; TODO print algo"
-.valid:
-	endif
-		add.w	d1,d1
-; if speedup is on and 1up is off, increase the tempo if possible
-		moveq	#1<<v_driverflags.speedsong|1<<v_driverflags.jingle,d2
-		and.b	v_driverflags(a1),d2
-		cmp.b	#1<<v_driverflags.speedsong|0<<v_driverflags.jingle,d2
-		bne.s	.nospeedalgo
-		move.w	d0,d2				; TODO: good math
-		lsr.w	#1,d2
-		sub.w	d2,d0
-.nospeedalgo:
-		jmp	.lut(pc,d1.w)
-.lut:		bra.s	.overflow
-		;bra.s	.overflowclear
-.overflowclear:
-		add.w	d0,v_main_tempo_timeout(a1)
-		bcc.s	.exit
-		clr.w	v_main_tempo_timeout(a1)
-		bra.s	.delay
-.overflow:
-		add.w	d0,v_main_tempo_timeout(a1)
-		bcc.s	.exit
-		;bra.s	.delay
-.delay:
-	set .val,v_music_pcm_tracks+TrackDurationTimeout
-	rept (v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz
-		if  __smpsSeqTimeSize
-		addq.w	#1,.val(a1)
-		else
-		addq.b	#1,.val(a1)
-		endif
-	set .val,.val+TrackDacSz
-	endr
-	set .val,v_music_fm_tracks+TrackDurationTimeout
-	rept (v_music_fm_tracks_end-v_music_fm_tracks)/TrackFmSz
-		if  __smpsSeqTimeSize
-		addq.w	#1,.val(a1)
-		else
-		addq.b	#1,.val(a1)
-		endif
-	set .val,.val+TrackFmSz
-	endr
-	set .val,v_music_psg_tracks+TrackDurationTimeout
-	rept (v_music_psg_tracks_end-v_music_psg_tracks)/TrackPsgSz
-		if  __smpsSeqTimeSize
-		addq.w	#1,.val(a1)
-		else
-		addq.b	#1,.val(a1)
-		endif
-	set .val,.val+TrackPsgSz
-	endr
-.exit:
 		rts
 ; ===========================================================================
 DoFadeOut_Stop:
@@ -363,7 +357,7 @@ smpsMakeChannelRamIndex macro reg,ctrlreg
 		bmi.s	.stoppsg
 		add.b	reg,reg
 		bpl.s	.stopfm
-		add.w	#((30/2)-$40)*2,reg
+		sub.w	#($40*2)-30,reg
 		bra.s	.stopdac
 .stoppsg:	lsr.w	#3,reg
 .stopfm:
@@ -397,7 +391,7 @@ smpsGetChannelFromRamIndex macro ramreg,indexreg,addreg,tempchanreg,chanreg
 	endm
 
 RAM_BGMChannel:
-		dc.w v_music_fm1_track,v_music_fm2_track,v_music_fm3_track,v_music_fm3_multifreq
+		dc.w v_music_fm1_track,v_music_fm2_track,v_music_fm3_track,v_music_extra
 		dc.w v_music_fm4_track,v_music_fm5_track,v_music_fm6_track,0
 		dc.w v_music_psg1_track,0	; 16
 		dc.w v_music_psg2_track,0
@@ -405,7 +399,7 @@ RAM_BGMChannel:
 		dc.w v_music_psg4_track
 		dc.w v_music_pcm1_track		; 30
 RAM_SFXChannel:
-		dc.w 0,0,v_sfx_fm3_track,v_sfx_fm3_multifreq
+		dc.w 0,0,v_sfx_fm3_track,v_sfx_extra
 		dc.w v_sfx_fm4_track,v_sfx_fm5_track,0,0
 		dc.w v_sfx_psg1_track,0
 		dc.w v_sfx_psg2_track,0
@@ -414,7 +408,7 @@ RAM_SFXChannel:
 		dc.w 0
 	if __smpsBSFX=1
 RAM_BSFXChannel:
-		dc.w 0,0,0,0
+		dc.w 0,0,0,v_bsfx_extra
 		dc.w v_bsfx_fm4_track,0,0,0
 		dc.w 0,0
 		dc.w 0,0
@@ -422,3 +416,19 @@ RAM_BSFXChannel:
 		dc.w v_bsfx_psg3_track
 		dc.w 0
 	endif
+UserSpeedPalAdjust:
+		save
+		listing purecode
+.i		set 0
+		rept 256
+.v		set ((.i+6)/12)+1
+		if (.i=0)
+		dc.b 5
+		elseif (.v>=4)||(.v<0)
+		dc.b 4
+		else
+		dc.b .v
+		endif
+.i		set .i+1
+		endr
+		restore

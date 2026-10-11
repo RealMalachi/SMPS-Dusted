@@ -160,6 +160,13 @@ SMPS_assertascii macro thing1,thing2
 		endif
 	endif
 	endm
+
+SMPS_share macro command,cmpid
+	if "cmpid"<>""
+command equ cmpid
+	endif
+	shared command
+	endm
 ; ---------------------------------------------------------------------------
 	phase 0
 drvdata:
@@ -286,6 +293,10 @@ TrackFmOperators:		ds.b 1			; FM
 TrackFmSz:			ds.b 0
 	dephase
 
+	phase 0
+TrackExtFm3Freq			ds.w 3*(__smpsFM3Multi<>0)
+TrackExtSz			ds.b 0
+	dephase
 
 	phase 0
 v_startofram:			ds.b 0
@@ -297,7 +308,7 @@ v_driverflags:			;ds.b 1
 .ssgoff				equ 4
 .paused				equ 3	; must be 3
 .dopause			equ 2	; must be 2
-.speedsong			equ 1
+.bgmpaladjust			equ 1
 .jingle				equ 0
 
 v_dataptr:			ds.l 1
@@ -309,7 +320,7 @@ v_hardware:			ds.b 1
 .firecore			equ 3
 
 v_communication:		ds.b __smpsCommBytes	; generally used for syncing gameplay with music
-v_communication_end:
+v_communication_end:		ds.b 0
 v_pcmsfx:			ds.b 1
 
 	ds.b (*)&1	; word-alignment
@@ -322,14 +333,16 @@ v_random:			ds.w 1
 
 	ds.b (*)&1	; word-alignment
 v_startofvariables:		ds.b 0
-v_sndprio:			ds.b 1	; sound priority
-v_paltimer:			ds.b 1
-; (priority of new music/SFX must be higher or equal to this value or it won't play
-; bit 7 of priority being set prevents this value from changing)
+v_sndprio:			ds.b 1	; sound effect priority
+	ds.b (*)&1	; word-alignment
+v_userspeed:			ds.b 1
+v_userspeedtimer:		ds.b 1
+
 v_fadeout_counter:		ds.b 1
 v_fadein_counter:		ds.b 1	; Timer for fade in
 v_revving_pitch:		ds.b 1
 v_revving_timer:		ds.b 1
+	ds.b (*)&1	; word-alignment
 v_contsfx_lastid:		ds.w 1
 v_contsfx_loop:			ds.b 1
 
@@ -362,8 +375,7 @@ v_music_psg3_track:		ds.b TrackPsgSz
 v_music_psg4_track:		ds.b TrackPsgSz
 v_music_psg_tracks_end:		ds.b 0
 v_music_track_ram_end:		ds.b 0
-
-v_music_fm3_multifreq:		ds.w 3*(__smpsFM3Multi<>0)
+v_music_extra:			ds.b TrackExtSz
 	if __smpsJingle
 v_1up_save_ram_end:		ds.b 0
 
@@ -382,7 +394,7 @@ v_sfx_psg2_track:		ds.b TrackPsgSz
 v_sfx_psg3_track:		ds.b TrackPsgSz
 v_sfx_psg_tracks_end:		ds.b 0
 v_sfx_track_ram_end:		ds.b 0
-v_sfx_fm3_multifreq:		ds.w 3*(__smpsFM3Multi<>0)
+v_sfx_extra:			ds.b TrackExtSz
 
 	if __smpsBSFX
 v_bsfx_track_ram:		ds.b 0
@@ -393,7 +405,7 @@ v_bsfx_psg_tracks:		ds.b 0
 v_bsfx_psg3_track:		ds.b TrackPsgSz
 v_bsfx_psg_tracks_end:		ds.b 0
 v_bsfx_track_ram_end:		ds.b 0
-;v_bsfx_fm3_multifreq:		ds.w 3*(__smpsFM3Multi<>0)
+v_bsfx_extra:			ds.b TrackExtSz
 	endif
 
 	if __smpsJingle
@@ -404,3 +416,6 @@ v_1up_ram_copy_end:		ds.b 0
 v_endofvariables:
 v_endofram:
 	dephase
+
+	SMPS_share smpsramsize,		v_endofram
+	SMPS_share smpspianoramsize,	$400

@@ -1,28 +1,51 @@
-@echo off
-set PrintText=0
 
+setlocal enabledelayedexpansion
+set mainpath=%~dp0
+set PrintText=0
+if not "%~2"=="" ( set PrintText=1 )
+
+if /i %PROCESSOR_ARCHITECTURE%==x86 (
+	set "AS=tools\asw\asw.exe -xx -n -A -L -U -i ."
+	) else (
+	set "AS=tools\asw\asw-x64.exe -xx -n -A -L -U -i ."
+)
+set "P2BIN=tools\asw\p2bin.exe"
+set "SJ=tools\sjasmplus\sjasmplus.exe"
+set "COMP=tools\zx0\salvador.exe"
 if %PrintText% == 1 (
-	set "PrintTextAS=-q -D __smpsPrintMessages=1"
-	set "PrintTextSJ="
+	set "ASFLAGS=-q -D __smpsPrintMessages=1"
+	set "SJFLAGS="
 ) else (
-	set "PrintTextAS=-q -D __smpsPrintMessages=0"
-	set "PrintTextSJ=--nologo --msg=war"
+	set "ASFLAGS=-q -D __smpsPrintMessages=0"
+	set "SJFLAGS=--nologo --msg=war"
 )
 
+if "%~1"=="-h" goto :help
+if "%~1"=="--help" goto :help
 if "%~1"=="" goto :all
 goto :%~1
 
 :all
-:build
 	call :drv
 	call :snd
 	call :rom
-	goto :EOF
-
-:done
 	if %PrintText% == 1 echo ============================================
 	if %PrintText% == 1 echo SMPS-Dusted is ready
 	if %PrintText% == 1 pause
+	goto :EOF
+
+:help
+	echo INPUT: build.bat routine print
+	echo   routine accepts the following inputs
+	echo     all   = (default) build the driver, sound data, and test rom
+	echo     drv   = build the driver
+	echo     snd   = build the sound data
+	echo     rom   = build the test rom (requires the driver and sound data to already be built)
+	echo     clean = clean the directory
+	echo     help  = print the help text that you're reading right now
+	echo     -h, --help = alias for help
+	echo   if print is given anything, debug text will be printed in the command line
+	pause
 	goto :EOF
 
 :clean
@@ -39,108 +62,73 @@ goto :%~1
 	
 	if exist smps-testrom.gen del smps-testrom.gen
 	goto :EOF
-
+	
 :drv
 	if not exist _out mkdir _out
-	if %PrintText% == 1 echo ============================================
-	if %PrintText% == 1 echo Building MegaPCM1
-	tools\sjasmplus\sjasmplus.exe src-z80/mpcm1/main.asm --raw=_out/mpcm1.bin --exp=_out/mpcm1.exp --lst=_out/mpcm1.lst >_out/mpcm1.txt %PrintTextSJ%
-	if %PrintText% == 1 echo Compressing MegaPCM1
-	tools\zx0\salvador.exe "_out/mpcm1.bin" "_out/mpcm1.zx0"
-	if %PrintText% == 1 echo ============================================
-	if %PrintText% == 1 echo Building MegaPCM2
-	tools\sjasmplus\sjasmplus.exe src-z80/mpcm2/megapcm.asm -DOUTPATH=\"_out/mpcm2.bin\" -DTRACEPATH=\"_out/mpcm2.tracedata.txt\" --exp=_out/mpcm2.exp --sym=_out/mpcm2.sym --lst=_out/mpcm2.lst >_out/mpcm2.txt %PrintTextSJ%
-	if %PrintText% == 1 echo Compressing MegaPCM2
-	tools\zx0\salvador.exe "_out/mpcm2.bin" "_out/mpcm2.zx0"
-	REM // if %PrintText% == 1 echo ============================================
-	REM // if %PrintText% == 1 echo Building DualPCM-FlexEd
-	REM // tools\sjasmplus\sjasmplus.exe src-z80/dualpcm-flexed/Z80.asm --raw=_out/dualpcm-flexed.bin --exp=_out/dualpcm-flexed.exp --sym=_out/dualpcm-flexed.sym --lst=_out/dualpcm-flexed.lst >_out/dualpcm-flexed.txt %PrintTextSJ%
-	REM // if %PrintText% == 1 echo Compressing DualPCM-FlexEd
-	REM // tools\zx0\salvador.exe "_out/dualpcm-flexed.bin" "_out/dualpcm-flexed.zx0"
-	REM // if %PrintText% == 1 echo ============================================
-	REM // if %PrintText% == 1 echo Building Z80 driver release blob
-	REM // tools\sjasmplus\sjasmplus.exe "src-z80/build.asm" --raw=_out/smps-drvz80.bin --exp=_out/drvz80.exp --lst=_out/drvz80.lst >_out/drvz80.txt %PrintTextSJ%
-	REM // if %PrintText% == 1 echo Compressing Z80 driver release blob
-	REM // tools\zx0\salvador.exe "_out/smps-drvz80.bin" "_out/smps-drvz80.bin"
-	if %PrintText% == 1 echo ============================================
-	if %PrintText% == 1 echo Building MegaCD driver
-	tools\asw\asw.exe -xx -n -A -L -U -g map -i . -olist _out\build-mcd.lst -E _out\build-mcd.log src-68k\build-mcd.asm %PrintTextAS%
-	if not exist src-68k\build-mcd.p goto _BUILDTYPE_ERROR_MEGACD
-	tools\asw\p2bin.exe "src-68k\build-mcd.p" "_out/build-mcd.bin" ""
-	> NUL move src-68k\build-mcd.p _out/build-mcd.p
-	if exist src-68k\build-mcd.map > NUL move src-68k\build-mcd.map _out/build-mcd.map
-	if exist _out\build-mcd.log type _out\build-mcd.log
-	if not exist _out\build-mcd.log ( if %PrintText% == 1 echo MegaCD driver build successful )
-	if %PrintText% == 1 echo Compressing MegaCD driver
-	tools\zx0\salvador.exe "_out/build-mcd.bin" "_out/build-mcd.zx0"
-	if %PrintText% == 1 echo ============================================
-	if %PrintText% == 1 echo Building 68K driver release blob
-	tools\asw\asw.exe -xx -n -A -L -U -g map -i . -a -shareout smps-def.asm -olist _out\build-drv.lst -E _out\build-drv.log build-drv.asm -D __smpsDebug=0 %PrintTextAS%
-	if not exist build-drv.p goto _BUILDTYPE_ERROR_RELEASE
-	tools\asw\p2bin.exe "build-drv.p" "smps-drv.bin" ""
-	> NUL move build-drv.p _out/build-drv.p
-	if exist build-drv.map > NUL move build-drv.map _out/build-drv.map
-	if exist _out\build-drv.log type _out\build-drv.log
-	if not exist _out\build-drv.log ( if %PrintText% == 1 echo Release driver build successful )
-	if %PrintText% == 1 echo ============================================
-	if %PrintText% == 1 echo Building 68K driver debug blob
-	tools\asw\asw.exe -xx -n -A -L -U -g map -i . -a -shareout smps-def-debug.asm -olist _out\build-drv-debug.lst -E _out\build-drv-debug.log build-drv.asm -D __smpsDebug=1 %PrintTextAS%
-	if not exist build-drv.p goto _BUILDTYPE_ERROR_DEBUG
-	tools\asw\p2bin.exe "build-drv.p" "smps-drv-debug.bin" ""
-	> NUL move build-drv.p _out/build-drv-debug.p
-	if exist build-drv.map > NUL move build-drv.map _out/build-drv-debug.map
-	if exist _out\build-drv-debug.log type _out\build-drv-debug.log
-	if not exist _out\build-drv-debug.log ( if %PrintText% == 1 echo Debug driver build successful )
+	call :BUILDZ80COMP "src-z80/mpcm1/main.asm" "mpcm1" "MegaPCM1"
+	call :BUILDZ80COMP "src-z80/mpcm2/megapcm.asm" "mpcm2" "MegaPCM2.0" "-DOUTPATH=\"_out/mpcm2.bin\" -DTRACEPATH=\"_out/mpcm2.tracedata.txt\""
+	call :BUILD68K "src-68k\build-mcd.asm" "_out/build-mcd.bin" "build-mcd" "MegaCD driver"
+	call :COMP "_out/build-mcd.bin" "_out/build-mcd.zx0"
+	call :BUILD68K "build-drv.asm" "smps-drv.bin" "build-drv" "SMPS driver blob" "-a -shareout smps-def.asm -D __smpsDebug=0 -g map"
+	call :BUILD68K "build-drv.asm" "smps-drv-debug.bin" "build-drv-debug" "SMPS debug driver blob" "-a -shareout smps-def-debug.asm -D __smpsDebug=1 -g map"
 	goto :EOF
-
-:_BUILDTYPE_ERROR_MEGACD
-	echo SMPS build error: No generated .p file for MegaCD driver
-	pause & exit
-
-:_BUILDTYPE_ERROR_RELEASE
-	echo SMPS build error: No generated .p file for release driver
-	pause & exit
-
-:_BUILDTYPE_ERROR_DEBUG
-	echo SMPS build error: No generated .p file for debug driver
-	pause & exit
 
 :snd
 	if not exist _out mkdir _out
-	if %PrintText% == 1 echo ============================================
-	if %PrintText% == 1 echo Building SMPS blob
-	tools\asw\asw.exe -xx -n -A -L -U -i . -a -shareout smps-ids.asm -olist _out\build-snd.lst -E _out\build-snd.log build-snd.asm -D __smpsDebug=0 %PrintTextAS%
-	if not exist build-snd.p goto _BUILDTYPE_ERROR_DATA
-	tools\asw\p2bin.exe "build-snd.p" "smps-snd.bin" ""
-	> NUL move build-snd.p _out
-	if exist build-snd.map > NUL move build-snd.map _out
-	if exist _out\build-snd.log type _out\build-snd.log
-	if not exist _out\build-snd.log ( if %PrintText% == 1 echo Sound data build successful )
+	call :BUILD68K "build-snd.asm" "smps-snd.bin" "build-snd" "SMPS sound data blob" "-a -shareout smps-ids.asm -D __smpsDebug=0"
 	goto :EOF
-
-:_BUILDTYPE_ERROR_DATA
-	echo SMPS build error: No generated .p file for driver data
-	pause & exit
 
 :rom
 	if not exist _out mkdir _out
-	if %PrintText% == 1 echo ============================================
-	if %PrintText% == 1 echo Building Test ROM Z80 entry code
-	tools\sjasmplus\sjasmplus.exe src-z80/entry.a80 --raw=_out/entry-z80.bin --lst=_out/entry-z80.lst >_out/entry-z80.txt %PrintTextSJ%
-	
-	if %PrintText% == 1 echo ============================================
-	if %PrintText% == 1 echo Building SMPS test rom
-	tools\asw\asw.exe -xx -n -A -L -U -g map -i . -olist _out\build-testrom.lst -E _out\build-testrom.log build-testrom.asm %PrintTextAS%
-	if not exist build-testrom.p goto _BUILDTYPE_ERROR_ROM
-	tools\asw\p2bin.exe "build-testrom.p" "smps-testrom.gen" ""
-	> NUL move build-testrom.p _out
-	if exist build-testrom.map > NUL move build-testrom.map _out
-	if exist _out\build-testrom.log type _out\build-testrom.log
-	if not exist _out\build-testrom.log ( if %PrintText% == 1 echo Sound data build successful )
+	call :BUILDZ80 "src-z80/entry.a80" entry-z80 "Test ROM Z80 entry code"
+	call :BUILD68K "build-testrom.asm" "smps-testrom.gen" "build-testrom" "SMPS test rom"
 	goto :EOF
 
-:_BUILDTYPE_ERROR_ROM
-	echo SMPS build error: No generated .p file for test rom
-	pause & exit
+:COMP
+	if %PrintText% == 1 echo Compressing %~3
+	%COMP% %~1 %~2
+	goto :EOF
+
+; call :BUILDZ80 src-z80/mpcm2/megapcm.asm "mpcm2" "MegaPCM2"
+; asmfile,outputfilenames,namefordebugtext,extraflags
+:BUILDZ80
+	if %PrintText% == 1 echo ============================================
+	if %PrintText% == 1 echo Building %~3
+	%SJ% %~1 %SJFLAGS% %~4 --raw=_out/%~2.bin --exp=_out/%~2.exp --sym=_out/%~2.sym --lst=_out/%~2.lst --cleanonerror
+	goto :EOF
+:BUILDZ80COMP
+	if %PrintText% == 1 echo ============================================
+	if %PrintText% == 1 echo Building %~3
+	%SJ% %~1 --raw=_out/%~2.bin --exp=_out/%~2.exp --sym=_out/%~2.sym --lst=_out/%~2.lst %~4 %SJFLAGS% >_out/%~2.txt
+	if %PrintText% == 1 echo Compressing %~3
+	%COMP% "_out/%~2.bin" "_out/%~2.zx0"
+	goto :EOF
+
+; call :BUILD68K 
+; asmfile,binaryoutput,outputfilenames,namefordebugtext,extraflags
+:BUILD68K
+	if %PrintText% == 1 echo ============================================
+	if %PrintText% == 1 echo Building %~4
+	%AS% %ASFLAGS% %~5 -olist _out\%~3.lst -E _out\%~3.log %~1
+	for %%C in ("%~1") do (
+		set "inputfilename=%%~dpC%%~nC"
+		set "inputfilename=!inputfilename:%mainpath%=!"
+	)
+	if not exist !inputfilename!.p (
+		echo - ASW ERROR: No generated .p file for %~4
+		if exist "_out\%~3.log" ( type "_out\%~3.log" )
+		pause
+		goto :EOF
+	)
+	%P2BIN% "!inputfilename!.p" "%~2" ""
+	if not exist "%~2" (
+		echo - P2BIN ERROR: No generated binary file for %~4
+		pause
+		goto :EOF
+	)
+	> NUL move !inputfilename!.p _out
+	if exist !inputfilename!.map ( > NUL move !inputfilename!.map _out )
+	if exist _out\%~3.log ( type _out\%~3.log ) else ( if %PrintText% == 1 echo - Successful )
+	goto :EOF
 
 :EOF

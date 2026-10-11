@@ -1,25 +1,28 @@
-; INPUT: a1 = start of driver ram
-; ===========================================================================
 ; Routine LUT and signature, for binary blob implementations
-APILUT:
-		bra.w	InitDriver				; 00 ; a0 = driver data, d0.w = driver ram size
-		bra.w	RunDriver				; 04 ; 
-		bra.w	QueueSound				; 08 ; d0.w = sound id
-		bra.w	UpdateFIFO				; 12 ;
-		bra.w	ReadComm				; 16 ; d0.b = comm, d1.b = index
-		bra.w	WriteComm				; 20 ; d0.b = comm, d1.b = index
-		bra.w	GuardDriver				; 24 ;
-		bra.w	UnguardDriver				; 28 ;
-		bra.w	SetupPianoRoll				; 32 ; a0 = piano ram
-		bra.w	RunMiscCommand				; 36 ; d0.w = command, other inputs depend on the command
-		bra.w	PlayCDDA				; 40 ; d0.b = track ID
-		rept (64-(*))/4
-		bra.w	.error
-		endr
+routlut macro routine
+	SMPS_share	SMPS_Offset_routine,(*)
+	bra.w	routine
+	endm
+APILUT:								; all: a1 = start of driver ram
+		routlut InitDriver				; a0 = driver data, d0.w = driver ram size
+		routlut RunDriver				; 
+		routlut QueueSound				; d0.w = sound id
+		routlut UpdateFIFO				; 
+		routlut ReadComm				; d0.b = comm, d1.b = index
+		routlut WriteComm				; d0.b = comm, d1.b = index
+		routlut GuardDriver				; 
+		routlut UnguardDriver				; 
+		routlut SetupPianoRoll				; a0 = piano ram
+		routlut PlayCDDA				; d0.b = track ID
+		routlut PauseDriver
+		routlut ResumeDriver
+		routlut SetBgmTempo				; d0.w = new tempo
+		routlut SetBgmSpeed				; d0.b = new speed
 ; ---------------------------------------------------------------------------
+		align $10,$FF
+		SMPS_share SMPS_Offset_Signature,(*)
 .sign:		dc.b "SMPS-DUSTED 68K V0.1 BY MALACHI",0
 		dc.b [32-((*)-.sign)]" "
-.error:		SMPS_assert "Undefined API command"
 ; ---------------------------------------------------------------------------
 		include "src-68k/init.asm"
 		include "src-68k/misc.asm"

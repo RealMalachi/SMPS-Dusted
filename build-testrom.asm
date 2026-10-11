@@ -100,7 +100,6 @@ v_prevselect:		ds.w 1
 v_apiindex:		ds.w 1
 v_soundid:		ds.w 1
 v_shortcut:		ds.w 1
-v_misccmd:		ds.w 1
 v_miscparam:		ds.w 1
 v_cddaid:		ds.b 1
 v_commindex:		ds.b 1
@@ -526,14 +525,17 @@ CallAPI:
 		bra.w	.writecomm
 		bra.w	.guarddriver
 		bra.w	.unguarddriver
-		bra.w	.runmisccmd
 		bra.w	.setuppianoroll
 		bra.w	.playcdda
+		bra.w	.pause
+		bra.w	.resume
+		bra.w	.bgmtempo
+		bra.w	.bgmspeed
 .lute:
 
 .initdriver:
-		lea	(SMPS_DriverData).l,a0
 		lea	v_soundram,a1
+		lea	(SMPS_DriverData).l,a0
 		moveq	#__smpsEnableMDP<<0|__smpsEnableMCD<<1|__smpsEnable32X<<2|__smpsAckFirecore<<3,d0
 		jsr	(SMPS_InitDriver).l
 		move.l	d0,v_externalsound
@@ -542,22 +544,22 @@ CallAPI:
 		lea	v_soundram,a1
 		jmp	(SMPS_RunDriver).l
 .queuesound:
-		move.w	v_soundid,d0
 		lea	v_soundram,a1
+		move.w	v_soundid,d0
 		jmp	(SMPS_QueueSound).l
 .updatefifo:
 		lea	v_soundram,a1
 		jmp	(SMPS_UpdateFIFO).l
 .readcomm:
-		move.b	v_commindex,d1
 		lea	v_soundram,a1
+		move.b	v_commindex,d1
 		jsr	(SMPS_ReadComm).l
 		move.b	d0,v_commval
 		rts
 .writecomm:
+		lea	v_soundram,a1
 		move.b	v_commindex,d1
 		move.b	v_commval,d0
-		lea	v_soundram,a1
 		jmp	(SMPS_WriteComm).l
 .guarddriver:
 		lea	v_soundram,a1
@@ -565,21 +567,31 @@ CallAPI:
 .unguarddriver:
 		lea	v_soundram,a1
 		jmp	(SMPS_UnguardDriver).l
-.runmisccmd:
-		move.w	v_misccmd,d0
-		move.w	v_miscparam,d1
-		lea	v_soundram,a1
-		jmp	(SMPS_RunMiscCommand).l
 .setuppianoroll:
-		lea	v_pianoram,a0
 		lea	v_soundram,a1
+		lea	v_pianoram,a0
 		jmp	(SMPS_SetupPianoRoll).l
 .playcdda:
-		move.b	v_cddaid,d0
 		lea	v_soundram,a1
+		move.b	v_cddaid,d0
 		jmp	(SMPS_PlayCDDA).l
+.pause:
+		lea	v_soundram,a1
+		jmp	(SMPS_PauseDriver).l
+.resume:
+		lea	v_soundram,a1
+		jmp	(SMPS_ResumeDriver).l
+.bgmspeed:
+		lea	v_soundram,a1
+		move.w	v_miscparam,d0
+		jmp	(SMPS_SetBgmSpeed).l
+.bgmtempo:
+		lea	v_soundram,a1
+		move.b	v_miscparam+1,d0
+		jmp	(SMPS_SetBgmTempo).l
 
 CallShortcut:
+		lea	v_soundram,a1
 		move.w	v_shortcut,d0
 		lsl.w	#2,d0
 		jmp	.lut(pc,d0.w)
@@ -602,75 +614,63 @@ CallShortcut:
 		bra.w	.fadeout
 		bra.w	.fadeoutbgm
 		bra.w	.fadein
-		bra.w	.pause
-		bra.w	.resume
 .lute:
 .stopall:
 		move.w	#cmd_StopAll,d0
-		bra.w	.queuesound
+		bra	.queuesound
 .stopbgm:
 		move.w	#cmd_StopBGM,d0
-		bra.w	.queuesound
+		bra	.queuesound
 .stopsfx:
 		move.w	#cmd_StopSFX,d0
-		bra.w	.queuesound
+		bra	.queuesound
 .stopbsfm:
 		move.w	#cmd_StopBSFX,d0
-		bra.w	.queuesound
+		bra	.queuesound
 .stoppcmsfx:
 		move.w	#cmd_StopPSFX,d0
-		bra.w	.queuesound
+		bra	.queuesound
 .stopflags:
 		move.w	#cmd_StopFlags,d0
-		bra.w	.queuesound
+		bra	.queuesound
 .stopbgmandflags:
 		move.w	#cmd_StopBGM|cmd_StopFlags,d0
-		bra.w	.queuesound
+		bra	.queuesound
 .stereo:
 		move.w	#cmd_PanStereo,d0
-		bra.w	.queuesound
+		bra	.queuesound
 .mono:
 		move.w	#cmd_PanMono,d0
-		bra.w	.queuesound
+		bra	.queuesound
 .ssgon:
 		move.w	#cmd_SsgOn,d0
-		bra.w	.queuesound
+		bra	.queuesound
 .ssgoff:
 		move.w	#cmd_SsgOff,d0
-		bra.w	.queuesound
-.speedon:
-		move.w	#cmd_SpeedOn,d0
-		bra.w	.queuesound
-.speedoff:
-		move.w	#cmd_SpeedOff,d0
-		bra.w	.queuesound
+		bra	.queuesound
 .muffleoff:
 		move.w	#cmd_MuffleOff,d0
-		bra.w	.queuesound
+		bra	.queuesound
 .muffleon:
 		move.w	#cmd_MuffleOn,d0
-		bra.w	.queuesound
+		bra	.queuesound
 .fadeout:
 		move.w	#cmd_Fadeout|80,d0
-		bra.w	.queuesound
+		bra	.queuesound
 .fadeoutbgm:
 		move.w	#cmd_FadeoutBGM|80,d0
-		bra.w	.queuesound
+		bra	.queuesound
 .fadein:
 		move.w	#cmd_Fadein|80,d0
-		;bra.w	.queuesound
+		;bra	.queuesound
 .queuesound:
-		lea	v_soundram,a1
 		jmp	(SMPS_QueueSound).l
-.pause:
-		move.w	#smpsmisc_Pause,d0
-		bra.w	.runmisccmd
-.resume:
-		move.w	#smpsmisc_Resume,d0
-		;bra.w	.runmisccmd
-.runmisccmd:
-		lea	v_soundram,a1
-		jmp	(SMPS_RunMiscCommand).l
+.speedon:
+		moveq	#8,d0
+		jmp	(SMPS_SetBgmSpeed).l
+.speedoff:
+		moveq	#0,d0
+		jmp	(SMPS_SetBgmSpeed).l
 
 
 InitRender:
@@ -795,7 +795,6 @@ HandleRender:
 		rentext.w ScreenText.apicall,v_apiindex
 		rentext.w ScreenText.shortcut,v_shortcut
 		renhex.w v_soundid
-		renhex.w v_misccmd
 		renhex.w v_miscparam
 		renhex.b v_cddaid
 		renhex.b v_commval
@@ -900,7 +899,6 @@ ControlList:
 .s:		ctrllist.w	v_apiindex,	(CallAPI.lute-CallAPI.lut)/4-1
 		ctrllist.w	v_shortcut,	(CallShortcut.lute-CallShortcut.lut)/4-1
 		ctrllist.w	v_soundid,	$FFFF
-		ctrllist.w	v_misccmd,	2
 		ctrllist.w	v_miscparam,	$FFFF
 		ctrllist.b	v_cddaid,	(99*2)
 		ctrllist.b	v_commval,	$FF
@@ -925,9 +923,12 @@ ScreenText:
 		dc.l .a_writecomm
 		dc.l .a_guard
 		dc.l .a_unguard
-		dc.l .a_misc
 		dc.l .a_piano
 		dc.l .a_cdda
+		dc.l .a_pause
+		dc.l .a_resume
+		dc.l .a_bgmtempo
+		dc.l .a_bgmspeed
 .shortcut:
 		dc.l .s_stopall
 		dc.l .s_stopbgm
@@ -947,8 +948,6 @@ ScreenText:
 		dc.l .s_fadeout
 		dc.l .s_fadeoutbgm
 		dc.l .s_fadein
-		dc.l .s_pause
-		dc.l .s_resume
 .vintrun:
 		dc.l .v_off
 		dc.l .v_on
@@ -959,7 +958,6 @@ ScreenText:
 		dc.b " (A)API Call:",1
 		dc.b " (B)Shortcut:",1
 		dc.b " Sound ID:",1
-		dc.b " Misc CMD:",1
 		dc.b " Misc Param:",1
 		dc.b " CDDA ID:",1
 		dc.b " Comm Value:",1
@@ -989,8 +987,11 @@ ScreenText:
 .a_guard:	dctxt .amax,"GuardDriver"
 .a_unguard:	dctxt .amax,"UnguardDriver"
 .a_piano:	dctxt .amax,"SetupPianoRoll"
-.a_misc:	dctxt .amax,"RunMiscCommand"
 .a_cdda:	dctxt .amax,"PlayCDDA"
+.a_pause:	dctxt .amax,"PauseDriver"
+.a_resume:	dctxt .amax,"ResumeDriver"
+.a_bgmspeed:	dctxt .amax,"SetBGMSpeed"
+.a_bgmtempo:	dctxt .amax,"SetBGMTempo"
 
 .smax		equ 15
 .s_stopall:	dctxt .smax,"Stop All"
@@ -1005,14 +1006,12 @@ ScreenText:
 .s_ssgon:	dctxt .smax,"SSG on"
 .s_ssgoff:	dctxt .smax,"SSG off"
 .s_speedoff:	dctxt .smax,"Speedup off"
-.s_speedon:	dctxt .smax,"Speedup on"
+.s_speedon:	dctxt .smax,"Speedup by 8"
 .s_muffleoff:	dctxt .smax,"Muffle off"
 .s_muffleon:	dctxt .smax,"Muffle on"
 .s_fadeout:	dctxt .smax,"Fadeout"
 .s_fadeoutbgm:	dctxt .smax,"Fadeout BGM"
 .s_fadein:	dctxt .smax,"Fadein"
-.s_pause:	dctxt .smax,"Pause Driver"
-.s_resume:	dctxt .smax,"Resume Driver"
 
 .vmax		equ 5
 .v_off:		dctxt .vmax,"Off"
@@ -1023,26 +1022,29 @@ ScreenText:
 	org $8000
 ;	org $3F800	; MSD bank test 1
 ;	org $40000	; MSD bank test 2
-SMPS_InitDriver		equ *+00
-SMPS_RunDriver		equ *+04
-SMPS_QueueSound		equ *+08
-SMPS_UpdateFIFO		equ *+12
-SMPS_ReadComm		equ *+16
-SMPS_WriteComm		equ *+20
-SMPS_GuardDriver	equ *+24
-SMPS_UnguardDriver	equ *+28
-SMPS_SetupPianoRoll	equ *+32
-SMPS_RunMiscCommand	equ *+36
-SMPS_PlayCDDA		equ *+40
-SMPS_Signature		equ *+64	; ASCII with zero-terminator
+SMPS_DriverCode:
+SMPS_InitDriver		equ SMPS_DriverCode+SMPS_Offset_InitDriver
+SMPS_RunDriver		equ SMPS_DriverCode+SMPS_Offset_RunDriver
+SMPS_QueueSound		equ SMPS_DriverCode+SMPS_Offset_QueueSound
+SMPS_UpdateFIFO		equ SMPS_DriverCode+SMPS_Offset_UpdateFIFO
+SMPS_ReadComm		equ SMPS_DriverCode+SMPS_Offset_ReadComm
+SMPS_WriteComm		equ SMPS_DriverCode+SMPS_Offset_WriteComm
+SMPS_GuardDriver	equ SMPS_DriverCode+SMPS_Offset_GuardDriver
+SMPS_UnguardDriver	equ SMPS_DriverCode+SMPS_Offset_UnguardDriver
+SMPS_SetupPianoRoll	equ SMPS_DriverCode+SMPS_Offset_SetupPianoRoll
+SMPS_PlayCDDA		equ SMPS_DriverCode+SMPS_Offset_PlayCDDA
+SMPS_PauseDriver	equ SMPS_DriverCode+SMPS_Offset_PauseDriver
+SMPS_ResumeDriver	equ SMPS_DriverCode+SMPS_Offset_ResumeDriver
+SMPS_SetBgmTempo	equ SMPS_DriverCode+SMPS_Offset_SetBgmTempo
+SMPS_SetBgmSpeed	equ SMPS_DriverCode+SMPS_Offset_SetBgmSpeed
+SMPS_Signature		equ SMPS_DriverCode+SMPS_Offset_Signature
 	if __smpsDebug==0
 	binclude "smps-drv.bin"
 	else
 	binclude "smps-drv-debug.bin"
 	endif
 	org $10000
-SMPS_DriverData:
-	binclude "smps-snd.bin"
+SMPS_DriverData:	binclude "smps-snd.bin"
 ; ---------------------------------------------------------------------------
 	even
 RomEnd:

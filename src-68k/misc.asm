@@ -36,19 +36,6 @@ GuardDriver:
 UnguardDriver:
 		bra.w	DACUnguard
 ; ===========================================================================
-RunMiscCommand:
-		cmp.w	#(.lute-.lut)/2,d0
-		blo.s	.valid
-		SMPS_assert "AudioCommand: Invalid command, TODO print command id"
-.valid:
-		add.w	d0,d0
-		jmp	.lut(pc,d0.w)
-.lut:
-		bra.s	PauseDriver
-		bra.s	ResumeDriver
-		bra.s	SetBgmTempo				; d1.w = new tempo
-.lute:
-
 PauseDriver:
 		btst	#v_driverflags.paused,v_driverflags(a1)
 		bne.s	.paused
@@ -68,5 +55,9 @@ ResumeDriver:
 .playing:
 		rts
 SetBgmTempo:
-		move.w	d1,v_main_tempo(a1)
+		move.w	d0,v_main_tempo(a1)
+		rts
+SetBgmSpeed:
+		move.b	d0,v_userspeed(a1)
+		move.b	#1,v_userspeedtimer(a1)
 		rts

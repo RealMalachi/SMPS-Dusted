@@ -1,5 +1,5 @@
 SCD_TimeTravel_Header:
-	smpsHeaderStartSong	"DUSTED",1
+	smpsHeaderStartSong	$F0E50000,1
 	smpsHeaderVoice		SCD_TimeTravel_Voices
 	smpsHeaderChan		$06, $00, $00
 	smpsHeaderTempo		$01, $0000

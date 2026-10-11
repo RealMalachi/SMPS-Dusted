@@ -80,7 +80,7 @@ PSGSetFreq:
 		move.b	d0,TrackVoiceControl(a5)
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	.noplay
-		st.b	v_lastpsg4(a1)
+		clr.b	v_lastpsg4(a1)
 .noplay:
 		move.b	(a0)+,TrackVolume(a5)
 		move.b	(a0)+,TrackVolEnvCtrl(a5)

@@ -22,8 +22,9 @@ StopAllSound:
 		bra.w	PSGSilenceAll
 ; ===========================================================================
 StopSoundFlags:
-		and.b	#$FF!(1<<v_driverflags.speedsong|1<<v_driverflags.muffle),v_driverflags(a1)
-		rts
+		and.b	#$FF!(1<<v_driverflags.muffle),v_driverflags(a1)
+		moveq	#0,d1
+		bra.w	SetBgmSpeed
 ; ===========================================================================
 StopBGM:
 	if __smpsJingle
@@ -1390,7 +1391,7 @@ cfSetVolEnv:
 		rts
 ; ---------------------------------------------------------------------------
 cfSetPSGNoise:
-		if __smpsDebug
+	if __smpsDebug
 ; ensure that only PSG3 or PSG4 channels are trying to use this
 		move.w	RAM_BGMChannel+24(pc),d0
 		beq.s	.nopsg3bgm
@@ -1420,7 +1421,7 @@ cfSetPSGNoise:
 		cmp.l	a3,a5
 		beq.s	.valid
 .nopsg4sfx:
-	if __smpsBSFX
+		if __smpsBSFX
 		move.w	RAM_BSFXChannel+24(pc),d0
 		beq.s	.nopsg3bsfx
 		move.l	a1,a3
@@ -1435,38 +1436,31 @@ cfSetPSGNoise:
 		cmp.l	a3,a5
 		beq.s	.valid
 .nopsg4bsfx:
-	endif
+		endif
 		SMPS_assert "cfxSetPSG3: Non-PSG3 usage, TODO: print channel"
 .valid:
-		endif
+	endif
 ; if channel is PSG4, simply save the new noise type
-		move.b	(a4)+,d1
+		move.b	(a4)+,d0
 		cmp.b	#$E0,TrackVoiceControl(a5)
 		bhs.s	.psg4
 .psg3:
-		and.b	#$C7,d1					; acknowledge it as PSG3, but save the noise type
-		bset	#_special,TrackPlaybackControl(a5)	; enable PSG special mode
-		tas.b	d1					; Test d0 then set bit 7 (yes this works, tas is fine on registers)
-		bpl.s	.exit					; If bit 7 was clear, don't silence psg 3
+		and.b	#$C7,d0					; acknowledge it as PSG3, but save the noise type
+		bset	#_special,TrackPlaybackControl(a5)	; set special mode
+		bne.s	.exit					; branch if it was already set
+
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	.exit
 		move.b	#$DF,(psginput).l			; mute PSG3
 .psg4:
 		clr.b	v_lastpsg4(a1)
 .exit:
-		move.b	d1,TrackVoiceControl(a5)
+		move.b	d0,TrackVoiceControl(a5)
 		rts
 ; ---------------------------------------------------------------------------
 cfxSetPSG3:
-		if __smpsDebug
+	if __smpsDebug
 ; ensure that only PSG3 channels are trying to use this
-		move.w	RAM_BGMChannel+24(pc),d0
-		beq.s	.nopsg3bgm
-		move.l	a1,a3
-		adda.w	d0,a3
-		cmp.l	a3,a5
-		beq.s	.valid
-.nopsg3bgm:
 		move.w	RAM_SFXChannel+24(pc),d0
 		beq.s	.nopsg3sfx
 		move.l	a1,a3
@@ -1474,7 +1468,7 @@ cfxSetPSG3:
 		cmp.l	a3,a5
 		beq.s	.valid
 .nopsg3sfx:
-	if __smpsBSFX
+		if __smpsBSFX
 		move.w	RAM_BSFXChannel+24(pc),d0
 		beq.s	.nopsg3bsfx
 		move.l	a1,a3
@@ -1482,20 +1476,26 @@ cfxSetPSG3:
 		cmp.l	a3,a5
 		beq.s	.valid
 .nopsg3bsfx:
-	endif
+		endif
+		move.w	RAM_BGMChannel+24(pc),d0
+		beq.s	.nopsg3bgm
+		move.l	a1,a3
+		adda.w	d0,a3
+		cmp.l	a3,a5
+		beq.s	.valid
+.nopsg3bgm:
 		SMPS_assert "cfxSetPSG3: Non-PSG3 usage, TODO: print channel"
 .valid:
-		endif
+	endif
 		move.b	#$C0,TrackVoiceControl(a5)		; Discard noise
 		bclr	#_special,TrackPlaybackControl(a5)	; clear special flag
-		sne.b	d0					; if it was set then mute PSG noise...
+		beq.s	.exit					; branch if it was already cleared
+
 		btst	#_sfxoverride,TrackPlaybackControl(a5)	; ...if SFXs aren't using it
-		bne.s	.locret
-		tst.b	d0
-		beq.s	.notpsg34shared
+		bne.s	.exit
 		move.b	#$FF,(psginput).l			; mute PSG noise
-.notpsg34shared:
-.locret:	rts
+.exit:
+		rts
 ; ---------------------------------------------------------------------------
 cfxFmKeyOnMask:
 	if __smpsDebug
@@ -1799,9 +1799,10 @@ cfStopTrack:
 .fm:		bra.w	FMNoteOff
 .psg:
 		btst	#_special,TrackPlaybackControl(a5)
-		beq.s	.psgnah
+		bne.s	.psgspec
 		cmp.b	#$E0,TrackVoiceControl(a5)
 		blo.s	.psgnah
+.psgspec:
 		clr.b	v_lastpsg4(a1)
 .psgnah:
 		bra.w	PSGNoteOff
@@ -1848,6 +1849,11 @@ cfStopTrack:
 
 	if __smpsJingle
 cfStopTrack_Jingle:
+; stop processing all sequences for this frame
+; this avoids desyncing the sequences
+		addq.w	#8,sp
+		pea	HandleSequencerEnd(pc)
+
 		bclr	#v_driverflags.jingle,v_driverflags(a1)	; Disable jingle
 		move.b	#$50,v_fadein_counter(a1)		; Trigger fade-in
 ; restore prior track
@@ -1893,9 +1899,7 @@ cfStopTrack_Jingle:
 		add.w	#TrackPsgSz,a5
 .nextpsg:
 		dbf	d7,.psgloop
-; stop processing all sequences for this frame
-		addq.w	#4,sp
-		bra.w	HandleSequencerEnd
+		rts
 	endif
 ; ===========================================================================
 cfxPlayID:

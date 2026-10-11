@@ -39,14 +39,30 @@ CycleSoundQueue:
 		cmp.w	(a0),d7				; Is this pcm?
 		blo.w	Sound_PlayPCM			; Branch if yes
 		rts
+	SMPS_share cmd__First,		$F000
+	SMPS_share cmd_FadeoutBGM,	$F000
+	SMPS_share cmd_Fadeout,		$F100
+	SMPS_share cmd_Fadein,		$F200
+	SMPS_share cmd_StopAll,		$F300
+	SMPS_share cmd_StopBGM,		$F301
+	SMPS_share cmd_StopSFX,		$F302
+	SMPS_share cmd_StopBSFX,	$F304
+	SMPS_share cmd_StopPSFX,	$F308
+	SMPS_share cmd_StopFlags,	$F380
+	SMPS_share cmd_MuffleOff,	$F400
+	SMPS_share cmd_MuffleOn,	$F401
+	SMPS_share cmd_PanStereo,	$F402
+	SMPS_share cmd_PanMono,		$F403
+	SMPS_share cmd_SsgOn,		$F404
+	SMPS_share cmd_SsgOff,		$F405
+	SMPS_share cmd__Last,		$F500
 ; ---------------------------------------------------------------------------
 Cmd_FadeOutMusicStopSFX:
-		move.w	d7,-(sp)
-		bsr.w	StopSFX
+		move.b	d7,v_fadeout_counter(a1)
 	if __smpsBSFX
-		bsr.w	StopBSFX
+		pea	StopBSFX(pc)
 	endif
-		move.w	(sp)+,d7
+		bra.w	StopSFX
 
 Cmd_FadeOutMusic:
 		move.b	d7,v_fadeout_counter(a1)
@@ -141,10 +157,9 @@ Cmd_SetBitFlag:
 .ack:		move.w	(a2)+,d0
 		jmp	.table(pc,d0.w)
 .table:
-		dc.w (v_driverflags.speedsong)<<13|v_driverflags,Cmd_SetBitFlag_Speed-.table	; 0 ; tempo speedup
+		dc.w (v_driverflags.muffle)<<13   |v_driverflags,Cmd_SetBitFlag_Muffle-.table	; 0 ; water muffle
 		dc.w (v_driverflags.mono)<<13     |v_driverflags,Cmd_SetBitFlag_Mono-.table	; 2 ; stereo/mono
 		dc.w (v_driverflags.ssgoff)<<13   |v_driverflags,Cmd_SetBitFlag_SSG-.table	; 4 ; SSG-EG
-		dc.w (v_driverflags.muffle)<<13   |v_driverflags,Cmd_SetBitFlag_Muffle-.table	; 6 ; water muffle
 .tend:
 
 Cmd_SetBitFlag_Speed:
@@ -319,27 +334,24 @@ Sound_PlayBGM:
 		beq.s	.bgmnot1up
 		bset	#v_driverflags.jingle,v_driverflags(a1)		; if 1up is already playing, branch
 		bne.s	.bgm_loadJingle
-
+; clear override
 		moveq_	$FF!(1<<_sfxoverride),d1
-
 		set .val,v_music_pcm_tracks+TrackPlaybackControl
 		rept (v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz
 		and.b	d1,.val(a1)
 		set .val,.val+TrackDacSz
 		endr
-
 		set .val,v_music_fm_tracks+TrackPlaybackControl
 		rept (v_music_fm_tracks_end-v_music_fm_tracks)/TrackFmSz
 		and.b	d1,.val(a1)
 		set .val,.val+TrackFmSz
 		endr
-
 		set .val,v_music_psg_tracks+TrackPlaybackControl
 		rept (v_music_psg_tracks_end-v_music_psg_tracks)/TrackPsgSz
 		and.b	d1,.val(a1)
 		set .val,.val+TrackPsgSz
 		endr
-
+; save previous song
 		lea	v_1up_save_ram(a1),a0
 		lea	v_1up_ram_copy(a1),a2
 		move.w	#((v_1up_ram_copy_end-v_1up_ram_copy)/4)-1,d1
@@ -362,15 +374,21 @@ Sound_PlayBGM:
 		endif
 	endif
 .bgm_loadMusic:
+		moveq	#0,d0
+		btst	#v_driverflags.pal,v_driverflags(a1)
+		beq.s	.bgm_notpal
+		btst	#6,d6
+		seq	d0
+		and.b	#1<<v_driverflags.bgmpaladjust,d0
+.bgm_notpal:
+		and.b	#$FF!(1<<v_driverflags.bgmpaladjust),v_driverflags(a1)
+		or.b	d0,v_driverflags(a1)
 .bgm_loadJingle:
+		move.b	#1,v_userspeedtimer(a1)			; init speed timer
+; skip BGM playback for one frame to avoid murdering the CPU
+; SFXs aren't skipped so they don't sound off
 		addq.w	#4,sp
-		pea	HandleSoundQueueEnd(pc)
-; setup PAL timer
-		moveq	#5,d0
-		btst	#6,d6					; bit 22 is the PAL slow play flag
-		beq.s	.pal_playnorm
-		moveq	#-1,d0
-.pal_playnorm:	move.b	d0,v_paltimer(a1)
+		pea	HandleSfxSequence(pc)
 
 		move.l	v_dataptr(a1),a6
 		moveq	#0,d0
