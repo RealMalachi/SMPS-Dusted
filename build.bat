@@ -1,4 +1,4 @@
-
+@echo off
 setlocal enabledelayedexpansion
 set mainpath=%~dp0
 set PrintText=0
