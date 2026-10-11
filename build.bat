@@ -66,7 +66,8 @@ goto :%~1
 :drv
 	if not exist _out mkdir _out
 	call :BUILDZ80COMP "src-z80/mpcm1/main.asm" "mpcm1" "MegaPCM1"
-	call :BUILDZ80COMP "src-z80/mpcm2/megapcm.asm" "mpcm2" "MegaPCM2.0" "-DOUTPATH=\"_out/mpcm2.bin\" -DTRACEPATH=\"_out/mpcm2.tracedata.txt\""
+	call :BUILDZ80 "src-z80/mpcm2/megapcm.asm" "megapcm2" "MegaPCM2.0" "-Wno-fileorg -DOUTPATH=\"_out/mpcm2.bin\" -DTRACEPATH=\"_out/mpcm2.tracedata.txt\""
+	call :COMP "_out/mpcm2.bin" "_out/mpcm2.zx0"
 	call :BUILD68K "src-68k\build-mcd.asm" "_out/build-mcd.bin" "build-mcd" "MegaCD driver"
 	call :COMP "_out/build-mcd.bin" "_out/build-mcd.zx0"
 	call :BUILD68K "build-drv.asm" "smps-drv.bin" "build-drv" "SMPS driver blob" "-a -shareout smps-def.asm -D __smpsDebug=0 -g map"
@@ -94,7 +95,7 @@ goto :%~1
 :BUILDZ80
 	if %PrintText% == 1 echo ============================================
 	if %PrintText% == 1 echo Building %~3
-	%SJ% %~1 %SJFLAGS% %~4 --raw=_out/%~2.bin --exp=_out/%~2.exp --sym=_out/%~2.sym --lst=_out/%~2.lst --cleanonerror
+	%SJ% %~1 %~4 --raw=_out/%~2.bin --exp=_out/%~2.exp --sym=_out/%~2.sym --lst=_out/%~2.lst --cleanonerror %SJFLAGS%
 	goto :EOF
 :BUILDZ80COMP
 	if %PrintText% == 1 echo ============================================
