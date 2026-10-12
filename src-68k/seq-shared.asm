@@ -1825,15 +1825,17 @@ cfStopTrack:
 		;bpl.s	.r_fm
 .r_fm:
 		bsr.w	FMNoteOff
-		exg.l	a3,a5
-		bsr.w	SetVoicePan
+		move.l	a5,-(sp)
 		move.l	a3,a5
+		bsr.w	SetVoicePan
+		move.l	(sp)+,a5
 		rts
 .r_psg:
 		bra.w	PSGNoteOff
 .r_psgnah:	rts
 .r_dac:
-		exg.l	a3,a5
+		move.l	a5,-(sp)
+		move.l	a3,a5
 		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
 		bsr.w	DACStopSample
@@ -1844,7 +1846,7 @@ cfStopTrack:
 		beq.s	.stereo
 		or.b	#$C0,d1
 .stereo:	bsr.w	DACSetPan
-		exg.l	a3,a5
+		move.l	(sp)+,a5
 		rts
 
 	if __smpsJingle
