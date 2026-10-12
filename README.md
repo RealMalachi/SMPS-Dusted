@@ -45,6 +45,7 @@ Excludes:
 | Clownacy | Clone Driver V2, p2bin |
 | Undying-Star | Flicky sounds |
 | Tomatowave | Beta testing |
+| DaxKatter | Dungeon music, beta testing |
 
 ## Legal notice
 Usage of this sound driver is only endorsed for non-commercial use.

@@ -853,6 +853,7 @@ SMPS_MusicIndex:
 	musdef 0,0,0,BgmTest,bgm_Test
 	musdef 0,0,0,BgmSonicExePiano,bgm_SonicExePiano
 	musdef 0,0,0,BgmSoccer,bgm_Soccer
+	musdef 0,0,0,BgmDungeon,bgm_Dungeon
 	musdef 0,0,0,BgmSCDTimeTravel,bgm_SCDTimeTravel
 	musdef 0,0,0,BgmS28bUnused,bgm_S28bUnused
 	musdef 0,0,1,BgmEveningStar,bgm_EveningStar
@@ -2602,6 +2603,8 @@ BgmTest:	include "res/bgm/_tester.asm"
 BgmSonicExePiano:	include "res/bgm/SonicExePiano.asm"
 		even
 BgmSoccer:	include "res/bgm/MDSoccer-Title.asm"
+		even
+BgmDungeon:	include "res/bgm/BGM_DUNGEON_3.asm"
 		even
 BgmSCDTimeTravel:	include "res/bgm/CD Time Travel.asm"
 		even
