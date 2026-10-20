@@ -1627,19 +1627,35 @@ SMPS_SampleTable:
 ; S3D
 	pcmdef	DPCM,	FinalFightMetalCrash,	dFinalFightMetalCrash,	pcm_FinalFightMetalCrash,	14000	; TODO: pretty sure it's the wrong HZ rate
 	pcmdef	DPCM,	IntroKick,		dIntroKick,		pcm_IntroKick,			9750
+; Chaotix
+;	pcmdef	PCM,	Pwm_ElecKick,		pElecKick,		pcm_KcElecKick,			11025 ; $800
+;	pcmdef	PCM,	Pwm_ElecSnare,		pElecSnare,		pcm_KcElecSnare,		11025 ; $800
+	pcmdef	PCM,	Pwm_Splash,		pSplash,		pcm_KcSplash,			11025 ; $800
+;	pcmdef	PCM,	Pwm_RideBell,		pRideBell,		pcm_KcRideBell,			11025 ; $800
+	pcmdef	PCM,	Pwm_Tom,		pTomHi,			pcm_KcTomHi,			11025 ; $800
+	pcmdef	PCM,	Pwm_Tom,		pTomMid,		pcm_KcTomMid,			10380 ; $659
+	pcmdef	PCM,	Pwm_Tom,		pTomLo,			pcm_KcTomLo,			6560  ; $4C2
+;	pcmdef	PCM,	Pwm_ElecHiHat,		pElecHiHat,		pcm_KcElecHiHat,		11025 ; $800
+;	pcmdef	PCM,	Pwm_Crash,		pCrash,			pcm_KcCrash,			11025 ; $800
+;	pcmdef	PCM,	Pwm_Clap,		pClap,			pcm_KcClap,			11025 ; $800
+	pcmdef	PCM,	Pwm_Kick,		pKick,			pcm_KcKick,			11025 ; $800
+	pcmdef	PCM,	Pwm_Snare,		pSnare,			pcm_KcSnare,			11025 ; $800
+;	pcmdef	PCM,	Pwm_Bell,		pBell,			pcm_KcBell,			11025 ; $800
+;	pcmdef	PCM,	Pwm_Snap,		pSnap,			pcm_KcSnap,			11025 ; $800
+;	pcmdef	PCM,	Pwm_Cowbell,		pCowbell,		pcm_KcCowbell,			11025 ; $800
+;	pcmdef	PCM,	Pwm_Click,		pClickHi,		pcm_KcClickHi,			11025 ; $800
+;	pcmdef	PCM,	Pwm_Click,		pClickLo,		pcm_KcClickLo,			8260  ; $5FE
+;	pcmdef	PCM,	Pwm_Bongo,		pBongoHi,		pcm_KcBongoHi,			11025 ; $800
+;	pcmdef	PCM,	Pwm_Bongo,		pBongoLo,		pcm_KcBongoLo,			8260  ; $5FE
+;	pcmdef	PCM,	Pwm_Timpani,		pTimpaniHi,		pcm_KcTimpaniHi,		11025 ; $800
+;	pcmdef	PCM,	Pwm_Timpani,		pTimpaniLo,		pcm_KcTimpaniLo,		8260  ; $5FE
 ; Extra
-	pcmdef	PCM,	SegaPCM,		dSegaChant,		pcm_SegaChant,			16000
-;	pcmdef	PCM,	Rizzmas,		dRizzmas,		pcm_Rizzmas
+;	pcmdef	PCM,	SegaPCM,		dSegaChant,		pcm_SegaChant,			16000
 ; ============= type	expected pcm		sequence id end label	queue id end label
 	pcmdef	END,	MegaPCM2,		d__Last,		pcm__Last
-pCrash	equ dHipHopHitKick
-pKick	equ dKickS3
-pSnare	equ dSnareS3
-pTomHi	equ dHighTom
-pTomMid	equ dMidTomS3
-pTomLo	equ dLowTomS3
-pSplash	equ dIntroKick
-
+pClap		equ dClapS3
+pCrash		equ dCrashCymbal
+dSegaChant	equ dIntroKick
 ; ---------------------------------------------------------------------------
 ; Sound effect data
 ; ---------------------------------------------------------------------------
@@ -3034,6 +3050,23 @@ BgmS3DCredits:	include "res/bgm/sonic3D/Credits.asm"
 
 	pcminc IntroKick,		"res/pcm/sonic3d/IntroKick.dpcm"
 	pcminc FinalFightMetalCrash,	"res/pcm/sonic3d/FinalFightMetalCrash.dpcm"
+
+	pcminc Pwm_ElecKick,		"res/pcm/chaotix/electric_kick.pwm"
+	pcminc Pwm_ElecSnare,		"res/pcm/chaotix/electric_snare.pwm"
+	pcminc Pwm_Splash,		"res/pcm/chaotix/splash_cymbal.pwm"
+	pcminc Pwm_RideBell,		"res/pcm/chaotix/ride_bell.pwm"
+	pcminc Pwm_Tom,			"res/pcm/chaotix/tom.pwm"
+	pcminc Pwm_ElecHiHat,		"res/pcm/chaotix/electric_hi_hat.pwm"
+	pcminc Pwm_Crash,		"res/pcm/chaotix/crash_cymbal.pwm"
+	pcminc Pwm_Clap,		"res/pcm/chaotix/clap.pwm"
+	pcminc Pwm_Kick,		"res/pcm/chaotix/kick.pwm"
+	pcminc Pwm_Snare,		"res/pcm/chaotix/snare.pwm"
+	pcminc Pwm_Bell,		"res/pcm/chaotix/bell.pwm"
+	pcminc Pwm_Snap,		"res/pcm/chaotix/snap.pwm"
+	pcminc Pwm_Cowbell,		"res/pcm/chaotix/cowbell.pwm"
+	pcminc Pwm_Click,		"res/pcm/chaotix/click.pwm"
+	pcminc Pwm_Bongo,		"res/pcm/chaotix/bongo.pwm"
+	pcminc Pwm_Timpani,		"res/pcm/chaotix/timpani.pwm"
 
 	pcminc SegaPCM,			"res/pcm/Sega.pcm"
 ;	pcminc Rizzmas,			"res/pcm/rizzmas.wav"

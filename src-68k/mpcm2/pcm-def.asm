@@ -153,24 +153,28 @@ musidbase2	set sampleseqid
 samplerate	equ samplequeueid
 		shared samplerate
 		endif
+	elseif "sampletype"=="END"
+		dc.w	-1	; end marker
+musidtrack	set -1
+		if "samplequeueid"<>""
+samplequeueid	equ musidbase1+musidtrack
+		endif
+		if "sampleseqid"<>""
+sampleseqid	equ musidbase2+musidtrack
+		endif
 	else
 		if "samplequeueid"<>""
 samplequeueid	equ musidbase1+musidtrack
 		shared samplequeueid
 		endif
-
-		if "sampleseqid"==""
-		elseif (musidbase2+musidtrack)>=$E0
-		fatal "ERROR: sampleseqid ($\{musidbase2+musidtrack}) exceeds valid SMPS sequence IDs ($E0)"
-		else
-sampleseqid	equ musidbase2+musidtrack
+		if "sampleseqid"<>""
+sampleseqid		equ musidbase2+musidtrack
+			if sampleseqid>=$E0
+			fatal "ERROR: sampleseqid ($\{musidbase2+musidtrack}) exceeds valid SMPS sequence IDs ($E0)"
+			endif
 		endif
 musidtrack	set musidtrack+1
-
-		if "sampletype"=="END"
-		dc.w	-1	; end marker
-musidtrack	set -1
-		elseif "sampletype"=="NONE"
+		if "sampletype"=="NONE"
 		dc.l	0,0,0
 		elseif "sampletype"=="PCM"
 			if (samplerate+0)>TYPE_PCM_MAX_RATE
