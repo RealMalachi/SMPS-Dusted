@@ -37,19 +37,22 @@ PSGDoNext:
 		pea	.noteloop(pc)
 		bra.w	CoordFlag				; manipulates stack
 ; ---------------------------------------------------------------------------
+.gotextnote:	SMPS_assert "PSG extended note that shouldn't exist"
 .gotnote:	bsr.s	PSGSetFreq
 		moveq	#0,d5
 		move.b	(a4)+,d5
 		bpl.s	.gotnotetime
 		subq.w	#1,a4
 		bra.w	PSGFinishTrackUpdate
-.gotnotetime:	tst.w	TrackFreq(a5)
+.gotnotetime:	beq.s	.gotextnote
+		tst.w	TrackFreq(a5)
 		bpl.s	.norest
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
 .norest:	pea	PSGFinishTrackUpdate(pc)
 		bra.w	SetDuration
 ; ---------------------------------------------------------------------------
-.gotonlytime:	tst.w	TrackFreq(a5)
+.gotonlytime:	beq.s	.gotextnote
+		tst.w	TrackFreq(a5)
 		bpl.s	.norest
 ; note-rest-time-time
 	if __smpsRestTimeTime=0

@@ -2,20 +2,7 @@
 ; SMPS-Dusted driver data
 ; ---------------------------------------------------------------------------
 SMPS_Start:
-.s:	dc.w bgm__Last-bgm__First
-	dc.w sfx__Last-sfx__First
-	dc.w pcm__Last-pcm__First
-	dc.w __smpsDataVer
-	dc.w SMPS_MusicIndex-.s
-	dc.w SMPS_SoundIndex-.s
-	dc.w SMPS_UVB_FM-.s
-	dc.w SMPS_VolEnvIndex-.s
-	dc.w SMPS_ModEnvIndex-.s
-	dc.w SMPS_PanEnvIndex-.s
-	dc.w SMPS_SampleTable-.s
-	dc.w SMPS_FmDrumTable-.s
-	dc.w SMPS_PsgDrumTable-.s
-	dc.w SMPS_PcmDrumTable-.s
+	headerdef bgm_,sfx_,pcm_,SMPS_MusicIndex,SMPS_SoundIndex,SMPS_UVB_FM,SMPS_VolEnvIndex,SMPS_ModEnvIndex,SMPS_PanEnvIndex,SMPS_SampleTable,SMPS_FmDrumTable,SMPS_PsgDrumTable,SMPS_PcmDrumTable
 ; ---------------------------------------------------------------------------
 ; Universal Panning Envelopes
 ; ---------------------------------------------------------------------------
@@ -1625,37 +1612,34 @@ SMPS_SampleTable:
 	pcmdef	DPCM,	PowerKickHit,		dLowerPowerKickHit,	pcm_LowerPowerKickHit,		9750
 	pcmdef	DPCM,	PowerKickHit,		dLowestPowerKickHit,	pcm_LowestPowerKickHit,		13000
 ; S3D
-	pcmdef	DPCM,	FinalFightMetalCrash,	dFinalFightMetalCrash,	pcm_FinalFightMetalCrash,	14000	; TODO: pretty sure it's the wrong HZ rate
+	pcmdef	DPCM,	FinalFightMetalCrash,	dFinalFightMetalCrash,	pcm_FinalFightMetalCrash,	14000 ; TODO: pretty sure it's the wrong HZ rate
 	pcmdef	DPCM,	IntroKick,		dIntroKick,		pcm_IntroKick,			9750
 ; Chaotix
-;	pcmdef	PCM,	Pwm_ElecKick,		pElecKick,		pcm_KcElecKick,			11025 ; $800
-;	pcmdef	PCM,	Pwm_ElecSnare,		pElecSnare,		pcm_KcElecSnare,		11025 ; $800
+	pcmdef	PCM,	Pwm_ElecKick,		pElecKick,		pcm_KcElecKick,			11025 ; $800
+	pcmdef	PCM,	Pwm_ElecSnare,		pElecSnare,		pcm_KcElecSnare,		11025 ; $800
 	pcmdef	PCM,	Pwm_Splash,		pSplash,		pcm_KcSplash,			11025 ; $800
-;	pcmdef	PCM,	Pwm_RideBell,		pRideBell,		pcm_KcRideBell,			11025 ; $800
+	pcmdef	PCM,	Pwm_RideBell,		pRideBell,		pcm_KcRideBell,			11025 ; $800
 	pcmdef	PCM,	Pwm_Tom,		pTomHi,			pcm_KcTomHi,			11025 ; $800
-	pcmdef	PCM,	Pwm_Tom,		pTomMid,		pcm_KcTomMid,			10380 ; $659
-	pcmdef	PCM,	Pwm_Tom,		pTomLo,			pcm_KcTomLo,			6560  ; $4C2
-;	pcmdef	PCM,	Pwm_ElecHiHat,		pElecHiHat,		pcm_KcElecHiHat,		11025 ; $800
-;	pcmdef	PCM,	Pwm_Crash,		pCrash,			pcm_KcCrash,			11025 ; $800
-;	pcmdef	PCM,	Pwm_Clap,		pClap,			pcm_KcClap,			11025 ; $800
+	pcmdef	PCM,	Pwm_Tom,		pTomMid,		pcm_KcTomMid,			10380 ; $659 ; TODO: pretty sure it's the wrong HZ rate
+	pcmdef	PCM,	Pwm_Tom,		pTomLo,			pcm_KcTomLo,			6560  ; $4C2 ; TODO: pretty sure it's the wrong HZ rate
+	pcmdef	PCM,	Pwm_ElecHiHat,		pElecHiHat,		pcm_KcElecHiHat,		11025 ; $800
+	pcmdef	PCM,	Pwm_Crash,		pCrash,			pcm_KcCrash,			11025 ; $800
+	pcmdef	PCM,	Pwm_Clap,		pClap,			pcm_KcClap,			11025 ; $800
 	pcmdef	PCM,	Pwm_Kick,		pKick,			pcm_KcKick,			11025 ; $800
 	pcmdef	PCM,	Pwm_Snare,		pSnare,			pcm_KcSnare,			11025 ; $800
-;	pcmdef	PCM,	Pwm_Bell,		pBell,			pcm_KcBell,			11025 ; $800
-;	pcmdef	PCM,	Pwm_Snap,		pSnap,			pcm_KcSnap,			11025 ; $800
-;	pcmdef	PCM,	Pwm_Cowbell,		pCowbell,		pcm_KcCowbell,			11025 ; $800
-;	pcmdef	PCM,	Pwm_Click,		pClickHi,		pcm_KcClickHi,			11025 ; $800
-;	pcmdef	PCM,	Pwm_Click,		pClickLo,		pcm_KcClickLo,			8260  ; $5FE
-;	pcmdef	PCM,	Pwm_Bongo,		pBongoHi,		pcm_KcBongoHi,			11025 ; $800
-;	pcmdef	PCM,	Pwm_Bongo,		pBongoLo,		pcm_KcBongoLo,			8260  ; $5FE
-;	pcmdef	PCM,	Pwm_Timpani,		pTimpaniHi,		pcm_KcTimpaniHi,		11025 ; $800
-;	pcmdef	PCM,	Pwm_Timpani,		pTimpaniLo,		pcm_KcTimpaniLo,		8260  ; $5FE
+	pcmdef	PCM,	Pwm_Bell,		pBell,			pcm_KcBell,			11025 ; $800
+	pcmdef	PCM,	Pwm_Snap,		pSnap,			pcm_KcSnap,			11025 ; $800
+	pcmdef	PCM,	Pwm_Cowbell,		pCowbell,		pcm_KcCowbell,			11025 ; $800
+	pcmdef	PCM,	Pwm_Click,		pClickHi,		pcm_KcClickHi,			11025 ; $800
+	pcmdef	PCM,	Pwm_Click,		pClickLo,		pcm_KcClickLo,			8260  ; $5FE ; TODO: pretty sure it's the wrong HZ rate
+	pcmdef	PCM,	Pwm_Bongo,		pBongoHi,		pcm_KcBongoHi,			11025 ; $800
+	pcmdef	PCM,	Pwm_Bongo,		pBongoLo,		pcm_KcBongoLo,			8260  ; $5FE ; TODO: pretty sure it's the wrong HZ rate
+	pcmdef	PCM,	Pwm_Timpani,		pTimpaniHi,		pcm_KcTimpaniHi,		11025 ; $800
+	pcmdef	PCM,	Pwm_Timpani,		pTimpaniLo,		pcm_KcTimpaniLo,		8260  ; $5FE ; TODO: pretty sure it's the wrong HZ rate
 ; Extra
-;	pcmdef	PCM,	SegaPCM,		dSegaChant,		pcm_SegaChant,			16000
+	pcmdef	PCM,	SegaPCM,		dSegaChant,		pcm_SegaChant,			16000
 ; ============= type	expected pcm		sequence id end label	queue id end label
 	pcmdef	END,	MegaPCM2,		d__Last,		pcm__Last
-pClap		equ dClapS3
-pCrash		equ dCrashCymbal
-dSegaChant	equ dIntroKick
 ; ---------------------------------------------------------------------------
 ; Sound effect data
 ; ---------------------------------------------------------------------------

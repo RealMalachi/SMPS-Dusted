@@ -458,6 +458,24 @@ smpsHeaderSFXChannel macro chanid,loc,pitch,vol
 	endif
 	endm
 ; ---------------------------------------------------------------------------
+;dc macro	; too slow to be viable
+;	smpsNote ALLARGS
+;	endm
+smpsNote macro data
+	if "data"<>""
+		ifndef data	; avoids AS forward-referencing error: if it's forward-referenced then it's likely per-song
+		!dc.b data
+		elseif ((data>0)&(data<$E0))|("data"="smpsNoAttack")|("data"="smpsHoldNote")
+		!dc.b data
+		elseif (data>=$100)&(data<$200)
+		!dc.b 0,data-$100
+		else
+		fatal "smpsNote: input (data) isn't a valid time, note or extended note"
+		endif
+		shift
+		smpsNote ALLARGS
+	endif
+	endm
 ; Co-ord Flag Macros and Equates
 panNone		equ $00
 panRight	equ $40
@@ -1104,10 +1122,10 @@ smpsEnvPan macro data
 ; ---------------------------------------------------------------------------
 ; you can also configure ams and pms via panval
 smpsFmDrum macro freq,voiceid,volval,volenv,modenv,panval
-	dc.b (freq)>>8,(freq)&$FF,voiceid,volval,volenv,modenv&$7F,panval
+	!dc.b (freq)>>8,(freq)&$FF,voiceid,volval,volenv,modenv&$7F,panval
 	endm
 smpsPsgDrum macro noisenote,volval,volenv
-	dc.b $E0+(noisenote-nnP10),volval,volenv
+	!dc.b $E0+(noisenote-nnP10),volval,volenv
 	endm
 ; ---------------------------------------------------------------------------
 ; Macros for FM instruments

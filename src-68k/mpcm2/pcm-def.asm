@@ -154,58 +154,58 @@ samplerate	equ samplequeueid
 		shared samplerate
 		endif
 	elseif "sampletype"=="END"
-		dc.w	-1	; end marker
-musidtrack	set -1
+		!dc.w	-1	; end marker
 		if "samplequeueid"<>""
 samplequeueid	equ musidbase1+musidtrack
 		endif
 		if "sampleseqid"<>""
-sampleseqid	equ musidbase2+musidtrack
+sampleseqid	equ musidbase2+musidtrack+(((musidbase2+musidtrack)>=$E0)*($100-$E0))
 		endif
+musidtrack	set -1
 	else
 		if "samplequeueid"<>""
 samplequeueid	equ musidbase1+musidtrack
 		shared samplequeueid
 		endif
 		if "sampleseqid"<>""
-sampleseqid		equ musidbase2+musidtrack
-			if sampleseqid>=$E0
-			fatal "ERROR: sampleseqid ($\{musidbase2+musidtrack}) exceeds valid SMPS sequence IDs ($E0)"
+sampleseqid		equ musidbase2+musidtrack+(((musidbase2+musidtrack)>=$E0)*($100-$E0))
+			if sampleseqid>=$200
+			fatal "ERROR: sampleseqid ($\{musidbase2+musidtrack}) exceeds valid SMPS sequence IDs"
 			endif
 		endif
 musidtrack	set musidtrack+1
 		if "sampletype"=="NONE"
-		dc.l	0,0,0
+		!dc.l	0,0,0
 		elseif "sampletype"=="PCM"
 			if (samplerate+0)>TYPE_PCM_MAX_RATE
 			fatal "Invalid sample rate: samplerate. TYPE_PCM only supports sample rates <= 25100 Hz"
 			endif
-		dc.b	TYPE_PCM				; $00	- type
-		dc.b	sampleflags+0				; $01	- flags (optional)
-		dc.b	(samplerate+0)*256/TYPE_PCM_BASE_RATE	; $02	- pitch (optional for .WAV files)
-		dc.b	0					; $03	- <RESERVED>
-		dc.l	sampleptr-(*+4)				; $04	- start offset
-		dc.l	sampleptr_End-(*+4)			; $08	- end offset
+		!dc.b	TYPE_PCM				; $00	- type
+		!dc.b	sampleflags+0				; $01	- flags (optional)
+		!dc.b	(samplerate+0)*256/TYPE_PCM_BASE_RATE	; $02	- pitch (optional for .WAV files)
+		!dc.b	0					; $03	- <RESERVED>
+		!dc.l	sampleptr-(*+4)				; $04	- start offset
+		!dc.l	sampleptr_End-(*+4)			; $08	- end offset
 		elseif "sampletype"=="DPCM"
 			if samplerate>TYPE_DPCM_MAX_RATE
 			fatal "Invalid sample rate: samplerate. TYPE_DPCM only supports sample rates <= 20600 Hz"
 			endif
-		dc.b	TYPE_DPCM				; $00	- type
-		dc.b	sampleflags+0				; $01	- flags (optional)
-		dc.b	(samplerate)*256/TYPE_DPCM_BASE_RATE	; $02	- pitch
-		dc.b	0					; $03	- <RESERVED>
-		dc.l	sampleptr-(*+4)				; $04	- start offset
-		dc.l	sampleptr_End-(*+4)			; $08	- end offset
+		!dc.b	TYPE_DPCM				; $00	- type
+		!dc.b	sampleflags+0				; $01	- flags (optional)
+		!dc.b	(samplerate)*256/TYPE_DPCM_BASE_RATE	; $02	- pitch
+		!dc.b	0					; $03	- <RESERVED>
+		!dc.l	sampleptr-(*+4)				; $04	- start offset
+		!dc.l	sampleptr_End-(*+4)			; $08	- end offset
 		elseif "sampletype"=="PCM-TURBO"
 			if ((samplerate+0)<>TYPE_PCM_TURBO_MAX_RATE)&((samplerate+0)<>0)
 			fatal "Invalid sample rate: samplerate. TYPE_PCM_TURBO only supports sample rate of 32000 Hz"
 			endif
-		dc.b	TYPE_PCM_TURBO				; $00	- type
-		dc.b	sampleflags+0				; $01	- flags (optional)
-		dc.b	$FF					; $02	- pitch (optional for .WAV files)
-		dc.b	0					; $03	- <RESERVED>
-		dc.l	sampleptr-(*+4)				; $04	- start offset
-		dc.l	sampleptr_End-(*+4)			; $08	- end offset
+		!dc.b	TYPE_PCM_TURBO				; $00	- type
+		!dc.b	sampleflags+0				; $01	- flags (optional)
+		!dc.b	$FF					; $02	- pitch (optional for .WAV files)
+		!dc.b	0					; $03	- <RESERVED>
+		!dc.l	sampleptr-(*+4)				; $04	- start offset
+		!dc.l	sampleptr_End-(*+4)			; $08	- end offset
 		elseif "sampletype"=="DPCM-HQ"
 		fatal "TEMPORAL ERROR: MPCM2.1 doesn't exist at this point in time"
 		else

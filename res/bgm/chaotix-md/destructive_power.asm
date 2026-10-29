@@ -182,12 +182,12 @@ DestructivePower_Loop4:
 	smpsJump            DestructivePower_Jump2
 
 DestructivePower_DAC:
-	dc.b	pCrash, $12, pKick, pSnare, $0C
-	dc.b	pKick, $06, $0C, $12, pSnare, $0C
-	smpsLoop            $00, $07, DestructivePower_DAC
-	dc.b	pCrash, $12, pKick, pSnare, $0C
-	dc.b	pKick, $06, $0C, pTomHi, $06, pTomMid, pTomLo, pSnare, $0C
-	smpsJump            DestructivePower_DAC
+	smpsNote	pCrash, $12, pKick, pSnare, $0C
+	smpsNote	pKick, $06, $0C, $12, pSnare, $0C
+	smpsLoop	$00, $07, DestructivePower_DAC
+	smpsNote	pCrash, $12, pKick, pSnare, $0C
+	smpsNote	pKick, $06, $0C, pTomHi, $06, pTomMid, pTomLo, pSnare, $0C
+	smpsJump	DestructivePower_DAC
 
 
 DestructivePower_Voices:

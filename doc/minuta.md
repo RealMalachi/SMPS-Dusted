@@ -10,7 +10,7 @@ SMPS-Dusted supports the following Sonic-exclusive features:
 - 1UP jingles and subsequent fade-in
 - Continuous pitch increasing (spindash) via sequence flag
 
-SMPS-Dusted doesn't support the following Sonic-exclusive features:
+SMPS-Dusted lacks the following Sonic-exclusive features:
 - Ring panning sound id hijack
 - CPZ gloop play/dontplay
 - Continuous pitch increasing (spindash) via hard-coded ID
@@ -20,7 +20,7 @@ These features can be easily emulated within the game itself
 ## main data
 | type | data | description |
 | - | - | - |
-| reserved | $00 | reserved for smps-dusted, invalid time for smps-68k and smps-z80 |
+| extnote | $00 | extended note for smps-dusted, broken time for smps-68k and smps-z80 |
 | time | $01-$7F | amount of time that the note or rest takes |
 | rest | $80 | mutes the channel until next note |
 | note | $81-$DF | note that corresponds to a frequency |
@@ -42,13 +42,13 @@ sequence data is organised as follows: flag,note/rest,time
 time is multiplied by the tempo "divider" then stored as a u8 value, effectively ANDed by $FF
 ```
         smpsChanTempoDiv $02                        ; this sequence results in ($40x$02)&$FF = $80
-		dc.b        nRst,$40
+        dc.b        nRst,$40
         smpsChanTempoDiv $04                        ; this sequence results in ($40x$04)&$FF = $00
-		dc.b        nRst,$40
+        dc.b        nRst,$40
         smpsChanTempoDiv $00                        ; this sequence results in ($40x$00)&$FF = $00
-		dc.b        nRst,$40
+        dc.b        nRst,$40
 ```
-A time of $00, be it from $00 directly or via multiplication, will result in waiting for 256 ticks, unless it's a bgm and the bgm tempo updates when it's $00, where it will increment to $01 updating immediately. To my knowledge, no SMPS sequences rely on a time of $00 or the bgm tempo logic
+A time of $00, be it via multiplication or from a time of $00 (the latter not being supported in smps-dusted), will result in waiting for 256 ticks, unless it's a bgm and the bgm tempo updates when it's $00, where it will increment to $01 updating immediately. To my knowledge, no SMPS sequences rely on a time of $00 or the bgm tempo logic
 - SMPS-Dusted features the `__smpsSeqTimeSize` setting, which extends the timers to u16 (effectively ANDed by $FFFF)
 - Debug builds of SMPS-Dusted will throw an error when the multiplication is $00, or exceeds $FF when `__smpsSeqTimeSize` is disabled
 
@@ -58,16 +58,31 @@ drum mode is a feature that's semi-exclusive to SMPS-Dusted
 drum mode replaces notes with a macro format intended to be used for drums, at the cost of flexibility
 ```
 ; note mode:
-		smpsPcmVoice pKick
-		dc.b        dC4,$18
-		smpsPcmVoice pSnare
-		dc.b        dC4,$18
+        smpsPcmVoice pKick
+        dc.b        dC4,$18
+        smpsPcmVoice pSnare
+        dc.b        dC4,$18
 ; drum mode
-		dc.b        dKick,$18,dSnare,$18
+        dc.b        dKick,$18,dSnare,$18
 ```
 FM, PSG and PCM have separate drum macros and parameters.
 
 YM2612 PCM drum mode logic is inverted, in that it defaults to drum mode by default and enabling driver support for drum mode allows it to run in non-drum mode
+
+### extended note
+Standard SMPS is limited to 95 notes/drums, or 96 if they remove rests. SMPS-Dusted supports the usual 95 and an additional 256
+
+The extended notes are acknowledged by $00 and indexed starting from $100, this is so extended notes can't be used as regular notes and vice versa
+```
+dExtExample equ $E0+($100-$E0)
+		dc.b        0,dExtSample-$100,$40
+```
+Note extension is handled automatically via `smpsNote`
+```
+dRegExample equ $81
+dExtExample equ $E0+($100-$E0)
+		smpsNote    dRegExample,$40,dExtExample,$40 ; $81,$40,$00,$00,$40
+```
 
 ## automatic sound updaters
 
@@ -81,18 +96,18 @@ Note timeouts (or perhaps a better name would be note cuts) are a timer that tha
 
 Instead of doing this:
 ``` 
-	dc.b nC0,$04,nRst,$0C
-	dc.b nC0,$04,nRst,$0C
-	dc.b nC0,$04,nRst,$0C
-	dc.b nC0,$04,nRst,$0C
+        dc.b nC0,$04,nRst,$0C
+        dc.b nC0,$04,nRst,$0C
+        dc.b nC0,$04,nRst,$0C
+        dc.b nC0,$04,nRst,$0C
 ```
 You can do this:
 ```
-    smpsNoteTimeout $04
-	dc.b nC0,$10
-	dc.b nC0,$10
-	dc.b nC0,$10
-	dc.b nC0,$10
+        smpsNoteTimeout $04
+        dc.b nC0,$10
+        dc.b nC0,$10
+        dc.b nC0,$10
+        dc.b nC0,$10
 ```
 In smps-dusted with PCM rest logic set to hold standard rests, this also serves as an alternative to add rests
 
@@ -135,10 +150,10 @@ Sonic 2s modalgo is slightly different in that it runs when the sequence updates
 
 Sonic 1s modalgo doesn't update during sequences. Despite having modulation, this will play a flat note
 ```
-		smpsModSet $36, $01, $0E, $7E, 0
+        smpsModSet $36, $01, $0E, $7E, 0
 Loop:
-		dc.b nC1,$01,smpsNoAttack
-		smpsJump Loop
+        dc.b nC1,$01,smpsNoAttack
+        smpsJump Loop
 ```
 
 ### pananim

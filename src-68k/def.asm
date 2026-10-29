@@ -252,8 +252,8 @@ TrackUniSz:			ds.b 0
 	dephase
 
 	phase TrackUniSz
-TrackSavedDAC:			ds.b 1			; DAC
 			ds.b (*)&1
+TrackSavedDAC:			ds.w 1			; DAC
 TrackDacSz:			ds.b 0
 	dephase
 

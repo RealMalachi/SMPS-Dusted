@@ -16,8 +16,7 @@ PCMUpdateTrack:
 		bne.s	.locret
 		moveq	#$3F,d0
 		and.b	TrackVoiceControl(a5),d0
-		moveq	#0,d1
-		move.b	TrackSavedDAC(a5),d1
+		move.w	TrackSavedDAC(a5),d1
 		bra.w	DACQueueSample
 ; ---------------------------------------------------------------------------
 .sampleongoing:
@@ -41,19 +40,24 @@ PCMDoNext:
 		pea	.noteloop(pc)
 		bra.w	CoordFlag				; manipulates stack
 ; ---------------------------------------------------------------------------
+.gotextnote:	move.b	(a4)+,d5
+		add.w	#$100-($100-$E0),d5
 .gotnote:	bsr.w	PCMSetDAC
 		moveq	#0,d5
 		move.b	(a4)+,d5
 		bpl.s	.gotnotetime
+.gotanotherextnote:
 		subq.w	#1,a4
 		bra.w	PCMFinishTrackUpdate
-.gotnotetime:	tst.w	TrackFreq(a5)
+.gotnotetime:	beq.s	.gotanotherextnote
+		tst.w	TrackFreq(a5)
 		bpl.s	.norest
 		or.b	#1<<_resting,TrackPlaybackControl(a5)
 .norest:	pea	PCMFinishTrackUpdate(pc)
 		bra.w	SetDuration
 ; ---------------------------------------------------------------------------
-.gotonlytime:	tst.w	TrackFreq(a5)
+.gotonlytime:	beq.s	.gotextnote
+		tst.w	TrackFreq(a5)
 		bpl.s	.norest
 ; note-rest-time-time
 	if __smpsRestTimeTime=0
@@ -65,9 +69,9 @@ PCMDoNext:
 	endif
 ; ===========================================================================
 PCMSetDAC:
-		sub.b	#$81,d5
+		sub.w	#$81,d5
 		bcs.s	.rest
-		move.b	d5,TrackSavedDAC(a5)
+		move.w	d5,TrackSavedDAC(a5)
 		move.w	#$100,TrackFreq(a5)
 		rts
 .rest:		or.b	#1<<_resting,TrackPlaybackControl(a5)
