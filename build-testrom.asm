@@ -116,6 +116,7 @@ v_jpad2held:		ds.b 1
 v_jpad2press:		ds.b 1
 
 v_vsync:		ds.b 1
+v_movetype:		ds.b 1
 
 			align 4
 v_hardresetend:		ds.b 0
@@ -456,13 +457,21 @@ HandleControl:
 		move.l	(a0),a1
 		move.l	4(a0),d1
 
-		moveq	#$01,d6
-		move.b	v_jpad1press,d7
-		btst	#btnC,v_jpad1held
+		btst	#btnC,v_jpad1press
 		beq.s	.cnah
-		move.b	v_jpad1held,d7
-		moveq	#$20,d6
+		addq.b	#1,v_movetype
+		and.b	#3,v_movetype
 .cnah:
+		moveq	#$01,d6
+		btst	#0,v_movetype
+		beq.s	.mtnah1
+		moveq	#$20,d6
+.mtnah1:
+		move.b	v_jpad1press,d7
+		btst	#1,v_movetype
+		beq.s	.mtnah2
+		move.b	v_jpad1held,d7
+.mtnah2:
 		btst	#btnLEFT,d7
 		beq.s	.lnah
 		moveq	#0,d0
@@ -783,11 +792,10 @@ HandleRender:
 		move.w	#" ",d1
 		move.w	v_prevselect,d0
 		bsr.w	PrintCursor
-		move.w	#">",d1
-		btst	#btnC,v_jpad1held
-		beq.s	.cnah
-		move.w	#"!",d1
-.cnah
+		lea	.cursor(pc),a0
+		moveq	#0,d1
+		move.b	v_movetype,d1
+		move.b	(a0,d1.w),d1
 		move.w	v_select,d0
 		bsr.w	PrintCursor
 		move.w	v_select,v_prevselect
@@ -803,6 +811,8 @@ HandleRender:
 		renhex.b v_hint
 		rentext.b ScreenText.vintrun,v_runinvint
 		rts
+.cursor:	dc.b ">*?!"
+		even
 PrintCursor:
 		and.l	#$FF,d0
 		lsl.w	#7,d0
