@@ -1,17 +1,12 @@
 @echo off
 setlocal enabledelayedexpansion
 set mainpath=%~dp0
-set PrintText=0
-if not "%~2"=="" ( set PrintText=1 )
-
-if /i %PROCESSOR_ARCHITECTURE%==x86 (
-	set "AS=tools\asw\asw.exe -xx -n -A -L -U -i ."
-	) else (
-	set "AS=tools\asw\asw-x64.exe -xx -n -A -L -U -i ."
-)
-set "P2BIN=tools\asw\p2bin.exe"
-set "SJ=tools\sjasmplus\sjasmplus.exe"
-set "COMP=tools\zx0\salvador.exe"
+if not "%~2"=="" ( set PrintText=1 ) else ( set PrintText=0 )
+if /i %PROCESSOR_ARCHITECTURE%==x86 ( set "systemfolder=win-x86" ) else ( set "systemfolder=win-x64" )
+set "AS=tools\%systemfolder%\asw.exe -xx -n -A -L -U -i ."
+set "P2BIN=tools\%systemfolder%\p2bin.exe"
+set "COMP=tools\%systemfolder%\salvador.exe"
+set "SJ=tools\win-x86\sjasmplus.exe"
 if %PrintText% == 1 (
 	set "ASFLAGS=-q -D __smpsPrintMessages=1"
 	set "SJFLAGS="
@@ -68,7 +63,7 @@ goto :%~1
 	call :BUILDZ80COMP "src-z80/mpcm1/main.asm" "mpcm1" "MegaPCM1"
 	call :BUILDZ80 "src-z80/mpcm2/megapcm.asm" "megapcm2" "MegaPCM2.0" "-Wno-fileorg -DOUTPATH=\"_out/mpcm2.bin\" -DTRACEPATH=\"_out/mpcm2.tracedata.txt\""
 	call :COMP "_out/mpcm2.bin" "_out/mpcm2.zx0"
-	call :BUILD68K "src-68k\build-mcd.asm" "_out/build-mcd.bin" "build-mcd" "MegaCD driver"
+	call :BUILD68K "src-68k/build-mcd.asm" "_out/build-mcd.bin" "build-mcd" "MegaCD driver"
 	call :COMP "_out/build-mcd.bin" "_out/build-mcd.zx0"
 	call :BUILD68K "build-drv.asm" "smps-drv.bin" "build-drv" "SMPS driver blob" "-a -shareout smps-def.asm -D __smpsDebug=0 -g map"
 	call :BUILD68K "build-drv.asm" "smps-drv-debug.bin" "build-drv-debug" "SMPS debug driver blob" "-a -shareout smps-def-debug.asm -D __smpsDebug=1 -g map"

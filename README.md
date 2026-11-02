@@ -12,7 +12,7 @@ Features:
 - SSG-EG and LFO provided by FM patches/instruments
 - Portamento support
 - Independant PSG4 channels
-- Drum modes for PSG
+- Note macros (drum mode)
 - Extensive error handling in debug driver builds
 
 Excludes:
@@ -22,10 +22,10 @@ Excludes:
 - Sonic 2 hard-coded spindash pitch increase (a non hard-coded method from Sonic 3 is provided)
 
 ## Bundled tools
-- [flamewings asl macro assembler fork](https://github.com/flamewing/asl-releases), labelled as asw for... some reason
-- [clownacys p2bin](https://github.com/Clownacy/p2bin)
-- [sjasmplus](https://github.com/z00m128/sjasmplus)
-- [ZX0 salvador](https://github.com/emmanuel-marty/salvador)
+- [flamewings macro as fork](https://github.com/flamewing/asl-releases) for 68K assembly
+- [clownacys p2bin](https://github.com/Clownacy/p2bin) for converting AS p files into binary
+- [sjasmplus](https://github.com/z00m128/sjasmplus) for Z80 assembly
+- [salvador](https://github.com/emmanuel-marty/salvador) for ZX0 compression
 
 ## Related tools
 - [smps2asm](https://forums.sonicretro.org/threads/smps2asm-and-improved-s-k-driver.26876)
@@ -40,8 +40,8 @@ Excludes:
 | person | thing |
 | - | - |
 | Alex Field | Disassembling Sonic 2 Simon Wai |
-| Devon | Disassembling Sonic CD |
-| Flamewing | Disassembling/compiling Sonic 3D Blasts OST, asl |
+| Devon | Disassembling Sonic CD and Chaotix |
+| Flamewing | Disassembling/compiling Sonic 3D Blasts OST, as fork |
 | Clownacy | Clone Driver V2, p2bin |
 | Undying-Star | Flicky sounds |
 | Tomatowave | Beta testing |
