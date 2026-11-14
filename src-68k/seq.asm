@@ -204,32 +204,32 @@ UpdateBgmSequence:
 		bcc.s	.nodelay
 		;bra.s	.delay
 .delay:
-	set .val,v_music_pcm_tracks+TrackDurationTimeout
+.val	set v_music_pcm_tracks+TrackDurationTimeout
 	rept (v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz
 		if  __smpsSeqTimeSize
 		addq.w	#1,.val(a1)
 		else
 		addq.b	#1,.val(a1)
 		endif
-	set .val,.val+TrackDacSz
+.val	set .val+TrackDacSz
 	endr
-	set .val,v_music_fm_tracks+TrackDurationTimeout
+.val	set v_music_fm_tracks+TrackDurationTimeout
 	rept (v_music_fm_tracks_end-v_music_fm_tracks)/TrackFmSz
 		if  __smpsSeqTimeSize
 		addq.w	#1,.val(a1)
 		else
 		addq.b	#1,.val(a1)
 		endif
-	set .val,.val+TrackFmSz
+.val	set .val+TrackFmSz
 	endr
-	set .val,v_music_psg_tracks+TrackDurationTimeout
+.val	set v_music_psg_tracks+TrackDurationTimeout
 	rept (v_music_psg_tracks_end-v_music_psg_tracks)/TrackPsgSz
 		if  __smpsSeqTimeSize
 		addq.w	#1,.val(a1)
 		else
 		addq.b	#1,.val(a1)
 		endif
-	set .val,.val+TrackPsgSz
+.val	set .val+TrackPsgSz
 	endr
 .nodelay:
 ; actual sequence update

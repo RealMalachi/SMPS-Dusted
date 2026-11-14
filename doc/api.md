@@ -1,7 +1,24 @@
 # How the API works
-SMPS-Dusted 68K is primarily provided in a binary blob, akin to many homebrew drivers nowadays.
-
-At the start of the blob is a LUT for subroutines and data that the user should have immediate access to.
+SMPS-Dusted 68K is primarily provided as a binary blob, akin to many homebrew drivers nowadays.
+```
+SMPS_DriverCode:	incbin "smps-drv.bin"
+SMPS_InitDriver		equ SMPS_DriverCode+SMPS_Offset_InitDriver
+SMPS_RunDriver		equ SMPS_DriverCode+SMPS_Offset_RunDriver
+SMPS_QueueSound		equ SMPS_DriverCode+SMPS_Offset_QueueSound
+SMPS_UpdateFIFO		equ SMPS_DriverCode+SMPS_Offset_UpdateFIFO
+SMPS_ReadComm		equ SMPS_DriverCode+SMPS_Offset_ReadComm
+SMPS_WriteComm		equ SMPS_DriverCode+SMPS_Offset_WriteComm
+SMPS_GuardDriver	equ SMPS_DriverCode+SMPS_Offset_GuardDriver
+SMPS_UnguardDriver	equ SMPS_DriverCode+SMPS_Offset_UnguardDriver
+SMPS_SetupPianoRoll	equ SMPS_DriverCode+SMPS_Offset_SetupPianoRoll
+SMPS_PlayCDDA		equ SMPS_DriverCode+SMPS_Offset_PlayCDDA
+SMPS_PauseDriver	equ SMPS_DriverCode+SMPS_Offset_PauseDriver
+SMPS_ResumeDriver	equ SMPS_DriverCode+SMPS_Offset_ResumeDriver
+SMPS_SetBgmTempo	equ SMPS_DriverCode+SMPS_Offset_SetBgmTempo
+SMPS_SetBgmSpeed	equ SMPS_DriverCode+SMPS_Offset_SetBgmSpeed
+SMPS_Signature		equ SMPS_DriverCode+SMPS_Offset_Signature
+```
+A generated definitions file provides the offsets for various routines prefixed with `SMPS_Offset_`; said routines are the topic of this document.
 
 ## InitDriver
 input:
@@ -13,13 +30,13 @@ output
 trashes: d0-d7,a0-a6
 
 description:
-Initialises ram and sound hardware
+Initialises driver ram and sound hardware
 
 Both the input and output of d0 share a bitfield, corresponding to additional/different sound hardware from the base target
-- The input denotes what hardware the game wishes the driver to support
-- The output communicates what the driver could access
-- Many of the bits are unmapped, they should be initialised to 0 and avoided past initiation
-- Any bits that aren't used by the drivers target (pico bits for md, etc) should also be init to 0 and avoided
+- The input denotes what hardware the game wants the driver to check for and utilise
+- The output communicates what the driver could find
+- Many of the bits are unmapped and may be used in the future, these should be avoided for forward-compatibility; input should initialise them as 0, output should ignore them
+- Any bits that aren't used by the drivers target hardware (pico bits for md, etc) should also be avoided
 ```
 ........ ........ ......MC ....FXDP
 P = (MD) MDplus
@@ -235,3 +252,7 @@ description:
 Sets a timer to update the bgm twice every X frames. Unlike S3K, setting it to 1 is valid.
 
 note for drv68K: NTSC uses the timer directly, whereas PAL uses a LUT
+
+## Signature
+description:
+A zero-terminated ASCII string, serves as a signature for the driver

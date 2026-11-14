@@ -845,6 +845,8 @@ SMPS_MusicIndex:
 	musdef 0,0,0,BgmS28bUnused,bgm_S28bUnused
 	musdef 0,0,1,BgmEveningStar,bgm_EveningStar
 	musdef 0,0,1,BgmDestructivePower,bgm_DestructivePower
+	musdef 0,0,1,BgmChildsSong,bgm_ChildsSong
+	musdef 0,0,1,BgmTubePanic,bgm_TubePanic
 	musdef 0,0,1,BgmEraserVS,bgm_EraserVS
 
 	musdef 0,0,0,BgmS1Title,bgm_S1Title
@@ -2611,6 +2613,10 @@ BgmSCDTimeTravel:	include "res/bgm/CD Time Travel.asm"
 BgmS28bUnused:	include "res/bgm/sonic2-8bit/Unknown Theme.asm"
 		even
 BgmDestructivePower:	include "res/bgm/chaotix-md/destructive_power.asm"
+		even
+BgmChildsSong:	include "res/bgm/chaotix-md/childs_song.asm"
+		even
+BgmTubePanic:	include "res/bgm/chaotix-md/tube_panic.asm"
 		even
 BgmEveningStar:	include "res/bgm/chaotix-md/evening_star.asm"
 		even

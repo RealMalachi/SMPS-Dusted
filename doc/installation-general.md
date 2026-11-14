@@ -33,7 +33,9 @@ v_soundram:			rs.b smpsramsize
 ```
 
 # Step 4
-Include the binary driver and sound data in the rom:
+Include the binary driver and sound data in the rom
+
+`smps-drv.asm` contains offsets for the API calls
 ```
 SMPS_DriverCode:	incbin "smps-drv.bin"
 SMPS_InitDriver		equ SMPS_DriverCode+SMPS_Offset_InitDriver
@@ -55,8 +57,7 @@ SMPS_DriverData:	incbin "smps-snd.bin"
 ```
 
 # Step 4.5
-If your rom building process supports separate debug builds via an assembler flag, consider using it to include the debug driver:
-*cough cough vladikcomper error handler*
+If your rom building process supports separate debug builds via an assembler flag *cough cough vladikcomper error handler*, consider using it to include the debug driver:
 ```
 	if def(__debug__)
 	include "smps-def-debug.asm"
@@ -64,6 +65,7 @@ If your rom building process supports separate debug builds via an assembler fla
 	include "smps-def.asm"
 	endif
 ...
+SMPS_DriverCode:
 	if def(__debug__)
 	incbin "smps-drv-debug.bin"
 	else
@@ -72,7 +74,7 @@ If your rom building process supports separate debug builds via an assembler fla
 ```
 
 # Step 5
-Refer to `api.md` or `src-68k/main.asm` for using these function calls
+Refer to `api.md` or `src-68k/main.asm` for using the drivers API calls
 
 # Step 6
-Uhh, test it.
+Uhh, test it. If the driver works in its dedicated test rom but not in your program, then you did something wrong.

@@ -1,8 +1,8 @@
-Master_Clock		= 53693175		; NTSC=53693175,PAL=53203424
-M68000_Clock		= Master_Clock/7	; 7670453
-Z80_Clock		= Master_Clock/15	; 3579478
-FM_Sample_Rate		= M68000_Clock/(6*6*4)	; 53267
-PSG_Sample_Rate		= Z80_Clock/16		; 223721
+Master_Clock		equ 53693175			; NTSC=53693175,PAL=53203424
+M68000_Clock		equ Master_Clock/7		; 7670453
+Z80_Clock		equ Master_Clock/15		; 3579478
+FM_Sample_Rate		equ M68000_Clock/(6*6*4)	; 53267
+PSG_Sample_Rate		equ Z80_Clock/16		; 223721
 ; ---------------------------------------------------------------------------
 ; https://www.plutiedev.com/ym2612-registers
 ; TODO: utilize
@@ -38,9 +38,8 @@ fmreg:
 ; ---------------------------------------------------------------------------
 vdpdata		equ $C00000
 vdpctrl		equ $C00004
-	if (__smpsTarget=="md68k")||(__smpsTarget=="mdz80")||(__smpsTarget=="fuckFM")
+	if (__smpsTarget=="md68k")||(__smpsTarget=="mdz80")
 psginput	equ $C00011
-	if __smpsTarget<>"fuckFM"
 ymstat		equ $A04000
 yma0		equ $A04000
 ymd0		equ $A04001
@@ -48,7 +47,7 @@ yma1		equ $A04002
 ymd1		equ $A04003
 z80ram		equ $A00000
 z80busreq	equ $A11100
-	endif
+z80busreset	equ $A11200
 ; MegaSD/MDPlus
 MSD_OverlaySignature	equ $3F7F6	; reads 'BATE' if overlay port was successful
 MSD_OverlayPort		equ $3F7FA	; write $CD54 to enable MegaSD control

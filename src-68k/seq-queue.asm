@@ -336,21 +336,21 @@ Sound_PlayBGM:
 		bne.s	.bgm_loadJingle
 ; clear override
 		moveq_	$FF!(1<<_sfxoverride),d1
-		set .val,v_music_pcm_tracks+TrackPlaybackControl
-		rept (v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz
+.val	set v_music_pcm_tracks+TrackPlaybackControl
+	rept (v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz
 		and.b	d1,.val(a1)
-		set .val,.val+TrackDacSz
-		endr
-		set .val,v_music_fm_tracks+TrackPlaybackControl
-		rept (v_music_fm_tracks_end-v_music_fm_tracks)/TrackFmSz
+.val	set .val+TrackDacSz
+	endr
+.val	set v_music_fm_tracks+TrackPlaybackControl
+	rept (v_music_fm_tracks_end-v_music_fm_tracks)/TrackFmSz
 		and.b	d1,.val(a1)
-		set .val,.val+TrackFmSz
-		endr
-		set .val,v_music_psg_tracks+TrackPlaybackControl
-		rept (v_music_psg_tracks_end-v_music_psg_tracks)/TrackPsgSz
+.val	set .val+TrackFmSz
+	endr
+.val	set v_music_psg_tracks+TrackPlaybackControl
+	rept (v_music_psg_tracks_end-v_music_psg_tracks)/TrackPsgSz
 		and.b	d1,.val(a1)
-		set .val,.val+TrackPsgSz
-		endr
+.val	set .val+TrackPsgSz
+	endr
 ; save previous song
 		lea	v_1up_save_ram(a1),a0
 		lea	v_1up_ram_copy(a1),a2
@@ -654,11 +654,11 @@ Sound_PlayBGM:
 	endif
 
 		move.b	d5,TrackTempoDivider(a5)
-	if (__smpsTarget=="md68k")&&(__smpsPCM=="DualPCM-FlexEd")
-		equ .std,2
-	else
-		equ .std,1
-	endif
+;	if (__smpsTarget=="md68k")&&(__smpsPCM=="DualPCM-FlexEd")
+;.std		equ 2
+;	else
+.std		equ 1
+;	endif
 	if __smpsSeqTimeSize
 		move.w	#.std,TrackDurationTimeout(a5)		; Set duration of first "note"
 	else
@@ -936,14 +936,14 @@ Sound_PlaySFX_Setup:
 	if __smpsDefaultFreq=0
 		move.w	#0,TrackFreq(a5)	; max
 	endif
-	if (__smpsTarget=="md68k")&&(__smpsPCM=="DualPCM-FlexEd")
-		equ .std,2
-		if __smpsSeqTimeSize
-		move.w	#.std,TrackDurationTimeout(a5)		; Set duration of first "note"
-		else
-		move.b	#.std,TrackDurationTimeout(a5)		; Set duration of first "note"
-		endif
-	endif
+;	if (__smpsTarget=="md68k")&&(__smpsPCM=="DualPCM-FlexEd")
+;.std		equ 2
+;		if __smpsSeqTimeSize
+;		move.w	#.std,TrackDurationTimeout(a5)		; Set duration of first "note"
+;		else
+;		move.b	#.std,TrackDurationTimeout(a5)		; Set duration of first "note"
+;		endif
+;	endif
 	if __smpsDrum
 		move.b	queue_psgdrumptr+1(a6),TrackDrumPtr+1(a5)
 		move.w	queue_psgdrumptr+2(a6),TrackDrumPtr+2(a5)

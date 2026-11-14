@@ -1,8 +1,5 @@
 ; ---------------------------------------------------------------------------
 FMUpdateTrack:
-	if __smpsTarget="fuckFM"
-	rts
-	endif
 	if __smpsSeqTimeSize
 		subq.w	#1,TrackDurationTimeout(a5)
 	else
@@ -199,7 +196,6 @@ FMPrepareNote:
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	.exit
 
-		fmstart	a0
 		move.w	d6,-(sp)				; d1.b = d6>>8
 		move.b	(sp)+,d1
 		move.b	TrackVoiceControl(a5),d0	; Get voice control bits
@@ -211,26 +207,27 @@ FMPrepareNote:
 .ivfm:		SMPS_assert "FMPrepareNote: Invalid FM channel, TODO: print channel"
 .vfm:
 		endif
+		fmstart	a0
 		subq.b	#1<<2,d0			; Is this bound for part I or II? (also clear chip toggle)
 		bcc.s	.fm2				; Branch if for part II
 		addq.b	#1<<2,d0
 .fm1:
 		add.b	#$A4,d0
+		fmwait	a0,0
 		fmwrite	a0,d0,d1,0
 		subq.w	#4,d0				; 4
-		or.l	d0,d0				; 8
-		nop					; 4
+		fmdelay	4
 		fmwrite	a0,d0,d6,0
-		fmstop	a0
+		fmstop	a0,0
 		rts
 .fm2:
 		add.b	#$A4,d0
+		fmwait	a0,1
 		fmwrite	a0,d0,d1,1
 		subq.w	#4,d0				; 4
-		or.l	d0,d0				; 8
-		nop					; 4
+		fmdelay	4
 		fmwrite	a0,d0,d6,1
-		fmstop	a0
+		fmstop	a0,1
 		;rts
 ; ---------------------------------------------------------------------------
 FMNoteOn_exit:
@@ -301,9 +298,27 @@ FMSilenceAll:
 		dbf	d3,.chloop
 		rts
 ; ---------------------------------------------------------------------------
+fminstraddtable macro value
+	if "value"<>""
+	dc.b value-.v
+.v	set value
+	shift
+	fminstraddtable ALLARGS
+	endif
+	endm
+FMInstrumentOperatorTable:
+.v	set fmreg.panamspms
+	fminstraddtable fmreg.algofeed
+	fminstraddtable fmreg.muldt+$0,fmreg.muldt+$8,fmreg.muldt+$4,fmreg.muldt+$C
+	fminstraddtable fmreg.arrs+$0,fmreg.arrs+$8,fmreg.arrs+$4,fmreg.arrs+$C
+	fminstraddtable fmreg.dramen+$0,fmreg.dramen+$8,fmreg.dramen+$4,fmreg.dramen+$C
+	fminstraddtable fmreg.sr+$0,fmreg.sr+$8,fmreg.sr+$4,fmreg.sr+$C
+	fminstraddtable fmreg.rrsl+$0,fmreg.rrsl+$8,fmreg.rrsl+$4,fmreg.rrsl+$C
+FMInstrumentOperatorTable_End:
+	even
+; ---------------------------------------------------------------------------
 SetVoicePan:
 SetVoice:
-		fmstart	a0
 		move.l	TrackFmVoicePtr(a5),a3		; voice pointer
 		moveq	#0,d1
 		move.b	TrackFmVoiceIndex(a5),d1	; Current voice
@@ -318,42 +333,47 @@ SetVoice:
 		beq.s	.stereo
 		or.b	#$C0,d1
 .stereo:
-		lea	FMInstrumentOperatorTable(pc),a2
-		moveq	#(FMInstrumentOperatorTable_End-FMInstrumentOperatorTable)-1,d3
-		move.b	TrackVoiceControl(a5),d2	; Get voice control bits
+		move.b	TrackVoiceControl(a5),d0	; Get voice control bits
 		if __smpsDebug
 ; 0-2 and 4-6 are valid, everything else isn't
-		cmp.b	#3,d2
+		cmp.b	#3,d0
 		beq.s	.ivfm
-		cmp.b	#6,d2
+		cmp.b	#6,d0
 		bls.s	.vfm
 .ivfm:		SMPS_assert "SetVoice: Invalid FM channel, TODO: print channel"
 .vfm:
 		endif
-		subq.b	#1<<2,d2			; Is this bound for part I or II? (also clear chip toggle)
+		lea	FMInstrumentOperatorTable(pc),a2
+.opl:		equ (FMInstrumentOperatorTable_End-FMInstrumentOperatorTable)
+		fmstart	a0
+		subq.b	#1<<2,d0			; Is this bound for part I or II? (also clear chip toggle)
 		bcc.w	.fm2				; Branch if for part II
-		addq.b	#1<<2,d2
+		addq.b	#1<<2,d0
 .fm1:
-		moveq_	fmreg.panamspms,d0
-		add.b	d2,d0
+		add.b	#fmreg.panamspms,d0
+		fmwait	a0,0
 		fmwrite	a0,d0,d1,0
-.loop1:		move.b	(a2)+,d0
+; TODO: ASM68K list usage
+	rept .opl
+		add.b	(a2)+,d0
 		move.b	(a3)+,d1
-		add.b	d2,d0				; Add in voice control bits
+		fmdelay	16
 		fmwrite	a0,d0,d1,0
-		dbf	d3,.loop1
-		bra.s	.loopend
+	endr
+		fmstop	a0,0
+		bra.w	.loopend
 .fm2:
-		moveq_	fmreg.panamspms,d0
-		add.b	d2,d0
+		add.b	#fmreg.panamspms,d0
+		fmwait	a0,1
 		fmwrite	a0,d0,d1,1
-.loop2:		move.b	(a2)+,d0
+	rept .opl
+		add.b	(a2)+,d0
 		move.b	(a3)+,d1
-		add.b	d2,d0
+		fmdelay	16
 		fmwrite	a0,d0,d1,1
-		dbf	d3,.loop2
+	endr
+		fmstop	a0,1
 .loopend:
-		fmstop	a0
 ; volume is handled later by DoVolEnv and UpdateVolume
 ;		bsr.w	SendVoiceTL
 		btst	#v_driverflags.ssgoff,v_driverflags(a1)		; if SSG-EG is disabled, uhh, disable it.
@@ -367,8 +387,8 @@ SendVoiceSSG:
 		moveq	#0,d1
 		move.b	TrackFmVoiceIndex(a5),d1
 		lsl.w	#5,d1		; x32
-		adda.w	d1,a3		; x32
-		adda.w	#22,a3		; Want SSG
+		add.w	#22,d1		; x32+22 ; we want SSG
+		adda.w	d1,a3
 .gotptr:
 		move.b	(a3)+,-(sp)
 		move.w	(sp)+,d4
@@ -402,8 +422,8 @@ SendVoiceTL:
 		moveq	#0,d1
 		move.b	TrackFmVoiceIndex(a5),d1
 		lsl.w	#5,d1		; x32
-		adda.w	d1,a3		; x32
-		adda.w	#24,a3		; Wants TL
+		add.w	#24,d1		; x32+42 ; we want TL
+		adda.w	d1,a3
 
 	if v_driverflags.muffle=7
 		tst.b	v_driverflags(a1)			; is underwater muffle enabled?
@@ -433,16 +453,6 @@ SendVoiceTL:
 		dbf	d3,.loop
 		rts
 ; ---------------------------------------------------------------------------
-FMInstrumentOperatorTable:
-		dc.b  fmreg.algofeed
-		dc.b  fmreg.muldt+$0,fmreg.muldt+$8,fmreg.muldt+$4,fmreg.muldt+$C
-		dc.b  fmreg.arrs+$0,fmreg.arrs+$8,fmreg.arrs+$4,fmreg.arrs+$C
-		dc.b  fmreg.dramen+$0,fmreg.dramen+$8,fmreg.dramen+$4,fmreg.dramen+$C
-		dc.b  fmreg.sr+$0,fmreg.sr+$8,fmreg.sr+$4,fmreg.sr+$C
-		dc.b  fmreg.rrsl+$0,fmreg.rrsl+$8,fmreg.rrsl+$4,fmreg.rrsl+$C
-FMInstrumentOperatorTable_End:
-	even
-; ---------------------------------------------------------------------------
 ; Note: look into other SMPS 68000 variants
 ; INPUT
 ; d0 = addr
@@ -450,29 +460,23 @@ FMInstrumentOperatorTable_End:
 ; a5 = sequence (WriteFMIorIIMain)
 ; TRASHES
 ; a0/d2
-	if __smpsTarget="fuckFM"
-WriteFMI:
-WriteFMII:
-WriteFMIorII:
-WriteFMIorIIMain:
-		rts
-	else
 WriteFMI:
 		fmstart	a0
+		fmwait	a0,0
 		fmwrite	a0,d0,d1,0
-		fmstop	a0
+		fmstop	a0,0
 		rts
 WriteFMII:
 		fmstart	a0
+		fmwait	a0,1
 		fmwrite	a0,d0,d1,1
-		fmstop	a0
+		fmstop	a0,1
 WriteFMIorIIMain_exit:
 		rts
 WriteFMIorIIMain:
 		btst	#_sfxoverride,TrackPlaybackControl(a5)
 		bne.s	WriteFMIorIIMain_exit
 WriteFMIorII:
-		fmstart	a0
 		move.b	TrackVoiceControl(a5),d2	; Get voice control bits
 		if __smpsDebug
 		cmp.b	#3,d2
@@ -482,16 +486,18 @@ WriteFMIorII:
 .ivfm:		SMPS_assert "WriteFMIorII: Invalid FM channel, TODO: print channel"
 .vfm:
 		endif
+		fmstart	a0
 		subq.b	#1<<2,d2			; Is this bound for part I or II? (also clear chip toggle)
 		bcc.s	.fm2				; Branch if for part II
 		addq.b	#1<<2,d2
 		add.b	d0,d2				; Add in voice control bits
+		fmwait	a0,0
 		fmwrite	a0,d2,d1,0
-		fmstop	a0
-.exit:		rts
+		fmstop	a0,0
+		rts
 .fm2:
 		add.b	d0,d2
+		fmwait	a0,1
 		fmwrite	a0,d2,d1,1
-		fmstop	a0
+		fmstop	a0,1
 		rts
-	endif

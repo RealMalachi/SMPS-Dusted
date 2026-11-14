@@ -1,12 +1,12 @@
 QueueSound:
-	set .loc,v_soundqueue_start
+.loc	set v_soundqueue_start
 	rept (v_soundqueue_end-v_soundqueue_start)/2-1
 		tst.w	.loc(a1)
 		bne.s	.n
 		move.w	d0,.loc(a1)
 		rts
 .n:
-	set .loc,.loc+2
+.loc	set .loc+2
 	endr
 		tst.w	.loc(a1)
 		bne.s	.n2

@@ -1,12 +1,25 @@
 @echo off
 setlocal enabledelayedexpansion
-set mainpath=%~dp0
-if not "%~2"=="" ( set PrintText=1 ) else ( set PrintText=0 )
-if /i %PROCESSOR_ARCHITECTURE%==x86 ( set "systemfolder=win-x86" ) else ( set "systemfolder=win-x64" )
-set "AS=tools\%systemfolder%\asw.exe -xx -n -A -L -U -i ."
-set "P2BIN=tools\%systemfolder%\p2bin.exe"
-set "COMP=tools\%systemfolder%\salvador.exe"
-set "SJ=tools\win-x86\sjasmplus.exe"
+set PrintText=0
+if not "%~2"=="" ( set PrintText=1 )
+
+set savedpath=%cd%
+set batchpath=%~dp0
+if %PrintText% == 1 (
+	echo caller path: "%savedpath%"
+	echo script path: "%batchpath%"
+)
+REM // goto where the batch script is located
+cd /d "%batchpath%"
+
+if /i %PROCESSOR_ARCHITECTURE%==x86 (
+	set "AS=tools\asw\asw.exe -xx -n -A -L -U -i ."
+	) else (
+	set "AS=tools\asw\asw-x64.exe -xx -n -A -L -U -i ."
+)
+set "P2BIN=tools\asw\p2bin.exe"
+set "SJ=tools\sjasmplus\sjasmplus.exe"
+set "COMP=tools\zx0\salvador.exe"
 if %PrintText% == 1 (
 	set "ASFLAGS=-q -D __smpsPrintMessages=1"
 	set "SJFLAGS="
@@ -108,7 +121,7 @@ goto :%~1
 	%AS% %ASFLAGS% %~5 -olist _out\%~3.lst -E _out\%~3.log %~1
 	for %%C in ("%~1") do (
 		set "inputfilename=%%~dpC%%~nC"
-		set "inputfilename=!inputfilename:%mainpath%=!"
+		set "inputfilename=!inputfilename:%batchpath%=!"
 	)
 	if not exist !inputfilename!.p (
 		echo - ASW ERROR: No generated .p file for %~4
@@ -128,3 +141,5 @@ goto :%~1
 	goto :EOF
 
 :EOF
+	REM // return from where the batch script was called
+	cd /d "%savedpath%"

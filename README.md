@@ -30,7 +30,7 @@ Excludes:
 ## Related tools
 - [smps2asm](https://forums.sonicretro.org/threads/smps2asm-and-improved-s-k-driver.26876)
 - [smpsopt](https://sonicresearch.org/community/index.php?threads/smps-optimizer.3001)
-- [vgm2smps](https://sonicresearch.org/community/index.php?threads/vgm2smps.5561)
+- [vgm2smps](https://github.com/N-BAH/vgm2smps)
 - [vgm2mid](https://vgmrips.net/wiki/Vgm2mid)
 - [mid2smps](https://forums.sonicretro.org/threads/mid2smps.25337)
 - [xm4smps](https://info.sonicretro.org/Xm4smps)

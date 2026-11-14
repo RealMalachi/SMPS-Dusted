@@ -1325,20 +1325,20 @@ cfxSetTempoDividerAll:
 .valid:
 		endif
 		move.b	(a4)+,d0
-	set .val,v_music_pcm_tracks+TrackTempoDivider
+.val	set v_music_pcm_tracks+TrackTempoDivider
 	rept (v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz
 		move.b	d0,.val(a1)
-	set .val,.val+TrackDacSz
+.val	set .val+TrackDacSz
 	endr
-	set .val,v_music_fm_tracks+TrackTempoDivider
+.val	set v_music_fm_tracks+TrackTempoDivider
 	rept (v_music_fm_tracks_end-v_music_fm_tracks)/TrackFmSz
 		move.b	d0,.val(a1)
-	set .val,.val+TrackFmSz
+.val	set .val+TrackFmSz
 	endr
-	set .val,v_music_psg_tracks+TrackTempoDivider
+.val	set v_music_psg_tracks+TrackTempoDivider
 	rept (v_music_psg_tracks_end-v_music_psg_tracks)/TrackPsgSz
 		move.b	d0,.val(a1)
-	set .val,.val+TrackPsgSz
+.val	set .val+TrackPsgSz
 	endr
 		rts
 ; ---------------------------------------------------------------------------
@@ -1731,20 +1731,20 @@ cfStopTrack:
 		btst	#v_driverflags.jingle,v_driverflags(a1)		; is a jingle playing?
 		beq.s	.nojingle
 		moveq	#0,d0
-	set .val,v_music_pcm_tracks+TrackPlaybackControl
+.val	set v_music_pcm_tracks+TrackPlaybackControl
 	rept (v_music_pcm_tracks_end-v_music_pcm_tracks)/TrackDacSz
 		or.b	.val(a1),d0
-	set .val,.val+TrackDacSz
+.val	set .val+TrackDacSz
 	endr
-	set .val,v_music_fm_tracks+TrackPlaybackControl
+.val	set v_music_fm_tracks+TrackPlaybackControl
 	rept (v_music_fm_tracks_end-v_music_fm_tracks)/TrackFmSz
 		or.b	.val(a1),d0
-	set .val,.val+TrackFmSz
+.val	set .val+TrackFmSz
 	endr
-	set .val,v_music_psg_tracks+TrackPlaybackControl
+.val	set v_music_psg_tracks+TrackPlaybackControl
 	rept (v_music_psg_tracks_end-v_music_psg_tracks)/TrackPsgSz
 		or.b	.val(a1),d0
-	set .val,.val+TrackPsgSz
+.val	set .val+TrackPsgSz
 	endr
 		and.b	#1<<_playing,d0				; check if any bgm channels are playing
 		bne.w	.nobgm					; if there's any left, don't restore the prior bgm

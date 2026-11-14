@@ -37,23 +37,13 @@ APILUT:								; all: a1 = start of driver ram
 		if __smpsDebug
 		include "src-68k/renassert.asm"
 		endif
-
-		if (__smpsPCM=="null") || (__smpsTarget=="fuckFM")
-		include "src-68k/null/pcm.asm"
-;		elseif __smpsPCM=="DirtyPCM"
-;		include "src-68k/dirtypcm/pcm.asm"
-		elseif __smpsPCM=="MegaPCM1"
+	switch __smpsPCM
+	case "mpcm1"
 		include "src-68k/mpcm1/pcm.asm"
-		elseif __smpsPCM=="MegaPCM2"
+	case "mpcm2"
 		include "src-68k/mpcm2/pcm.asm"
-;		elseif __smpsPCM=="DualPCM"
-;		include "src-68k/dualpcm/pcm.asm"
-;		elseif __smpsPCM=="DualPCM-FlexEd"
-;		include "src-68k/dualpcm-flexed/pcm.asm"
-;		elseif __smpsPCM=="DualClown"
-;		include "src-68k/dualclown/pcm.asm"
-		else
-		fatal "Unknown PCM type"
-		endif
+	elsecase
+		include "src-68k/fmbuffer/pcm.asm"
+	endcase
 ; ===========================================================================
 		even

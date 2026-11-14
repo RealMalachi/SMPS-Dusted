@@ -405,7 +405,7 @@ vcTemp	set mod
 	endif
 	CheckedChannelPointer loc
 	if sourcePsgVolBits==7
-	!dc.b	(pitch+psgdelta)&$FF,vol,mod,voice
+	!dc.b	(pitch+psgdelta)&$FF,vol,vcTemp,voice
 	elseif sourcePsgVolBits==4
 	!dc.b	(pitch+psgdelta)&$FF,((vol&$F)<<3)|((vol)&$80),vcTemp,voice
 	else
@@ -461,8 +461,8 @@ smpsHeaderSFXChannel macro chanid,loc,pitch,vol
 ;dc macro	; too slow to be viable
 ;	smpsNote ALLARGS
 ;	endm
-smpsNote macro data
-	if "data"<>""
+smpsNote macro
+	irp data,ALLARGS
 		ifndef data	; avoids AS forward-referencing error: if it's forward-referenced then it's likely per-song
 		!dc.b data
 		elseif ((data>0)&(data<$E0))|("data"="smpsNoAttack")|("data"="smpsHoldNote")
@@ -472,9 +472,7 @@ smpsNote macro data
 		else
 		fatal "smpsNote: input (data) isn't a valid time, note or extended note"
 		endif
-		shift
-		smpsNote ALLARGS
-	endif
+	endr
 	endm
 ; Co-ord Flag Macros and Equates
 panNone		equ $00

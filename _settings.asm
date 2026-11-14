@@ -1,7 +1,7 @@
 ;__smpsDebug		equ 0		; defined during assembler call
-__smpsDataVer		equ 5		; if these don't match between the driver and sound data, it complains
+__smpsDataVer		equ 6		; if these don't match between the driver and sound data, it complains
 __smpsTarget		equ "md68k"	; read below
-__smpsPCM		equ "MegaPCM2"	; read below
+__smpsPCM		equ "mpcm2"	; read below
 __smpsWarnDisabledUsage	equ __smpsDebug	; 0 ignores or circumvents disabled features, 1 triggers an assert
 
 __smpsDefaultFreq	equ 0		; 0 maxes PSG and mutes the others, 1 mutes all
@@ -22,22 +22,15 @@ __smpsFM3Multi		equ 0		; (TODO) 1 enables FM3 multifrequency mode
 __smpsDrum		equ 1		; 1 enables YMPCM notes and FM/PSG macros (primarily used for drums)
 __smpsPortamento	equ 1		; 1 enables portamento
 ; __smpsTarget values:
-; "md68k"		| 68K driver + Z80 PCM player
-; "mdz80"		| (TODO) Z80 driver + 68K API
-; "fuckFM"		| 68K driver with FM disabled
-; "sys14"		| (TODO) 68K driver for 2xYM2203 System 14s
-; "pico"		| (TODO) 68K driver for Sega Pico
-; "copera"		| (TODO) 68K driver for Yamaha Copera
-; "mpico68k"		| (TODO) 68K driver for MegaPico hardware mods https://youtu.be/xWsJlW3UeXM
-; "mpicoz80"		| (TODO) Z80 driver for MegaPico hardware mods https://youtu.be/xWsJlW3UeXM
+; "md68k"	| 68K driver + Z80 PCM player
+; "mdz80"	| (TODO) Z80 driver + 68K API
+; "sys14"	| (TODO) 68K driver for System 14
+; "pico"	| (TODO) 68K driver for Sega Pico
+; "copera"	| (TODO) 68K driver for Yamaha Copera
+; "mpico68k"	| (TODO) 68K driver for MegaPico hardware mods https://youtu.be/xWsJlW3UeXM
+; "mpicoz80"	| (TODO) Z80 driver for MegaPico hardware mods https://youtu.be/xWsJlW3UeXM
 
-; __smpsPCM values: (these only apply to md68k)
-; "null"		| Nothing
-; "MegaPCM1"		| (WIP) MegaPCM v1.1 by vladikcomper
-; "MegaPCM2"		| MegaPCM v2.0 by vladikcomper
-; "MegaPCM2-1"		| (TODO) MegaPCM v2.1 by vladikcomper
-; "DualPCM"		| (TODO) The first public version of the 2-channel software mixer by MarkeyJester
-; "DualPCM-FlexEd"	| (TODO) What most people call DualPCM is the second version, also by MarkeyJester
-; "DualClown"		| (TODO) The custom 2-channel software mixer from CloneDriver v2.8 by CLownacy
-; "Sonar"		| (TOOD) DPCM driver by Nat
-; "VDPCM"		| (TOOD) Custom PCM format by Malachi; Legal name:`Variance Differencial Pulse Code Modulation`
+; __smpsPCM directly correspond to the folder names in src-68k
+; "fmbuffer"	| generic Z80 FM buffer, no PCM support
+; "mpcm1"	| MegaPCM v1.1 by vladikcomper
+; "mpcm2"	| MegaPCM v2.0 by vladikcomper
