@@ -1,25 +1,22 @@
 @echo off
 setlocal enabledelayedexpansion
-set PrintText=0
-if not "%~2"=="" ( set PrintText=1 )
+if not "%~2"=="" ( set PrintText=1 ) else ( set PrintText=0 )
 
 set savedpath=%cd%
 set batchpath=%~dp0
+REM // goto where the batch script is located
+cd /d "%batchpath%"
 if %PrintText% == 1 (
 	echo caller path: "%savedpath%"
 	echo script path: "%batchpath%"
+	echo currently: %cd%
 )
-REM // goto where the batch script is located
-cd /d "%batchpath%"
+if /i %PROCESSOR_ARCHITECTURE%==x86 ( set "systemfolder=win-x86" ) else ( set "systemfolder=win-x64" )
+set "AS=tools\%systemfolder%\asw.exe -xx -n -A -L -U -i ."
+set "P2BIN=tools\%systemfolder%\p2bin.exe"
+set "COMP=tools\%systemfolder%\salvador.exe"
+set "SJ=tools\win-x86\sjasmplus.exe"
 
-if /i %PROCESSOR_ARCHITECTURE%==x86 (
-	set "AS=tools\asw\asw.exe -xx -n -A -L -U -i ."
-	) else (
-	set "AS=tools\asw\asw-x64.exe -xx -n -A -L -U -i ."
-)
-set "P2BIN=tools\asw\p2bin.exe"
-set "SJ=tools\sjasmplus\sjasmplus.exe"
-set "COMP=tools\zx0\salvador.exe"
 if %PrintText% == 1 (
 	set "ASFLAGS=-q -D __smpsPrintMessages=1"
 	set "SJFLAGS="
